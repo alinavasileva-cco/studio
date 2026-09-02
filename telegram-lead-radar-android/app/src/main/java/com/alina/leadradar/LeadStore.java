@@ -12,119 +12,63 @@ import java.util.Set;
 
 public final class LeadStore {
     private static final String PREFS = "lead_radar";
-    private static final int RULES_VERSION = 6;
+    private static final int RULES_VERSION = 7;
     private static final String RESULTS_FILE = "manual_lead_results.txt";
 
-    private static final String OLD_V5_CHANNELS =
-            "zakaz_design\nDesigns_squad\nDesigns_job\ndesignwork_vacansii\njobaem\npro_zayavki\nGetClient\n"
-            + "dsgn_vacancies\ndesign_crate\nzakazi_designers\nvakansiidesign\nvakansii_dlya_dizaynera\ndsgnworkers";
-
-    /*
-     * 100 public sources. Profiled design/freelance sources are first, broader
-     * digital/remote aggregators follow. A dead/private/renamed source is simply
-     * skipped by ScannerService and never stops the full manual pass.
-     */
+    // v7: high-signal quick/project feeds first. Broad career channels from v6 were removed.
     private static final String DEFAULT_CHANNELS =
-            "workzavr\n"
-            + "designer_ru\n"
-            + "designhunters\n"
-            + "designwork_vacansii\n"
+            "rueventjob\n"
+            + "mskeventjob\n"
+            + "freelancetaverna\n"
             + "zakaz_design\n"
             + "zakazi_designers\n"
-            + "designizer\n"
-            + "design_jobs_uxui\n"
-            + "vakansii_dlya_dizaynera\n"
-            + "design_freevacancies\n"
-            + "jobs_designer\n"
-            + "comeindesign\n"
-            + "vakansii_design\n"
-            + "dprofilejob\n"
-            + "design_careers\n"
-            + "vacancies_dsgn\n"
-            + "webdesign_jobs\n"
-            + "rabota_design\n"
-            + "design_vacancy\n"
-            + "dsgnworkers\n"
-            + "fordesigner\n"
-            + "designer_vacancies\n"
-            + "junior_designers\n"
-            + "jun_hi_vacancies\n"
-            + "Visionisland\n"
-            + "vakansii_dizaynerov\n"
-            + "workindesign\n"
-            + "design_crate\n"
-            + "Designs_squad\n"
             + "Designs_job\n"
+            + "design_freevacancies\n"
+            + "SearchDesignerr\n"
             + "free_Design1\n"
             + "freelance_design_work\n"
-            + "GetJob_design\n"
-            + "DesignHub_Jobs\n"
-            + "designslot\n"
-            + "rabota_designer\n"
+            + "jobs_designer\n"
+            + "offers_design\n"
+            + "webdesign_jobs\n"
+            + "rabota_design\n"
             + "job4designer\n"
-            + "designer_jobs\n"
-            + "rost_design\n"
-            + "yotolabdesigner\n"
-            + "searchdesignerr\n"
-            + "Jobs_for_designers\n"
-            + "bbe_jobs\n"
-            + "local_talent\n"
+            + "designerworkchat\n"
+            + "vakansii_dlya_dizaynera\n"
+            + "designer_work\n"
+            + "workindesign\n"
+            + "designizer\n"
+            + "rabotadesign\n"
+            + "GetJob_design\n"
+            + "vsedizaineri\n"
+            + "pro_zayavki\n"
+            + "design_crate\n"
+            + "Designs_squad\n"
+            + "dsgnworkers\n"
+            + "GetClient\n"
+            + "job_webdesign\n"
+            + "freelance_dev_work\n"
+            + "search_zakaz\n"
+            + "design_vacancy\n"
+            + "dsgn_vacancies\n"
+            + "design_jobs_uxui\n"
+            + "designodromo\n"
+            + "dprofilejob\n"
+            + "vacancies_dsgn\n"
+            + "designer_vacancies\n"
+            + "fordesigner\n"
+            + "design_careers\n"
+            + "designhunters\n"
             + "designer_ru_work\n"
-            + "uiux_jobs\n"
-            + "webfrl\n"
-            + "vdhl_good\n"
-            + "perezvonyu\n"
-            + "FrWork\n"
-            + "theyseeku\n"
-            + "xCareers\n"
-            + "prjctr\n"
-            + "dna325\n"
-            + "workoo\n"
-            + "recruit\n"
-            + "vacanciesrus\n"
-            + "chooseajob\n"
-            + "Well_paid_Job\n"
-            + "zapwork\n"
-            + "DobbyFreeLance\n"
-            + "stage_1st\n"
-            + "normrabota\n"
-            + "freelancefeed\n"
-            + "workathomerus\n"
-            + "digital_hr\n"
-            + "digital_human\n"
-            + "mediajobs_ru\n"
-            + "digitaltender\n"
-            + "Remoteit\n"
-            + "naudalenkebro\n"
-            + "stage_first\n"
-            + "vezdeworker\n"
-            + "antirabstvo\n"
-            + "findbestpartner\n"
-            + "distantsiya\n"
-            + "finfreelance\n"
-            + "dnative_job\n"
-            + "rueventjob\n"
-            + "freelancetaverna\n"
-            + "projectperhour\n"
-            + "remote_ru\n"
-            + "kadrof_work\n"
-            + "rabotaforyou\n"
-            + "promopoisk\n"
-            + "founderjob\n"
-            + "workasap\n"
-            + "worklis\n"
-            + "polyaluzjob\n"
-            + "divanjobs\n"
-            + "remote_tgworks\n"
-            + "frwork3\n"
+            + "designer_ru\n"
+            + "freelance_vacancii\n"
+            + "frilanser_vacansii\n"
             + "proffreelancee\n"
-            + "hmoffice\n"
-            + "udalendwork\n"
-            + "udafrii\n"
-            + "jobforjunior\n"
-            + "evacuatejobs\n"
-            + "huggabletalents\n"
-            + "theblueprintcareer";
+            + "ALLW0RK\n"
+            + "freetasks\n"
+            + "freeworkfeed\n"
+            + "jobaem\n"
+            + "job_developer\n"
+            + "jobs_for_it";
 
     private final Context appContext;
     private final SharedPreferences p;
@@ -132,23 +76,14 @@ public final class LeadStore {
     public LeadStore(Context context) {
         appContext = context.getApplicationContext();
         p = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        migrateToV6();
+        migrateToV7();
     }
 
-    private void migrateToV6() {
+    private void migrateToV7() {
         if (p.getInt("rules_version", 0) >= RULES_VERSION) return;
-
-        String existing = p.getString("channels", "");
-        String normalizedExisting = existing == null ? "" : existing.trim();
-        int existingCount = countLines(normalizedExisting);
-        boolean looksLikeOldDefault = normalizedExisting.isEmpty()
-                || normalizedExisting.equalsIgnoreCase(OLD_V5_CHANNELS.trim())
-                || existingCount <= 13;
-        String channelsToUse = looksLikeOldDefault ? DEFAULT_CHANNELS : normalizedExisting;
-
         p.edit()
                 .putInt("rules_version", RULES_VERSION)
-                .putString("channels", channelsToUse)
+                .putString("channels", DEFAULT_CHANNELS)
                 .putInt("lookback_days", 7)
                 .putBoolean("sites_enabled", true)
                 .putBoolean("presentations_enabled", true)
@@ -178,9 +113,10 @@ public final class LeadStore {
 
         String budget = lead.budget == null || lead.budget.trim().isEmpty() ? "не указан" : lead.budget.trim();
         String original = cleanExcerpt(lead.text, 900);
-        String contactUrl = "https://t.me/" + lead.username;
+        String contactUrl = contactUrl(lead.username);
+        String contactLabel = isExternalTaskRef(lead.username) ? "Ссылка на быстрое задание" : "Telegram-контакт";
         String entry = "[" + categoryName(lead.category) + "]\n"
-                + "Контакт: " + contactUrl
+                + contactLabel + ": " + contactUrl
                 + "\nБюджет: " + budget
                 + "\nИсходный пост: " + lead.postUrl
                 + "\n\nЗАДАЧА:\n" + original
@@ -207,6 +143,17 @@ public final class LeadStore {
     public String lastPreviewMessage() { return p.getString("last_preview_message", ""); }
     public int previewCount() { return p.getInt("preview_count", 0); }
 
+    public static boolean isExternalTaskRef(String ref) {
+        return ref != null && ref.startsWith("url:");
+    }
+
+    public static String contactUrl(String ref) {
+        if (ref == null || ref.trim().isEmpty()) return "";
+        if (isExternalTaskRef(ref)) return ref.substring(4);
+        if (ref.startsWith("http://") || ref.startsWith("https://")) return ref;
+        return "https://t.me/" + ref.replace("@", "");
+    }
+
     public void clearPreviewHistory() {
         try { resultsFile().delete(); } catch (Exception ignored) {}
         p.edit()
@@ -221,68 +168,41 @@ public final class LeadStore {
     }
 
     public String channels() { return p.getString("channels", DEFAULT_CHANNELS); }
-    public void setChannels(String channels) {
-        p.edit().putString("channels", channels == null ? "" : channels.trim()).apply();
-    }
+    public void setChannels(String channels) { p.edit().putString("channels", channels == null ? "" : channels.trim()).apply(); }
 
     public int lookbackDays() {
         int d = p.getInt("lookback_days", 7);
         return (d == 1 || d == 3 || d == 7 || d == 14) ? d : 7;
     }
-
     public void setLookbackDays(int days) {
         int d = (days == 1 || days == 3 || days == 7 || days == 14) ? days : 7;
         p.edit().putInt("lookback_days", d).apply();
     }
 
-    public String profileUrl() {
-        return p.getString("profile_url", "https://alinavasileva-cco.github.io/studio/");
-    }
-
-    public void setProfileUrl(String url) {
-        p.edit().putString("profile_url", url == null ? "" : url.trim()).apply();
-    }
+    public String profileUrl() { return p.getString("profile_url", "https://alinavasileva-cco.github.io/studio/"); }
+    public void setProfileUrl(String url) { p.edit().putString("profile_url", url == null ? "" : url.trim()).apply(); }
 
     public boolean sitesEnabled() { return p.getBoolean("sites_enabled", true); }
     public boolean presentationsEnabled() { return p.getBoolean("presentations_enabled", true); }
     public boolean aiEnabled() { return false; }
     public boolean consultingEnabled() { return false; }
-
     public void setCategories(boolean sites, boolean presentations) {
-        p.edit()
-                .putBoolean("sites_enabled", sites)
-                .putBoolean("presentations_enabled", presentations)
-                .apply();
+        p.edit().putBoolean("sites_enabled", sites).putBoolean("presentations_enabled", presentations).apply();
     }
 
     public synchronized void beginRun(int totalChannels) {
-        p.edit()
-                .putBoolean("running", true)
-                .putInt("checked_channels", 0)
-                .putInt("total_channels", totalChannels)
-                .putInt("run_found", 0)
-                .putString("current_channel", "")
-                .putLong("run_started_at", System.currentTimeMillis())
-                .remove("run_finished_at")
-                .apply();
+        p.edit().putBoolean("running", true).putInt("checked_channels", 0).putInt("total_channels", totalChannels)
+                .putInt("run_found", 0).putString("current_channel", "").putLong("run_started_at", System.currentTimeMillis())
+                .remove("run_finished_at").apply();
     }
-
     public void setProgress(int checked, int total, String currentChannel) {
-        p.edit()
-                .putInt("checked_channels", checked)
-                .putInt("total_channels", total)
-                .putString("current_channel", currentChannel == null ? "" : currentChannel)
-                .apply();
+        p.edit().putInt("checked_channels", checked).putInt("total_channels", total)
+                .putString("current_channel", currentChannel == null ? "" : currentChannel).apply();
     }
-
     public synchronized void finishRun() {
-        p.edit()
-                .putBoolean("running", false)
-                .putString("current_channel", "")
-                .putLong("run_finished_at", System.currentTimeMillis())
-                .apply();
+        p.edit().putBoolean("running", false).putString("current_channel", "")
+                .putLong("run_finished_at", System.currentTimeMillis()).apply();
     }
-
     public void requestStop() { p.edit().putBoolean("running", false).apply(); }
     public boolean running() { return p.getBoolean("running", false); }
     public int checkedChannels() { return p.getInt("checked_channels", 0); }
@@ -291,25 +211,18 @@ public final class LeadStore {
     public String currentChannel() { return p.getString("current_channel", ""); }
 
     private File resultsFile() { return new File(appContext.getFilesDir(), RESULTS_FILE); }
-
     private String readResultsFile() {
         File file = resultsFile();
         if (!file.exists()) return "";
-        try (FileInputStream in = new FileInputStream(file);
-             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[8192];
-            int read;
+        try (FileInputStream in = new FileInputStream(file); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192]; int read;
             while ((read = in.read(buffer)) != -1) out.write(buffer, 0, read);
             return out.toString("UTF-8");
-        } catch (Exception ignored) {
-            return "";
-        }
+        } catch (Exception ignored) { return ""; }
     }
-
     private void writeResultsFile(String text) {
         try (FileOutputStream out = new FileOutputStream(resultsFile(), false)) {
-            out.write(text.getBytes("UTF-8"));
-            out.flush();
+            out.write(text.getBytes("UTF-8")); out.flush();
         } catch (Exception ignored) {}
     }
 
@@ -318,15 +231,9 @@ public final class LeadStore {
         String s = text.replaceAll("\\s+", " ").trim();
         return s.length() <= limit ? s : s.substring(0, limit - 1).trim() + "…";
     }
-
     private static String categoryName(Lead.Category c) {
         if (c == Lead.Category.SITE) return "САЙТ / ЛЕНДИНГ";
         if (c == Lead.Category.PRESENTATION) return "ПРЕЗЕНТАЦИЯ";
         return "ИСКЛЮЧЕНО";
-    }
-
-    private static int countLines(String raw) {
-        if (raw == null || raw.trim().isEmpty()) return 0;
-        return raw.trim().split("[\\n,; ]+").length;
     }
 }
