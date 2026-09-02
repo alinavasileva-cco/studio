@@ -28,6 +28,7 @@ public final class MainActivity extends Activity {
     private TextView previewHistory;
     private CheckBox sites;
     private CheckBox presentations;
+    private CheckBox ai;
     private CheckBox consulting;
     private CheckBox previewMode;
     private EditText channels;
@@ -39,7 +40,7 @@ public final class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         store = new LeadStore(this);
-        setTitle("Universal Lead Radar v2");
+        setTitle("Universal Lead Radar v3");
         setContentView(buildUi());
         loadSettings();
         if (store.enabled()) startScannerService();
@@ -61,13 +62,13 @@ public final class MainActivity extends Activity {
         scroll.addView(root);
 
         TextView title = new TextView(this);
-        title.setText("Universal Telegram Lead Radar v2");
+        title.setText("Universal Telegram Lead Radar v3");
         title.setTextSize(24);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         root.addView(title);
 
         TextView subtitle = new TextView(this);
-        subtitle.setText("Сайты · Презентации · Консалтинг\nПерсонализирует сообщение по содержанию конкретной заявки. Тестовый режим ничего не отправляет.");
+        subtitle.setText("Сайты · Презентации · AI/ИИ/генерация · Консалтинг\nБольшие посты-подборки разбираются на отдельные задания. Тестовый режим ничего не отправляет.");
         subtitle.setTextSize(15);
         subtitle.setPadding(0, dp(8), 0, dp(14));
         root.addView(subtitle);
@@ -83,9 +84,10 @@ public final class MainActivity extends Activity {
         root.addView(previewMode);
 
         root.addView(label("Что искать"));
-        sites = new CheckBox(this); sites.setText("Сайты-визитки / простые лендинги"); root.addView(sites);
-        presentations = new CheckBox(this); presentations.setText("Презентации"); root.addView(presentations);
-        consulting = new CheckBox(this); consulting.setText("Бизнес-консалтинг / трекинг"); root.addView(consulting);
+        sites = new CheckBox(this); sites.setText("Сайты / лендинги / Tilda"); root.addView(sites);
+        presentations = new CheckBox(this); presentations.setText("Презентации / pitch deck"); root.addView(presentations);
+        ai = new CheckBox(this); ai.setText("AI / ИИ / нейросети / генерация изображений и видео"); root.addView(ai);
+        consulting = new CheckBox(this); consulting.setText("Бизнес-консалтинг / трекинг — только явные запросы"); root.addView(consulting);
 
         root.addView(label("Публичные Telegram-каналы (по одному на строке)"));
         channels = new EditText(this);
@@ -98,7 +100,7 @@ public final class MainActivity extends Activity {
         scanMinutes.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         root.addView(scanMinutes, fullWidth());
 
-        root.addView(label("Пауза между автоотправками, секунд (используется только в авто-режиме, минимум 30)"));
+        root.addView(label("Пауза между автоотправками, секунд (только авто-режим, минимум 30)"));
         sendPause = new EditText(this);
         sendPause.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         root.addView(sendPause, fullWidth());
@@ -158,21 +160,19 @@ public final class MainActivity extends Activity {
         root.addView(openLast, buttonParams());
 
         Button clearHistory = new Button(this);
-        clearHistory.setText("Очистить тестовую историю на экране");
+        clearHistory.setText("Очистить тестовую историю и проверить заново");
         clearHistory.setOnClickListener(v -> {
             store.clearPreviewHistory();
             updatePreviewHistory();
+            Toast.makeText(this, "История очищена — эти посты можно проверить заново", Toast.LENGTH_SHORT).show();
         });
         root.addView(clearHistory, buttonParams());
 
         Button retry = new Button(this);
         retry.setText("Повторить ожидающую автоотправку");
         retry.setOnClickListener(v -> {
-            if (store.previewMode()) {
-                Toast.makeText(this, "В тестовом режиме отправка отключена", Toast.LENGTH_SHORT).show();
-            } else {
-                AutoSendAccessibilityService.requestProcess(this);
-            }
+            if (store.previewMode()) Toast.makeText(this, "В тестовом режиме отправка отключена", Toast.LENGTH_SHORT).show();
+            else AutoSendAccessibilityService.requestProcess(this);
         });
         root.addView(retry, buttonParams());
 
@@ -186,7 +186,7 @@ public final class MainActivity extends Activity {
         root.addView(previewHistory, fullWidth());
 
         TextView note = new TextView(this);
-        note.setText("Автоотправка разрешается только после отключения галочки ТЕСТОВЫЙ РЕЖИМ и повторного нажатия «Сохранить и запустить поиск». Бот берёт только публичные русскоязычные запросы с прямым @username для отклика. Ограничения и антиспам Telegram не обходит.");
+        note.setText("v3 анализирует конкретное задание внутри поста, а не весь дайджест целиком. Обычные вакансии, зарплатные позиции, менеджеры маркетплейсов и нерелевантные роли отсекаются. Автоотправка включается только после отключения тестового режима.");
         note.setTextSize(13);
         note.setPadding(0, dp(14), 0, dp(20));
         root.addView(note);
@@ -197,6 +197,7 @@ public final class MainActivity extends Activity {
     private void loadSettings() {
         sites.setChecked(store.sitesEnabled());
         presentations.setChecked(store.presentationsEnabled());
+        ai.setChecked(store.aiEnabled());
         consulting.setChecked(store.consultingEnabled());
         previewMode.setChecked(store.previewMode());
         channels.setText(store.channels());
@@ -208,7 +209,7 @@ public final class MainActivity extends Activity {
     }
 
     private void saveSettings() {
-        store.setCategories(sites.isChecked(), presentations.isChecked(), consulting.isChecked());
+        store.setCategories(sites.isChecked(), presentations.isChecked(), ai.isChecked(), consulting.isChecked());
         store.setPreviewMode(previewMode.isChecked());
         store.setChannels(channels.getText().toString());
         store.setScanMinutes(parseInt(scanMinutes.getText().toString(), 5));
@@ -230,7 +231,7 @@ public final class MainActivity extends Activity {
         if (previewHistory == null) return;
         String history = store.previewHistory();
         previewHistory.setText(history == null || history.isEmpty()
-                ? "Пока ничего не найдено. Запусти поиск в тестовом режиме и нажми «Обновить найденные заявки на экране»."
+                ? "Пока ничего не найдено. Запусти поиск в тестовом режиме и затем обнови список."
                 : history);
         Linkify.addLinks(previewHistory, Linkify.WEB_URLS);
     }
