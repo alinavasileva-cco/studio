@@ -9,6 +9,8 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
@@ -28,19 +30,25 @@ public final class MainActivity extends Activity {
     private TextView previewHistory;
     private CheckBox sites;
     private CheckBox presentations;
-    private CheckBox ai;
-    private CheckBox consulting;
     private CheckBox previewMode;
     private EditText channels;
     private EditText scanMinutes;
     private EditText sendPause;
     private EditText profileUrl;
+    private final Handler uiHandler = new Handler(Looper.getMainLooper());
+    private final Runnable autoRefresh = new Runnable() {
+        @Override public void run() {
+            updateStatus();
+            updatePreviewHistory();
+            uiHandler.postDelayed(this, 3000L);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         store = new LeadStore(this);
-        setTitle("Universal Lead Radar v3");
+        setTitle("Universal Lead Radar v4");
         setContentView(buildUi());
         loadSettings();
         if (store.enabled()) startScannerService();
@@ -51,6 +59,14 @@ public final class MainActivity extends Activity {
         super.onResume();
         updateStatus();
         updatePreviewHistory();
+        uiHandler.removeCallbacks(autoRefresh);
+        uiHandler.postDelayed(autoRefresh, 1000L);
+    }
+
+    @Override
+    protected void onPause() {
+        uiHandler.removeCallbacks(autoRefresh);
+        super.onPause();
     }
 
     private View buildUi() {
@@ -62,13 +78,13 @@ public final class MainActivity extends Activity {
         scroll.addView(root);
 
         TextView title = new TextView(this);
-        title.setText("Universal Telegram Lead Radar v3");
+        title.setText("Universal Telegram Lead Radar v4");
         title.setTextSize(24);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         root.addView(title);
 
         TextView subtitle = new TextView(this);
-        subtitle.setText("Сайты · Презентации · AI/ИИ/генерация · Консалтинг\nБольшие посты-подборки разбираются на отдельные задания. Тестовый режим ничего не отправляет.");
+        subtitle.setText("ТОЛЬКО: создание презентаций + создание лендингов / простых сайтов.\nИсключено: Tilda, WordPress, AI/ИИ, логотипы, айдентика, фирменный стиль и обычные вакансии.");
         subtitle.setTextSize(15);
         subtitle.setPadding(0, dp(8), 0, dp(14));
         root.addView(subtitle);
@@ -84,14 +100,16 @@ public final class MainActivity extends Activity {
         root.addView(previewMode);
 
         root.addView(label("Что искать"));
-        sites = new CheckBox(this); sites.setText("Сайты / лендинги / Tilda"); root.addView(sites);
-        presentations = new CheckBox(this); presentations.setText("Презентации / pitch deck"); root.addView(presentations);
-        ai = new CheckBox(this); ai.setText("AI / ИИ / нейросети / генерация изображений и видео"); root.addView(ai);
-        consulting = new CheckBox(this); consulting.setText("Бизнес-консалтинг / трекинг — только явные запросы"); root.addView(consulting);
+        sites = new CheckBox(this);
+        sites.setText("Создание лендинга / простого сайта — НЕ Tilda и НЕ WordPress");
+        root.addView(sites);
+        presentations = new CheckBox(this);
+        presentations.setText("Создание / оформление презентации, PowerPoint / PDF / pitch deck");
+        root.addView(presentations);
 
-        root.addView(label("Публичные Telegram-каналы (по одному на строке)"));
+        root.addView(label("Публичные Telegram-каналы (расширенный профильный пул)"));
         channels = new EditText(this);
-        channels.setMinLines(6);
+        channels.setMinLines(8);
         channels.setGravity(android.view.Gravity.TOP);
         root.addView(channels, fullWidth());
 
@@ -105,7 +123,7 @@ public final class MainActivity extends Activity {
         sendPause.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         root.addView(sendPause, fullWidth());
 
-        root.addView(label("Ссылка на портфолио (можно менять или оставить пустой)"));
+        root.addView(label("Ссылка на портфолио"));
         profileUrl = new EditText(this);
         profileUrl.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_URI);
         root.addView(profileUrl, fullWidth());
@@ -164,7 +182,7 @@ public final class MainActivity extends Activity {
         clearHistory.setOnClickListener(v -> {
             store.clearPreviewHistory();
             updatePreviewHistory();
-            Toast.makeText(this, "История очищена — эти посты можно проверить заново", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "История очищена — можно повторить проверку", Toast.LENGTH_SHORT).show();
         });
         root.addView(clearHistory, buttonParams());
 
@@ -176,7 +194,7 @@ public final class MainActivity extends Activity {
         });
         root.addView(retry, buttonParams());
 
-        root.addView(label("Последние тестовые заявки и подготовленные сообщения"));
+        root.addView(label("Последние релевантные заявки и подготовленные сообщения"));
         previewHistory = new TextView(this);
         previewHistory.setTextSize(14);
         previewHistory.setTextIsSelectable(true);
@@ -186,7 +204,7 @@ public final class MainActivity extends Activity {
         root.addView(previewHistory, fullWidth());
 
         TextView note = new TextView(this);
-        note.setText("v3 анализирует конкретное задание внутри поста, а не весь дайджест целиком. Обычные вакансии, зарплатные позиции, менеджеры маркетплейсов и нерелевантные роли отсекаются. Автоотправка включается только после отключения тестового режима.");
+        note.setText("v4 использует расширенный набор профильных каналов и пропускает только конкретные заказы на презентации или создание сайта/лендинга. Если в задаче требуется Tilda, WordPress, логотип, айдентика, фирменный стиль или это штатная/долгосрочная вакансия — заявка отбрасывается.");
         note.setTextSize(13);
         note.setPadding(0, dp(14), 0, dp(20));
         root.addView(note);
@@ -197,8 +215,6 @@ public final class MainActivity extends Activity {
     private void loadSettings() {
         sites.setChecked(store.sitesEnabled());
         presentations.setChecked(store.presentationsEnabled());
-        ai.setChecked(store.aiEnabled());
-        consulting.setChecked(store.consultingEnabled());
         previewMode.setChecked(store.previewMode());
         channels.setText(store.channels());
         scanMinutes.setText(String.valueOf(store.scanMinutes()));
@@ -209,7 +225,7 @@ public final class MainActivity extends Activity {
     }
 
     private void saveSettings() {
-        store.setCategories(sites.isChecked(), presentations.isChecked(), ai.isChecked(), consulting.isChecked());
+        store.setCategories(sites.isChecked(), presentations.isChecked());
         store.setPreviewMode(previewMode.isChecked());
         store.setChannels(channels.getText().toString());
         store.setScanMinutes(parseInt(scanMinutes.getText().toString(), 5));
@@ -231,7 +247,7 @@ public final class MainActivity extends Activity {
         if (previewHistory == null) return;
         String history = store.previewHistory();
         previewHistory.setText(history == null || history.isEmpty()
-                ? "Пока ничего не найдено. Запусти поиск в тестовом режиме и затем обнови список."
+                ? "Пока релевантных заявок нет. После запуска результаты появятся здесь автоматически."
                 : history);
         Linkify.addLinks(previewHistory, Linkify.WEB_URLS);
     }
