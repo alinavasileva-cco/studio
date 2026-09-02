@@ -16,11 +16,13 @@ import android.os.Looper;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +34,7 @@ public final class MainActivity extends Activity {
     private CheckBox presentations;
     private EditText channels;
     private EditText profileUrl;
+    private Spinner lookback;
 
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
     private final Runnable autoRefresh = new Runnable() {
@@ -46,7 +49,7 @@ public final class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         store = new LeadStore(this);
-        setTitle("Universal Lead Radar v5");
+        setTitle("Universal Lead Radar v6");
         setContentView(buildUi());
         loadSettings();
     }
@@ -75,14 +78,14 @@ public final class MainActivity extends Activity {
         scroll.addView(root);
 
         TextView title = new TextView(this);
-        title.setText("Universal Telegram Lead Radar v5");
+        title.setText("Universal Telegram Lead Radar v6");
         title.setTextSize(24);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         root.addView(title);
 
         TextView subtitle = new TextView(this);
-        subtitle.setText("РУЧНОЙ РЕЖИМ. Бот никогда не отправляет сообщения сам.\n"
-                + "Ты сама запускаешь один поиск, сама останавливаешь его при необходимости и сама решаешь, кому писать.\n"
+        subtitle.setText("РУЧНОЙ РЕЖИМ · 100 ИСТОЧНИКОВ. Никакой автоотправки.\n"
+                + "Один запуск проходит выбранные каналы и листает историю назад до выбранной даты. "
                 + "Ищем только создание презентаций и создание лендингов / простых сайтов; Tilda и WordPress исключены.");
         subtitle.setTextSize(15);
         subtitle.setPadding(0, dp(8), 0, dp(14));
@@ -101,10 +104,25 @@ public final class MainActivity extends Activity {
         presentations.setText("Создание / оформление презентации, PowerPoint / PDF / pitch deck");
         root.addView(presentations);
 
+        root.addView(label("За какой период проверить историю каждого канала"));
+        lookback = new Spinner(this);
+        String[] periods = {"24 часа", "3 дня", "7 дней", "14 дней"};
+        ArrayAdapter<String> periodAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, periods);
+        periodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        lookback.setAdapter(periodAdapter);
+        root.addView(lookback, fullWidth());
+
+        TextView periodHelp = new TextView(this);
+        periodHelp.setText("По умолчанию — 7 дней. Бот листает публичную историю канала назад до границы выбранного периода, затем переходит к следующему каналу.");
+        periodHelp.setTextSize(13);
+        periodHelp.setPadding(0, dp(4), 0, dp(6));
+        root.addView(periodHelp);
+
         root.addView(label("Публичные Telegram-каналы"));
         TextView channelHelp = new TextView(this);
-        channelHelp.setText("По одному каналу на строке. Можно вставлять большой список — сотни и тысячи каналов. "
-                + "Один ручной запуск проходит весь список один раз и после завершения сам останавливается.");
+        channelHelp.setText("Стартовый каталог v6 содержит 100 источников: сначала профильные дизайн/фриланс-каналы, затем более широкие каналы удалённой работы. "
+                + "Список можно редактировать. Один ручной запуск проходит его один раз и останавливается.");
         channelHelp.setTextSize(13);
         root.addView(channelHelp);
 
@@ -190,8 +208,8 @@ public final class MainActivity extends Activity {
 
         root.addView(label("Найденные заявки"));
         TextView manualHint = new TextView(this);
-        manualHint.setText("В каждой заявке есть кликабельный Telegram-контакт, исходный пост и подготовленный текст. "
-                + "Ничего не отправляется автоматически. Текст результатов можно выделять и копировать.");
+        manualHint.setText("В каждой заявке есть кликабельный Telegram-контакт, исходный пост, бюджет (если указан) и подготовленный текст. "
+                + "Ничего не отправляется автоматически.");
         manualHint.setTextSize(13);
         root.addView(manualHint);
 
@@ -204,9 +222,8 @@ public final class MainActivity extends Activity {
         root.addView(results, fullWidth());
 
         TextView note = new TextView(this);
-        note.setText("Нет расписания, таймера повторного запуска, автоотправки и фонового автозапуска после перезагрузки. "
-                + "Поиск работает только после твоего нажатия и делает один полный проход по указанному списку. "
-                + "Приложение не ставит искусственный лимит на число найденных заявок; фактический объём ограничен только ресурсами устройства и доступностью публичных страниц Telegram.");
+        note.setText("Нет расписания, периодических запусков, автоотправки и автозапуска после перезагрузки. "
+                + "Поиск работает только после твоего нажатия. Чем больше каналов и глубже период, тем дольше один проход — приложение его искусственно по времени не обрывает.");
         note.setTextSize(13);
         note.setPadding(0, dp(14), 0, dp(20));
         root.addView(note);
@@ -219,6 +236,7 @@ public final class MainActivity extends Activity {
         presentations.setChecked(store.presentationsEnabled());
         channels.setText(store.channels());
         profileUrl.setText(store.profileUrl());
+        setLookbackSelection(store.lookbackDays());
         updateStatus();
         updateResults();
     }
@@ -227,6 +245,7 @@ public final class MainActivity extends Activity {
         store.setCategories(sites.isChecked(), presentations.isChecked());
         store.setChannels(channels.getText().toString());
         store.setProfileUrl(profileUrl.getText().toString());
+        store.setLookbackDays(selectedLookbackDays());
     }
 
     private void startManualSearch() {
@@ -246,7 +265,8 @@ public final class MainActivity extends Activity {
         requestNotificationsIfNeeded();
         Intent i = new Intent(this, ScannerService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(i); else startService(i);
-        Toast.makeText(this, "Ручной поиск запущен. После одного полного прохода он остановится сам.", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Ручной поиск запущен за " + periodLabel(store.lookbackDays())
+                + ". После полного прохода он остановится сам.", Toast.LENGTH_LONG).show();
         uiHandler.postDelayed(this::updateStatus, 500L);
     }
 
@@ -270,8 +290,10 @@ public final class MainActivity extends Activity {
         String current = store.currentChannel();
         StringBuilder s = new StringBuilder();
         s.append("Режим: ТОЛЬКО РУЧНОЙ · АВТООТПРАВКИ НЕТ\n");
+        s.append("Период: ").append(periodLabel(store.lookbackDays())).append("\n");
         s.append("Поиск: ").append(running ? "ИДЁТ" : "НЕ ЗАПУЩЕН").append("\n");
         if (total > 0) s.append("Проверено каналов: ").append(checked).append(" / ").append(total).append("\n");
+        else s.append("Каналов в текущем списке: ").append(countChannels(store.channels())).append("\n");
         if (running && current != null && !current.isEmpty()) s.append("Сейчас: @").append(current).append("\n");
         s.append("Найдено за текущий запуск: ").append(store.runFound()).append("\n");
         s.append("Всего сохранено: ").append(store.previewCount());
@@ -282,9 +304,41 @@ public final class MainActivity extends Activity {
         if (results == null) return;
         String history = store.previewHistory();
         results.setText(history == null || history.isEmpty()
-                ? "Пока ничего не найдено. Нажми «Запустить один ручной поиск»."
+                ? "Пока ничего не найдено. Выбери период и нажми «Запустить один ручной поиск»."
                 : history);
         Linkify.addLinks(results, Linkify.WEB_URLS);
+    }
+
+    private int selectedLookbackDays() {
+        int pos = lookback == null ? 2 : lookback.getSelectedItemPosition();
+        if (pos == 0) return 1;
+        if (pos == 1) return 3;
+        if (pos == 3) return 14;
+        return 7;
+    }
+
+    private void setLookbackSelection(int days) {
+        if (lookback == null) return;
+        int pos = days == 1 ? 0 : days == 3 ? 1 : days == 14 ? 3 : 2;
+        lookback.setSelection(pos);
+    }
+
+    private String periodLabel(int days) {
+        if (days == 1) return "24 часа";
+        if (days == 3) return "3 дня";
+        if (days == 14) return "14 дней";
+        return "7 дней";
+    }
+
+    private int countChannels(String raw) {
+        if (raw == null || raw.trim().isEmpty()) return 0;
+        java.util.HashSet<String> unique = new java.util.HashSet<>();
+        String[] pieces = raw.split("[\\n,; ]+");
+        for (String piece : pieces) {
+            String c = LeadScanner.normalizeChannel(piece);
+            if (!c.isEmpty()) unique.add(c.toLowerCase(java.util.Locale.ROOT));
+        }
+        return unique.size();
     }
 
     private void requestNotificationsIfNeeded() {
