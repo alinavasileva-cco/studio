@@ -78,7 +78,7 @@ public final class ScannerService extends Service {
                         store.addPreview(lead, message);
                     }
                 } catch (Exception ignored) {
-                    // Один недоступный/закрытый канал не должен останавливать общий проход.
+                    // Закрытый, переименованный или временно недоступный канал не останавливает общий проход.
                 }
 
                 checked++;
@@ -89,10 +89,11 @@ public final class ScannerService extends Service {
             int found = store.runFound();
             store.finishRun();
             if (stoppedByUser) {
-                updateNotification("Ручной поиск остановлен. Проверено " + checked + " из " + channels.size()
+                updateNotification("Поиск остановлен. Проверено " + checked + " из " + channels.size()
                         + ", найдено " + found, false);
             } else {
-                updateNotification("Ручной поиск завершён. Проверено " + checked + " каналов, найдено " + found, false);
+                updateNotification("Поиск завершён за " + periodLabel(store.lookbackDays()) + ". Проверено "
+                        + checked + " каналов, найдено " + found, false);
             }
             stopForeground(true);
             stopSelf();
@@ -111,11 +112,18 @@ public final class ScannerService extends Service {
         return result;
     }
 
+    private String periodLabel(int days) {
+        if (days == 1) return "24 часа";
+        if (days == 3) return "3 дня";
+        if (days == 14) return "14 дней";
+        return "7 дней";
+    }
+
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID, "Lead Radar — ручной поиск", NotificationManager.IMPORTANCE_LOW);
-            channel.setDescription("Показывает прогресс только когда пользователь сам запускает поиск");
+            channel.setDescription("Прогресс ручного поиска по публичным Telegram-каналам");
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
     }
@@ -127,7 +135,7 @@ public final class ScannerService extends Service {
         Notification.Builder b = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
                 ? new Notification.Builder(this, CHANNEL_ID)
                 : new Notification.Builder(this);
-        return b.setContentTitle("Lead Radar v5 — ручной поиск")
+        return b.setContentTitle("Lead Radar v6 — ручной поиск · " + periodLabel(store.lookbackDays()))
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.stat_notify_sync)
                 .setContentIntent(pi)
