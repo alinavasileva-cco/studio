@@ -14,29 +14,29 @@ public final class LeadStore {
         p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
-    public boolean wasSent(String postUrl) {
-        return new HashSet<>(p.getStringSet("sent_posts", new HashSet<>())).contains(postUrl);
+    public boolean wasSent(String key) {
+        return new HashSet<>(p.getStringSet("sent_posts", new HashSet<>())).contains(key);
     }
 
-    public boolean wasPreviewed(String postUrl) {
-        return new HashSet<>(p.getStringSet("previewed_posts", new HashSet<>())).contains(postUrl);
+    public boolean wasPreviewed(String key) {
+        return new HashSet<>(p.getStringSet("previewed_posts", new HashSet<>())).contains(key);
     }
 
     public synchronized void addPreview(Lead lead, String message) {
         Set<String> previewed = new HashSet<>(p.getStringSet("previewed_posts", new HashSet<>()));
-        previewed.add(lead.postUrl);
+        previewed.add(lead.dedupKey);
 
         String budget = lead.budget == null || lead.budget.trim().isEmpty() ? "не указан" : lead.budget.trim();
-        String original = cleanExcerpt(lead.text, 520);
+        String original = cleanExcerpt(lead.text, 700);
         String entry = "[" + categoryName(lead.category) + "] @" + lead.username
                 + "\nБюджет: " + budget
                 + "\nИсходный пост: " + lead.postUrl
-                + "\n\nЗаявка:\n" + original
+                + "\n\nКОНКРЕТНОЕ ЗАДАНИЕ:\n" + original
                 + "\n\nСообщение бота:\n" + message;
 
         String old = p.getString("preview_history", "");
         String combined = old.isEmpty() ? entry : entry + "\n\n────────────\n\n" + old;
-        combined = trimHistory(combined, 10);
+        combined = trimHistory(combined, 15);
 
         p.edit()
                 .putStringSet("previewed_posts", previewed)
@@ -52,9 +52,17 @@ public final class LeadStore {
     public String previewHistory() { return p.getString("preview_history", ""); }
     public String lastPreviewPost() { return p.getString("last_preview_post", ""); }
     public int previewCount() { return p.getInt("preview_count", 0); }
+
     public void clearPreviewHistory() {
-        p.edit().remove("preview_history").remove("last_preview_post").remove("last_preview_user")
-                .remove("last_preview_message").remove("last_preview_text").putInt("preview_count", 0).apply();
+        p.edit()
+                .remove("preview_history")
+                .remove("previewed_posts")
+                .remove("last_preview_post")
+                .remove("last_preview_user")
+                .remove("last_preview_message")
+                .remove("last_preview_text")
+                .putInt("preview_count", 0)
+                .apply();
     }
 
     public synchronized void setPending(Lead lead, String message) {
@@ -63,6 +71,7 @@ public final class LeadStore {
                 .putString("pending_user", lead.username)
                 .putString("pending_message", message)
                 .putString("pending_post", lead.postUrl)
+                .putString("pending_key", lead.dedupKey)
                 .putString("pending_category", lead.category.name())
                 .putString("pending_budget", lead.budget == null ? "" : lead.budget)
                 .putLong("pending_since", System.currentTimeMillis())
@@ -74,29 +83,29 @@ public final class LeadStore {
     public String pendingUser() { return p.getString("pending_user", ""); }
     public String pendingMessage() { return p.getString("pending_message", ""); }
     public String pendingPost() { return p.getString("pending_post", ""); }
+    public String pendingKey() { return p.getString("pending_key", pendingPost()); }
     public long pendingSince() { return p.getLong("pending_since", 0L); }
     public int pendingAttempts() { return p.getInt("pending_attempts", 0); }
-
     public void bumpPendingAttempt() { p.edit().putInt("pending_attempts", pendingAttempts() + 1).apply(); }
 
     public synchronized void markPendingSent() {
-        String post = pendingPost();
+        String key = pendingKey();
         Set<String> sent = new HashSet<>(p.getStringSet("sent_posts", new HashSet<>()));
-        if (post != null && !post.isEmpty()) sent.add(post);
+        if (key != null && !key.isEmpty()) sent.add(key);
         int count = p.getInt("sent_count", 0) + 1;
         p.edit()
                 .putStringSet("sent_posts", sent)
                 .putInt("sent_count", count)
                 .putLong("last_send_at", System.currentTimeMillis())
                 .putBoolean("pending", false)
-                .remove("pending_user").remove("pending_message").remove("pending_post")
+                .remove("pending_user").remove("pending_message").remove("pending_post").remove("pending_key")
                 .remove("pending_category").remove("pending_budget").remove("pending_since").remove("pending_attempts")
                 .apply();
     }
 
     public synchronized void clearPending() {
         p.edit().putBoolean("pending", false)
-                .remove("pending_user").remove("pending_message").remove("pending_post")
+                .remove("pending_user").remove("pending_message").remove("pending_post").remove("pending_key")
                 .remove("pending_category").remove("pending_budget").remove("pending_since").remove("pending_attempts")
                 .apply();
     }
@@ -128,10 +137,16 @@ public final class LeadStore {
 
     public boolean sitesEnabled() { return p.getBoolean("sites_enabled", true); }
     public boolean presentationsEnabled() { return p.getBoolean("presentations_enabled", true); }
+    public boolean aiEnabled() { return p.getBoolean("ai_enabled", true); }
     public boolean consultingEnabled() { return p.getBoolean("consulting_enabled", true); }
-    public void setCategories(boolean sites, boolean presentations, boolean consulting) {
-        p.edit().putBoolean("sites_enabled", sites).putBoolean("presentations_enabled", presentations)
-                .putBoolean("consulting_enabled", consulting).apply();
+
+    public void setCategories(boolean sites, boolean presentations, boolean ai, boolean consulting) {
+        p.edit()
+                .putBoolean("sites_enabled", sites)
+                .putBoolean("presentations_enabled", presentations)
+                .putBoolean("ai_enabled", ai)
+                .putBoolean("consulting_enabled", consulting)
+                .apply();
     }
 
     private static String cleanExcerpt(String text, int limit) {
@@ -143,6 +158,7 @@ public final class LeadStore {
     private static String categoryName(Lead.Category c) {
         if (c == Lead.Category.SITE) return "САЙТ";
         if (c == Lead.Category.PRESENTATION) return "ПРЕЗЕНТАЦИЯ";
+        if (c == Lead.Category.AI) return "AI / ИИ / ГЕНЕРАЦИЯ";
         return "КОНСАЛТИНГ";
     }
 
