@@ -3,9 +3,10 @@ package com.alina.leadradar;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -92,13 +93,9 @@ public final class LeadStore {
                 + "\n\nЗАДАЧА:\n" + original
                 + "\n\nПОДГОТОВЛЕННЫЙ ОТКЛИК:\n" + message;
 
-        try {
-            String old = resultsFile().exists()
-                    ? Files.readString(resultsFile().toPath(), StandardCharsets.UTF_8)
-                    : "";
-            String combined = old.isEmpty() ? entry : entry + "\n\n━━━━━━━━━━━━━━━━━━\n\n" + old;
-            Files.writeString(resultsFile().toPath(), combined, StandardCharsets.UTF_8);
-        } catch (Exception ignored) {}
+        String old = readResultsFile();
+        String combined = old.isEmpty() ? entry : entry + "\n\n━━━━━━━━━━━━━━━━━━\n\n" + old;
+        writeResultsFile(combined);
 
         p.edit()
                 .putStringSet("previewed_posts", previewed)
@@ -111,16 +108,7 @@ public final class LeadStore {
                 .apply();
     }
 
-    public String previewHistory() {
-        try {
-            return resultsFile().exists()
-                    ? Files.readString(resultsFile().toPath(), StandardCharsets.UTF_8)
-                    : "";
-        } catch (Exception ignored) {
-            return "";
-        }
-    }
-
+    public String previewHistory() { return readResultsFile(); }
     public String lastPreviewPost() { return p.getString("last_preview_post", ""); }
     public String lastPreviewUser() { return p.getString("last_preview_user", ""); }
     public String lastPreviewMessage() { return p.getString("last_preview_message", ""); }
@@ -199,6 +187,27 @@ public final class LeadStore {
     public String currentChannel() { return p.getString("current_channel", ""); }
 
     private File resultsFile() { return new File(appContext.getFilesDir(), RESULTS_FILE); }
+
+    private String readResultsFile() {
+        File file = resultsFile();
+        if (!file.exists()) return "";
+        try (FileInputStream in = new FileInputStream(file);
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = in.read(buffer)) != -1) out.write(buffer, 0, read);
+            return out.toString("UTF-8");
+        } catch (Exception ignored) {
+            return "";
+        }
+    }
+
+    private void writeResultsFile(String text) {
+        try (FileOutputStream out = new FileOutputStream(resultsFile(), false)) {
+            out.write(text.getBytes("UTF-8"));
+            out.flush();
+        } catch (Exception ignored) {}
+    }
 
     private static String cleanExcerpt(String text, int limit) {
         if (text == null) return "";
