@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Lead Radar</string>
+    <string name="accessibility_description">Автоматически открывает Telegram, вставляет подготовленное сообщение и нажимает отправку только для заявок, прошедших фильтр Lead Radar.</string>
+</resources>
