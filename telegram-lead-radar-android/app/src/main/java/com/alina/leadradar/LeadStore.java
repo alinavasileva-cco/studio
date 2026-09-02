@@ -12,22 +12,114 @@ import java.util.Set;
 
 public final class LeadStore {
     private static final String PREFS = "lead_radar";
-    private static final int RULES_VERSION = 5;
+    private static final int RULES_VERSION = 6;
     private static final String RESULTS_FILE = "manual_lead_results.txt";
+
+    private static final String OLD_V5_CHANNELS =
+            "zakaz_design\nDesigns_squad\nDesigns_job\ndesignwork_vacansii\njobaem\npro_zayavki\nGetClient\n"
+            + "dsgn_vacancies\ndesign_crate\nzakazi_designers\nvakansiidesign\nvakansii_dlya_dizaynera\ndsgnworkers";
+
     private static final String DEFAULT_CHANNELS =
-            "zakaz_design\n" +
-            "Designs_squad\n" +
-            "Designs_job\n" +
-            "designwork_vacansii\n" +
-            "jobaem\n" +
-            "pro_zayavki\n" +
-            "GetClient\n" +
-            "dsgn_vacancies\n" +
-            "design_crate\n" +
-            "zakazi_designers\n" +
-            "vakansiidesign\n" +
-            "vakansii_dlya_dizaynera\n" +
-            "dsgnworkers";
+            "designhunters\n"
+            + "workasap\n"
+            + "jun_hi_vacancies\n"
+            + "designwork_vacansii\n"
+            + "designs_job\n"
+            + "design_vacancy\n"
+            + "design_jobs_uxui\n"
+            + "fordesigner\n"
+            + "dsgn_vacancies\n"
+            + "zakaz_design\n"
+            + "jun_hi\n"
+            + "forallmedia\n"
+            + "designer_vacancies\n"
+            + "junior_designers\n"
+            + "vakansii_dizaynerov\n"
+            + "dprofilejob\n"
+            + "dsgnworkers\n"
+            + "vakansii_dlya_dizaynera\n"
+            + "workindesign\n"
+            + "designs_squad\n"
+            + "vakansii_design\n"
+            + "visionisland\n"
+            + "frilans\n"
+            + "jun_jobs\n"
+            + "designizer\n"
+            + "vacancies_dsgn\n"
+            + "designodromo\n"
+            + "designkziskra\n"
+            + "jobaem\n"
+            + "design_freevacancies\n"
+            + "board_axolotl\n"
+            + "design_careers\n"
+            + "zakazi_designers\n"
+            + "jobs_designer\n"
+            + "freelance_design_work\n"
+            + "webdesign_jobs\n"
+            + "rabota_design\n"
+            + "rabotadesign\n"
+            + "uiux_jobs\n"
+            + "uxui_jobs\n"
+            + "designer_ru\n"
+            + "kadrof_work\n"
+            + "vacanciesrus\n"
+            + "getclient\n"
+            + "freelancetaverna\n"
+            + "digitaltender\n"
+            + "dnative_job\n"
+            + "mediajobs_ru\n"
+            + "dddwork\n"
+            + "edujobs\n"
+            + "edmarketclubjob\n"
+            + "dl_marketplace\n"
+            + "jobpower\n"
+            + "digital_hr\n"
+            + "perezvonyu\n"
+            + "normrabota\n"
+            + "theyseeku\n"
+            + "naudalenkebro\n"
+            + "rabotka_zdes\n"
+            + "well_paid_job\n"
+            + "chooseajob\n"
+            + "stage_first\n"
+            + "easy_wrk\n"
+            + "yuniorapp\n"
+            + "digitalbroccoli\n"
+            + "frwork3\n"
+            + "freeworkfeed\n"
+            + "remoteit\n"
+            + "evacuatejobs\n"
+            + "from_home\n"
+            + "freetasks\n"
+            + "hmoffice\n"
+            + "remotejobss\n"
+            + "udalenkabezz\n"
+            + "zapwork\n"
+            + "rabota_udalennaya_vakansii_tg\n"
+            + "freelancce\n"
+            + "maroset\n"
+            + "workoo\n"
+            + "distantsiya\n"
+            + "noexperience\n"
+            + "frilanser_vacansii\n"
+            + "udafrii\n"
+            + "koteyka_freelancer\n"
+            + "talentedpeoples\n"
+            + "vacancysmm\n"
+            + "work_from_lina\n"
+            + "vacanciesmarketing\n"
+            + "proffreelancee\n"
+            + "workzavr\n"
+            + "jobi_jobs\n"
+            + "udalendwork\n"
+            + "freelance_vacancii\n"
+            + "distantwork_freelance_vacancies\n"
+            + "udalenkamoya\n"
+            + "remote_tgworks\n"
+            + "poisk_udalenka\n"
+            + "vacansii_na_udalenke\n"
+            + "on_remote\n"
+            + "udfril";
 
     private final Context appContext;
     private final SharedPreferences p;
@@ -35,16 +127,24 @@ public final class LeadStore {
     public LeadStore(Context context) {
         appContext = context.getApplicationContext();
         p = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        migrateToV5();
+        migrateToV6();
     }
 
-    private void migrateToV5() {
+    private void migrateToV6() {
         if (p.getInt("rules_version", 0) >= RULES_VERSION) return;
-        String existingChannels = p.getString("channels", DEFAULT_CHANNELS);
-        if (existingChannels == null || existingChannels.trim().isEmpty()) existingChannels = DEFAULT_CHANNELS;
+
+        String existing = p.getString("channels", "");
+        String normalizedExisting = existing == null ? "" : existing.trim();
+        int existingCount = countLines(normalizedExisting);
+        boolean looksLikeOldDefault = normalizedExisting.isEmpty()
+                || normalizedExisting.equalsIgnoreCase(OLD_V5_CHANNELS.trim())
+                || existingCount <= 13;
+        String channelsToUse = looksLikeOldDefault ? DEFAULT_CHANNELS : normalizedExisting;
+
         p.edit()
                 .putInt("rules_version", RULES_VERSION)
-                .putString("channels", existingChannels)
+                .putString("channels", channelsToUse)
+                .putInt("lookback_days", 7)
                 .putBoolean("sites_enabled", true)
                 .putBoolean("presentations_enabled", true)
                 .putBoolean("running", false)
@@ -52,28 +152,16 @@ public final class LeadStore {
                 .putInt("total_channels", 0)
                 .putInt("run_found", 0)
                 .putInt("preview_count", 0)
-                .remove("preview_history")
                 .remove("previewed_posts")
-                .remove("pending")
-                .remove("pending_user")
-                .remove("pending_message")
-                .remove("pending_post")
-                .remove("pending_key")
-                .remove("pending_category")
-                .remove("pending_budget")
-                .remove("pending_since")
-                .remove("pending_attempts")
-                .remove("enabled")
-                .remove("preview_mode")
-                .remove("scan_minutes")
-                .remove("send_pause_seconds")
+                .remove("last_preview_post")
+                .remove("last_preview_user")
+                .remove("last_preview_message")
+                .remove("last_preview_text")
                 .apply();
         try { resultsFile().delete(); } catch (Exception ignored) {}
     }
 
-    public boolean wasSent(String key) {
-        return false;
-    }
+    public boolean wasSent(String key) { return false; }
 
     public boolean wasPreviewed(String key) {
         return new HashSet<>(p.getStringSet("previewed_posts", new HashSet<>())).contains(key);
@@ -132,9 +220,20 @@ public final class LeadStore {
         p.edit().putString("channels", channels == null ? "" : channels.trim()).apply();
     }
 
+    public int lookbackDays() {
+        int d = p.getInt("lookback_days", 7);
+        return (d == 1 || d == 3 || d == 7 || d == 14) ? d : 7;
+    }
+
+    public void setLookbackDays(int days) {
+        int d = (days == 1 || days == 3 || days == 7 || days == 14) ? days : 7;
+        p.edit().putInt("lookback_days", d).apply();
+    }
+
     public String profileUrl() {
         return p.getString("profile_url", "https://alinavasileva-cco.github.io/studio/");
     }
+
     public void setProfileUrl(String url) {
         p.edit().putString("profile_url", url == null ? "" : url.trim()).apply();
     }
@@ -219,5 +318,10 @@ public final class LeadStore {
         if (c == Lead.Category.SITE) return "САЙТ / ЛЕНДИНГ";
         if (c == Lead.Category.PRESENTATION) return "ПРЕЗЕНТАЦИЯ";
         return "ИСКЛЮЧЕНО";
+    }
+
+    private static int countLines(String raw) {
+        if (raw == null || raw.trim().isEmpty()) return 0;
+        return raw.trim().split("[\\n,; ]+").length;
     }
 }
