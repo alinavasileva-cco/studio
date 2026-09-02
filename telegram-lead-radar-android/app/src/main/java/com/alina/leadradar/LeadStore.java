@@ -8,10 +8,57 @@ import java.util.Set;
 
 public final class LeadStore {
     private static final String PREFS = "lead_radar";
+    private static final int RULES_VERSION = 4;
+    private static final String V4_CHANNELS =
+            "zakaz_design\n" +
+            "Designs_squad\n" +
+            "Designs_job\n" +
+            "designwork_vacansii\n" +
+            "jobaem\n" +
+            "pro_zayavki\n" +
+            "GetClient\n" +
+            "dsgn_vacancies\n" +
+            "design_crate\n" +
+            "zakazi_designers\n" +
+            "vakansiidesign\n" +
+            "vakansii_dlya_dizaynera\n" +
+            "dsgnworkers";
+
     private final SharedPreferences p;
 
     public LeadStore(Context context) {
         p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        migrateToV4();
+    }
+
+    private void migrateToV4() {
+        if (p.getInt("rules_version", 0) >= RULES_VERSION) return;
+        p.edit()
+                .putInt("rules_version", RULES_VERSION)
+                .putString("channels", V4_CHANNELS)
+                .putBoolean("sites_enabled", true)
+                .putBoolean("presentations_enabled", true)
+                .putBoolean("ai_enabled", false)
+                .putBoolean("consulting_enabled", false)
+                .putBoolean("preview_mode", true)
+                .putBoolean("enabled", false)
+                .putBoolean("pending", false)
+                .remove("preview_history")
+                .remove("previewed_posts")
+                .remove("last_preview_post")
+                .remove("last_preview_user")
+                .remove("last_preview_message")
+                .remove("last_preview_text")
+                .remove("pending_user")
+                .remove("pending_message")
+                .remove("pending_post")
+                .remove("pending_key")
+                .remove("pending_category")
+                .remove("pending_budget")
+                .remove("pending_since")
+                .remove("pending_attempts")
+                .putInt("preview_count", 0)
+                .apply();
     }
 
     public boolean wasSent(String key) {
@@ -36,7 +83,7 @@ public final class LeadStore {
 
         String old = p.getString("preview_history", "");
         String combined = old.isEmpty() ? entry : entry + "\n\n────────────\n\n" + old;
-        combined = trimHistory(combined, 15);
+        combined = trimHistory(combined, 20);
 
         p.edit()
                 .putStringSet("previewed_posts", previewed)
@@ -119,9 +166,7 @@ public final class LeadStore {
     public boolean previewMode() { return p.getBoolean("preview_mode", true); }
     public void setPreviewMode(boolean enabled) { p.edit().putBoolean("preview_mode", enabled).apply(); }
 
-    public String channels() {
-        return p.getString("channels", "rueventjob\nGetClient\nworkk_on\nfreelancetaverna\ngolubin_channel\nmskeventjob");
-    }
+    public String channels() { return p.getString("channels", V4_CHANNELS); }
     public void setChannels(String channels) { p.edit().putString("channels", channels).apply(); }
 
     public int scanMinutes() { return Math.max(2, p.getInt("scan_minutes", 5)); }
@@ -137,15 +182,15 @@ public final class LeadStore {
 
     public boolean sitesEnabled() { return p.getBoolean("sites_enabled", true); }
     public boolean presentationsEnabled() { return p.getBoolean("presentations_enabled", true); }
-    public boolean aiEnabled() { return p.getBoolean("ai_enabled", true); }
-    public boolean consultingEnabled() { return p.getBoolean("consulting_enabled", true); }
+    public boolean aiEnabled() { return false; }
+    public boolean consultingEnabled() { return false; }
 
-    public void setCategories(boolean sites, boolean presentations, boolean ai, boolean consulting) {
+    public void setCategories(boolean sites, boolean presentations) {
         p.edit()
                 .putBoolean("sites_enabled", sites)
                 .putBoolean("presentations_enabled", presentations)
-                .putBoolean("ai_enabled", ai)
-                .putBoolean("consulting_enabled", consulting)
+                .putBoolean("ai_enabled", false)
+                .putBoolean("consulting_enabled", false)
                 .apply();
     }
 
@@ -156,10 +201,9 @@ public final class LeadStore {
     }
 
     private static String categoryName(Lead.Category c) {
-        if (c == Lead.Category.SITE) return "САЙТ";
+        if (c == Lead.Category.SITE) return "САЙТ / ЛЕНДИНГ";
         if (c == Lead.Category.PRESENTATION) return "ПРЕЗЕНТАЦИЯ";
-        if (c == Lead.Category.AI) return "AI / ИИ / ГЕНЕРАЦИЯ";
-        return "КОНСАЛТИНГ";
+        return "ИСКЛЮЧЕНО";
     }
 
     private static String trimHistory(String history, int maxEntries) {
