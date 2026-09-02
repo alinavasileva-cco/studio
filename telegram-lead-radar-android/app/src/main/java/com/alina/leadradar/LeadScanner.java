@@ -22,48 +22,55 @@ public final class LeadScanner {
 
     private static final String[] INTENT = {
             "ищу", "ищем", "ищется", "нужен", "нужна", "нужны", "нужно", "требуется", "требуются",
-            "задача", "заказ", "подрядчик", "исполнитель", "специалист", "кто может", "кто сможет",
-            "пишите", "напишите", "отклик", "присылайте"
+            "задача", "заказ", "подрядчик", "исполнитель", "кто может", "кто сможет", "пишите", "напишите",
+            "отклик", "присылайте", "контакт"
     };
 
     private static final String[] SELF_PROMO = {
             "ищу работу", "ищу клиентов", "оказываю услуги", "мои услуги", "создам вам", "делаю сайты",
-            "могу сделать сайт", "возьму заказ", "готов взять", "портфолио моих работ"
+            "могу сделать сайт", "разрабатываю сайты", "создаю сайты", "сделаю лендинг", "создам лендинг",
+            "возьму заказ", "готов взять", "портфолио моих работ", "обращайтесь", "заказать у меня"
     };
 
     private static final String[] EMPLOYMENT = {
-            "#вакансия", "вакансия", "в штат", "полная занятость", "частичная занятость", "оформление по тк",
-            "собеседование", "присылайте резюме", "отправляйте резюме", "резюме кандидата", "зарплата",
-            "обязанности:", "обязанности -", "требования:", "требования -", "условия:", "условия -",
-            "график работы", "испытательный срок", "гражданство рф", "для женщин (от 18", "оклад"
+            "#вакансия", "вакансия", "в штат", "штатный", "полная занятость", "частичная занятость",
+            "оформление по тк", "трудоустройство", "собеседование", "резюме", "зарплата", "оклад",
+            "график работы", "испытательный срок", "в команду", "на постоянной основе", "постоянное сотрудничество",
+            "долгосрочное сотрудничество", "регулярные заказы", "ежемесячно", "еженедельно", "ставка в месяц"
     };
 
     private static final String[] COMPLEX_SITE = {
             "маркетплейс", "интернет-магазин", "интернет магазин", "мобильное приложение", "мобильного приложения",
-            "backend", "бекенд", "личный кабинет", "fullstack", "фулстек", "saas", "crm-система", "crm система"
+            "backend", "бекенд", "личный кабинет", "fullstack", "фулстек", "saas", "crm-система", "crm система",
+            "онлайн-магазин", "каталог товаров", "интернет витрина", "e-commerce", "ecommerce"
     };
 
-    private static final String[] AI_TERMS = {
-            "нейросет", "искусственн", "chatgpt", "gpt", "midjourney", "миджорн", "stable diffusion", "stablediffusion",
-            "runway", "kling", "sora", "flux", "comfyui", "leonardo ai", "нейрофото", "нейровидео", "ai-видео",
-            "ai video", "ai-контент", "ai контент", "ai-аватар", "ai аватар", "нейроаватар", "промпт", "prompt",
-            "нейрокреатор", "нейро-креатор", "ai_дизайнер", "ai-дизайнер"
+    private static final String[] SITE_OBJECT = {
+            "сайт", "лендинг", "landing", "сайт-визит", "одностраничный сайт", "одностраничник", "landing page"
     };
 
-    private static final String[] GENERATION_TERMS = {
-            "сгенерировать", "генерация изображ", "генерации изображ", "генерация картин", "генерации картин",
-            "генерация фото", "генерации фото", "генерация видео", "генерации видео", "генерация ролик", "генерации ролик",
-            "генерация креатив", "генерации креатив", "генерация контент", "генерации контент", "генерация персонаж",
-            "генерации персонаж", "генерация аватар", "генерации аватар", "генерация визуал", "генерации визуал",
-            "создать нейро", "сделать нейро", "нейро фото", "нейро видео"
+    private static final String[] SITE_BUILD_ACTION = {
+            "сделать сайт", "создать сайт", "разработать сайт", "собрать сайт", "сверстать сайт", "верстка сайта",
+            "сделать лендинг", "создать лендинг", "разработать лендинг", "собрать лендинг", "сверстать лендинг",
+            "верстка лендинга", "создание сайта", "разработка сайта", "создание лендинга", "разработка лендинга",
+            "сайт с нуля", "лендинг с нуля", "сайт под ключ", "лендинг под ключ", "нужен сайт", "нужен лендинг",
+            "нужно сделать сайт", "нужно сделать лендинг", "кто сделает сайт", "кто сделает лендинг"
     };
 
-    private static final String[] CONSULTING_STRICT = {
-            "бизнес-трекер", "бизнес трекер", "бизнес-трекинг", "бизнес трекинг", "бизнес-консультант", "бизнес консультант",
-            "консультант по бизнесу", "консультация по бизнесу", "стратегическая сессия", "стратегическую сессию",
-            "аудит бизнеса", "разбор бизнеса", "разобрать бизнес", "диагностика бизнеса", "стратегия бизнеса",
-            "стратегию бизнеса", "коммерческая стратегия", "коммерческую стратегию", "масштабирование бизнеса",
-            "настроить отдел продаж", "построить отдел продаж", "юнит-экономика", "юнит экономика", "unit economics"
+    private static final String[] DESIGN_ONLY_SITE = {
+            "только дизайн", "дизайн-макет сайта", "дизайн макет сайта", "дизайн-макет лендинга", "дизайн макет лендинга",
+            "прототип сайта", "прототип лендинга", "отрисовать сайт", "отрисовать лендинг", "макет сайта в figma",
+            "макет лендинга в figma", "дизайн сайта в figma", "дизайн лендинга в figma", "только макет"
+    };
+
+    private static final String[] PRESENTATION_OBJECT = {
+            "презентац", "pitch deck", "питч-дек", "питч дек", "powerpoint", "pptx"
+    };
+
+    private static final String[] PRESENTATION_ACTION = {
+            "сделать презентац", "создать презентац", "оформить презентац", "собрать презентац", "подготовить презентац",
+            "разработать презентац", "переделать презентац", "переработать презентац", "редизайн презентац",
+            "задизайнить презентац", "дизайн презентац", "верстка презентац", "оформление презентац"
     };
 
     public List<Lead> scanChannel(String rawChannel, LeadStore store) throws Exception {
@@ -114,48 +121,83 @@ public final class LeadScanner {
 
     private Lead.Category classify(String text, LeadStore store, boolean inheritedIntent) {
         String s = text.toLowerCase(Locale.ROOT);
-        if (countCyrillic(s) < 8) return null;
+        if (countCyrillic(s) < 12) return null;
         if (containsAny(s, SELF_PROMO)) return null;
+        if (containsAny(s, EMPLOYMENT)) return null;
+
         boolean intent = inheritedIntent || containsAny(s, INTENT);
-        boolean employment = containsAny(s, EMPLOYMENT);
+        if (!intent) return null;
 
-        boolean siteObject = containsAny(s, new String[]{"сайт", "лендинг", "landing", "tilda", "тильд", "визитк", "одностранич"});
-        boolean siteAction = containsAny(s, new String[]{"сдел", "созда", "разработ", "собра", "сверст", "верст", "доработ", "редизайн", "перенест", "оформ"});
-        if (store.sitesEnabled() && !employment && siteObject && siteAction && !containsAny(s, COMPLEX_SITE)) {
-            return Lead.Category.SITE;
-        }
-
-        boolean presentationObject = containsAny(s, new String[]{"презентац", "pitch deck", "питч-дек", "питч дек"});
-        boolean presentationAction = containsAny(s, new String[]{"сдел", "созда", "собра", "оформ", "дизайн", "верст", "редизайн", "подготов"});
-        if (store.presentationsEnabled() && !employment && presentationObject && (presentationAction || intent)) {
-            return Lead.Category.PRESENTATION;
-        }
-
-        if (store.aiEnabled() && !employment && isAiTask(s, intent)) {
-            return Lead.Category.AI;
-        }
-
-        if (store.consultingEnabled() && !employment && intent && containsAny(s, CONSULTING_STRICT)) {
-            return Lead.Category.CONSULTING;
-        }
-
+        if (store.sitesEnabled() && isSiteCreation(s)) return Lead.Category.SITE;
+        if (store.presentationsEnabled() && isPresentationCreation(s)) return Lead.Category.PRESENTATION;
         return null;
     }
 
-    private boolean isAiTask(String s, boolean intent) {
-        boolean explicitAi = containsAny(s, AI_TERMS) || hasAiWord(s);
-        boolean generation = containsAny(s, GENERATION_TERMS);
-        if (generation) return true;
-        if (!explicitAi) return false;
-        boolean taskAction = containsAny(s, new String[]{"сдел", "созда", "сгенер", "генерац", "настро", "обуч", "аватар", "видео",
-                "изображ", "картин", "фото", "контент", "креатив", "визуал", "персонаж", "озвуч", "голос", "промпт", "prompt",
-                "дизайн", "разработ"});
-        return taskAction || intent;
+    private boolean isSiteCreation(String s) {
+        if (!containsAny(s, SITE_OBJECT)) return false;
+        if (containsAny(s, COMPLEX_SITE)) return false;
+        if (requiresForbiddenPlatform(s)) return false;
+        if (requiresBrandWork(s)) return false;
+
+        boolean explicitBuild = containsAny(s, SITE_BUILD_ACTION);
+        boolean genericBuild = containsAny(s, new String[]{"сверст", "верстк", "под ключ", "с нуля"}) && containsAny(s, SITE_OBJECT);
+        if (!explicitBuild && !genericBuild) return false;
+
+        if (containsAny(s, DESIGN_ONLY_SITE) && !containsAny(s, new String[]{"сверст", "верстк", "собрать", "под ключ", "запуск"})) {
+            return false;
+        }
+
+        if (containsAny(s, new String[]{"внести правки", "доработать сайт", "доработать лендинг", "исправить сайт",
+                "изменить дизайн", "настроить сайт", "подключить", "seo", "сео"}) && !containsAny(s, new String[]{"с нуля", "под ключ"})) {
+            return false;
+        }
+        return true;
     }
 
-    private boolean hasAiWord(String s) {
-        String padded = " " + s.replaceAll("[^a-zа-яё0-9]+", " ") + " ";
-        return padded.contains(" ai ") || padded.contains(" ии ");
+    private boolean isPresentationCreation(String s) {
+        if (!containsAny(s, PRESENTATION_OBJECT)) return false;
+        if (requiresBrandWork(s)) return false;
+
+        boolean action = containsAny(s, PRESENTATION_ACTION);
+        boolean clearProject = containsAny(s, new String[]{"слайд", "слайдов", "pptx", "powerpoint", "pdf"})
+                && containsAny(s, new String[]{"нужно", "нужна", "ищу", "требуется", "задача", "сделать", "оформить"});
+        return action || clearProject;
+    }
+
+    private boolean requiresForbiddenPlatform(String s) {
+        String x = s
+                .replace("не на тильде", "")
+                .replace("не тильда", "")
+                .replace("без тильды", "")
+                .replace("без tilda", "")
+                .replace("не tilda", "")
+                .replace("не на wordpress", "")
+                .replace("не wordpress", "")
+                .replace("без wordpress", "")
+                .replace("не на вордпресс", "")
+                .replace("не вордпресс", "")
+                .replace("без вордпресс", "");
+        return containsAny(x, new String[]{"tilda", "тильд", "wordpress", "вордпресс", "word press"});
+    }
+
+    private boolean requiresBrandWork(String s) {
+        String x = s
+                .replace("логотип готов", "")
+                .replace("лого готов", "")
+                .replace("логотип уже есть", "")
+                .replace("лого уже есть", "")
+                .replace("фирменный стиль готов", "")
+                .replace("фирменный стиль уже есть", "")
+                .replace("есть фирменный стиль", "")
+                .replace("по фирменному стилю", "")
+                .replace("в фирменном стиле", "")
+                .replace("гайдлайн готов", "")
+                .replace("гайдлайны есть", "");
+        return containsAny(x, new String[]{
+                "создать логотип", "сделать логотип", "разработать логотип", "нужен логотип", "нужно лого",
+                "айдентик", "брендбук", "разработать фирменный стиль", "создать фирменный стиль", "разработка фирменного стиля",
+                "брендинг под ключ"
+        });
     }
 
     private List<String> splitTasks(String text, String channel) {
@@ -220,7 +262,7 @@ public final class LeadScanner {
             int score = 0;
             if (around.contains("пишите") || around.contains("писать") || around.contains("напишите")) score += 8;
             if (around.contains("отклик") || around.contains("присылайте")) score += 7;
-            if (around.contains("контакт") || around.contains("связ")) score += 5;
+            if (around.contains("контакт") || around.contains("связ")) score += 6;
             if (around.contains("лс") || around.contains("личк")) score += 5;
             if (m.start() > text.length() * 0.50) score += 4;
             if (score > bestScore) {
