@@ -12,10 +12,10 @@ import java.util.Set;
 
 public final class LeadStore {
     private static final String PREFS = "lead_radar";
-    private static final int RULES_VERSION = 7;
+    private static final int RULES_VERSION = 8;
     private static final String RESULTS_FILE = "manual_lead_results.txt";
 
-    // v7: high-signal quick/project feeds first. Broad career channels from v6 were removed.
+    // v8: only Telegram sources. Marketplace-only Kwork/YouDo feeds were removed.
     private static final String DEFAULT_CHANNELS =
             "rueventjob\n"
             + "mskeventjob\n"
@@ -26,9 +26,7 @@ public final class LeadStore {
             + "design_freevacancies\n"
             + "SearchDesignerr\n"
             + "free_Design1\n"
-            + "freelance_design_work\n"
             + "jobs_designer\n"
-            + "offers_design\n"
             + "webdesign_jobs\n"
             + "rabota_design\n"
             + "job4designer\n"
@@ -46,7 +44,6 @@ public final class LeadStore {
             + "dsgnworkers\n"
             + "GetClient\n"
             + "job_webdesign\n"
-            + "freelance_dev_work\n"
             + "search_zakaz\n"
             + "design_vacancy\n"
             + "dsgn_vacancies\n"
@@ -76,10 +73,10 @@ public final class LeadStore {
     public LeadStore(Context context) {
         appContext = context.getApplicationContext();
         p = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        migrateToV7();
+        migrateToV8();
     }
 
-    private void migrateToV7() {
+    private void migrateToV8() {
         if (p.getInt("rules_version", 0) >= RULES_VERSION) return;
         p.edit()
                 .putInt("rules_version", RULES_VERSION)
@@ -114,9 +111,8 @@ public final class LeadStore {
         String budget = lead.budget == null || lead.budget.trim().isEmpty() ? "не указан" : lead.budget.trim();
         String original = cleanExcerpt(lead.text, 900);
         String contactUrl = contactUrl(lead.username);
-        String contactLabel = isExternalTaskRef(lead.username) ? "Ссылка на быстрое задание" : "Telegram-контакт";
         String entry = "[" + categoryName(lead.category) + "]\n"
-                + contactLabel + ": " + contactUrl
+                + "Telegram-контакт: " + contactUrl
                 + "\nБюджет: " + budget
                 + "\nИсходный пост: " + lead.postUrl
                 + "\n\nЗАДАЧА:\n" + original
@@ -143,15 +139,11 @@ public final class LeadStore {
     public String lastPreviewMessage() { return p.getString("last_preview_message", ""); }
     public int previewCount() { return p.getInt("preview_count", 0); }
 
-    public static boolean isExternalTaskRef(String ref) {
-        return ref != null && ref.startsWith("url:");
-    }
-
-    public static String contactUrl(String ref) {
-        if (ref == null || ref.trim().isEmpty()) return "";
-        if (isExternalTaskRef(ref)) return ref.substring(4);
-        if (ref.startsWith("http://") || ref.startsWith("https://")) return ref;
-        return "https://t.me/" + ref.replace("@", "");
+    public static String contactUrl(String username) {
+        if (username == null || username.trim().isEmpty()) return "";
+        String u = username.trim();
+        while (u.startsWith("@")) u = u.substring(1);
+        return "https://t.me/" + u;
     }
 
     public void clearPreviewHistory() {
@@ -174,6 +166,7 @@ public final class LeadStore {
         int d = p.getInt("lookback_days", 7);
         return (d == 1 || d == 3 || d == 7 || d == 14) ? d : 7;
     }
+
     public void setLookbackDays(int days) {
         int d = (days == 1 || days == 3 || days == 7 || days == 14) ? days : 7;
         p.edit().putInt("lookback_days", d).apply();
@@ -186,6 +179,7 @@ public final class LeadStore {
     public boolean presentationsEnabled() { return p.getBoolean("presentations_enabled", true); }
     public boolean aiEnabled() { return false; }
     public boolean consultingEnabled() { return false; }
+
     public void setCategories(boolean sites, boolean presentations) {
         p.edit().putBoolean("sites_enabled", sites).putBoolean("presentations_enabled", presentations).apply();
     }
@@ -195,14 +189,17 @@ public final class LeadStore {
                 .putInt("run_found", 0).putString("current_channel", "").putLong("run_started_at", System.currentTimeMillis())
                 .remove("run_finished_at").apply();
     }
+
     public void setProgress(int checked, int total, String currentChannel) {
         p.edit().putInt("checked_channels", checked).putInt("total_channels", total)
                 .putString("current_channel", currentChannel == null ? "" : currentChannel).apply();
     }
+
     public synchronized void finishRun() {
         p.edit().putBoolean("running", false).putString("current_channel", "")
                 .putLong("run_finished_at", System.currentTimeMillis()).apply();
     }
+
     public void requestStop() { p.edit().putBoolean("running", false).apply(); }
     public boolean running() { return p.getBoolean("running", false); }
     public int checkedChannels() { return p.getInt("checked_channels", 0); }
@@ -211,18 +208,22 @@ public final class LeadStore {
     public String currentChannel() { return p.getString("current_channel", ""); }
 
     private File resultsFile() { return new File(appContext.getFilesDir(), RESULTS_FILE); }
+
     private String readResultsFile() {
         File file = resultsFile();
         if (!file.exists()) return "";
         try (FileInputStream in = new FileInputStream(file); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[8192]; int read;
+            byte[] buffer = new byte[8192];
+            int read;
             while ((read = in.read(buffer)) != -1) out.write(buffer, 0, read);
             return out.toString("UTF-8");
         } catch (Exception ignored) { return ""; }
     }
+
     private void writeResultsFile(String text) {
         try (FileOutputStream out = new FileOutputStream(resultsFile(), false)) {
-            out.write(text.getBytes("UTF-8")); out.flush();
+            out.write(text.getBytes("UTF-8"));
+            out.flush();
         } catch (Exception ignored) {}
     }
 
@@ -231,6 +232,7 @@ public final class LeadStore {
         String s = text.replaceAll("\\s+", " ").trim();
         return s.length() <= limit ? s : s.substring(0, limit - 1).trim() + "…";
     }
+
     private static String categoryName(Lead.Category c) {
         if (c == Lead.Category.SITE) return "САЙТ / ЛЕНДИНГ";
         if (c == Lead.Category.PRESENTATION) return "ПРЕЗЕНТАЦИЯ";
