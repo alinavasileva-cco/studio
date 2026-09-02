@@ -6,11 +6,13 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,9 +36,10 @@ public final class LeadScanner {
 
     private static final String[] EMPLOYMENT = {
             "#вакансия", "вакансия", "в штат", "штатный", "полная занятость", "частичная занятость",
-            "оформление по тк", "трудоустройство", "собеседование", "резюме", "зарплата", "оклад",
-            "график работы", "испытательный срок", "в команду", "на постоянной основе", "постоянное сотрудничество",
-            "долгосрочное сотрудничество", "регулярные заказы", "ежемесячно", "еженедельно", "ставка в месяц"
+            "оформление по тк", "трудоустройство", "собеседование", "присылайте резюме", "отправляйте резюме",
+            "резюме кандидата", "зарплата", "оклад", "график работы", "испытательный срок", "в команду",
+            "на постоянной основе", "постоянное сотрудничество", "долгосрочное сотрудничество",
+            "регулярные заказы", "ежемесячно", "еженедельно", "ставка в месяц"
     };
 
     private static final String[] COMPLEX_SITE = {
@@ -78,42 +81,82 @@ public final class LeadScanner {
         List<Lead> out = new ArrayList<>();
         if (channel.isEmpty()) return out;
 
-        Document doc = Jsoup.connect("https://t.me/s/" + channel)
-                .userAgent("Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/131 Mobile Safari/537.36")
-                .timeout(20000)
-                .get();
+        Instant cutoff = Instant.now().minus(Duration.ofDays(store.lookbackDays()));
+        String before = null;
+        Set<String> seenPosts = new HashSet<>();
+        Set<Long> seenPageAnchors = new HashSet<>();
 
-        Elements messages = doc.select("div.tgme_widget_message[data-post]");
-        for (Element message : messages) {
-            String dataPost = message.attr("data-post");
-            if (dataPost == null || dataPost.isEmpty()) continue;
-            String postUrl = "https://t.me/" + dataPost;
-            if (!isFresh(message)) continue;
+        while (store.running()) {
+            String url = "https://t.me/s/" + channel + (before == null ? "" : "?before=" + before);
+            Document doc = Jsoup.connect(url)
+                    .userAgent("Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/131 Mobile Safari/537.36")
+                    .timeout(20000)
+                    .get();
 
-            Element textNode = message.selectFirst("div.tgme_widget_message_text");
-            if (textNode == null) continue;
-            String fullText = textNode.wholeText().trim();
-            if (fullText.isEmpty()) fullText = textNode.text().trim();
-            if (fullText.length() < 20) continue;
+            Elements messages = doc.select("div.tgme_widget_message[data-post]");
+            if (messages.isEmpty()) break;
 
-            boolean inheritedIntent = containsAny(fullText.toLowerCase(Locale.ROOT), INTENT);
-            List<String> tasks = splitTasks(fullText, channel);
-            for (String task : tasks) {
-                String text = task.replaceAll("[\\t ]+", " ").trim();
-                if (text.length() < 20) continue;
+            long minPostId = Long.MAX_VALUE;
+            boolean pageHasTimestamp = false;
+            boolean reachedCutoff = false;
 
-                Lead.Category category = classify(text, store, inheritedIntent);
-                if (category == null) continue;
+            for (Element message : messages) {
+                if (!store.running()) break;
 
-                String username = chooseContact(text, channel);
-                if (username == null || username.isEmpty()) continue;
+                String dataPost = message.attr("data-post");
+                if (dataPost == null || dataPost.isEmpty()) continue;
 
-                String dedupKey = postUrl + "|" + category.name() + "|" + username.toLowerCase(Locale.ROOT)
-                        + "|" + Integer.toHexString(text.toLowerCase(Locale.ROOT).hashCode());
-                if (store.wasSent(dedupKey)) continue;
+                long postId = parsePostId(dataPost);
+                if (postId > 0 && postId < minPostId) minPostId = postId;
 
-                String budget = extractBudget(text);
-                out.add(new Lead(category, channel, postUrl, text, username, budget, dedupKey));
+                Instant postedAt = parsePostedAt(message);
+                if (postedAt != null) {
+                    pageHasTimestamp = true;
+                    if (postedAt.isBefore(cutoff)) {
+                        reachedCutoff = true;
+                        continue;
+                    }
+                }
+
+                String postUrl = "https://t.me/" + dataPost;
+                if (!seenPosts.add(postUrl)) continue;
+
+                Element textNode = message.selectFirst("div.tgme_widget_message_text");
+                if (textNode == null) continue;
+                String fullText = textNode.wholeText().trim();
+                if (fullText.isEmpty()) fullText = textNode.text().trim();
+                if (fullText.length() < 20) continue;
+
+                boolean inheritedIntent = containsAny(fullText.toLowerCase(Locale.ROOT), INTENT);
+                List<String> tasks = splitTasks(fullText, channel);
+                for (String task : tasks) {
+                    if (!store.running()) break;
+                    String text = task.replaceAll("[\\t ]+", " ").trim();
+                    if (text.length() < 20) continue;
+
+                    Lead.Category category = classify(text, store, inheritedIntent);
+                    if (category == null) continue;
+
+                    String username = chooseContact(text, channel);
+                    if (username == null || username.isEmpty()) continue;
+
+                    String normalizedTask = normalizeForDedup(text);
+                    String dedupKey = category.name() + "|" + username.toLowerCase(Locale.ROOT)
+                            + "|" + Integer.toHexString(normalizedTask.hashCode());
+                    String budget = extractBudget(text);
+                    out.add(new Lead(category, channel, postUrl, text, username, budget, dedupKey));
+                }
+            }
+
+            if (!store.running() || reachedCutoff) break;
+            if (!pageHasTimestamp) break;
+            if (minPostId == Long.MAX_VALUE || minPostId <= 1) break;
+            if (!seenPageAnchors.add(minPostId)) break;
+
+            before = String.valueOf(minPostId);
+            try { Thread.sleep(120L); } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
             }
         }
         return out;
@@ -129,7 +172,7 @@ public final class LeadScanner {
         if (!intent) return null;
 
         if (store.sitesEnabled() && isSiteCreation(s)) return Lead.Category.SITE;
-        if (store.presentationsEnabled() && isPresentationCreation(s)) return Lead.Category.PRESENTATION;
+        if (store.presentationsEnabled() && isPresentationCreation(s, intent)) return Lead.Category.PRESENTATION;
         return null;
     }
 
@@ -140,28 +183,34 @@ public final class LeadScanner {
         if (requiresBrandWork(s)) return false;
 
         boolean explicitBuild = containsAny(s, SITE_BUILD_ACTION);
-        boolean genericBuild = containsAny(s, new String[]{"сверст", "верстк", "под ключ", "с нуля"}) && containsAny(s, SITE_OBJECT);
+        boolean genericBuild = containsAny(s, new String[]{"сверст", "верстк", "под ключ", "с нуля"})
+                && containsAny(s, SITE_OBJECT);
         if (!explicitBuild && !genericBuild) return false;
 
-        if (containsAny(s, DESIGN_ONLY_SITE) && !containsAny(s, new String[]{"сверст", "верстк", "собрать", "под ключ", "запуск"})) {
+        if (containsAny(s, DESIGN_ONLY_SITE)
+                && !containsAny(s, new String[]{"сверст", "верстк", "собрать", "под ключ", "запуск"})) {
             return false;
         }
 
         if (containsAny(s, new String[]{"внести правки", "доработать сайт", "доработать лендинг", "исправить сайт",
-                "изменить дизайн", "настроить сайт", "подключить", "seo", "сео"}) && !containsAny(s, new String[]{"с нуля", "под ключ"})) {
+                "изменить дизайн", "настроить сайт", "подключить", "seo", "сео"})
+                && !containsAny(s, new String[]{"с нуля", "под ключ"})) {
             return false;
         }
         return true;
     }
 
-    private boolean isPresentationCreation(String s) {
+    private boolean isPresentationCreation(String s, boolean intent) {
         if (!containsAny(s, PRESENTATION_OBJECT)) return false;
         if (requiresBrandWork(s)) return false;
 
         boolean action = containsAny(s, PRESENTATION_ACTION);
         boolean clearProject = containsAny(s, new String[]{"слайд", "слайдов", "pptx", "powerpoint", "pdf"})
                 && containsAny(s, new String[]{"нужно", "нужна", "ищу", "требуется", "задача", "сделать", "оформить"});
-        return action || clearProject;
+        boolean directDesignerRequest = intent && containsAny(s, new String[]{
+                "дизайнер презентац", "дизайнера презентац", "презентацию", "презентации", "презентация"
+        });
+        return action || clearProject || directDesignerRequest;
     }
 
     private boolean requiresForbiddenPlatform(String s) {
@@ -195,8 +244,8 @@ public final class LeadScanner {
                 .replace("гайдлайны есть", "");
         return containsAny(x, new String[]{
                 "создать логотип", "сделать логотип", "разработать логотип", "нужен логотип", "нужно лого",
-                "айдентик", "брендбук", "разработать фирменный стиль", "создать фирменный стиль", "разработка фирменного стиля",
-                "брендинг под ключ"
+                "айдентик", "брендбук", "разработать фирменный стиль", "создать фирменный стиль",
+                "разработка фирменного стиля", "брендинг под ключ"
         });
     }
 
@@ -256,15 +305,16 @@ public final class LeadScanner {
         while (m.find()) {
             String user = m.group(1);
             if (user.equalsIgnoreCase(channel) || user.toLowerCase(Locale.ROOT).endsWith("bot")) continue;
-            int from = Math.max(0, m.start() - 90);
-            int to = Math.min(text.length(), m.end() + 45);
+            int from = Math.max(0, m.start() - 100);
+            int to = Math.min(text.length(), m.end() + 55);
             String around = lower.substring(from, to);
             int score = 0;
             if (around.contains("пишите") || around.contains("писать") || around.contains("напишите")) score += 8;
             if (around.contains("отклик") || around.contains("присылайте")) score += 7;
             if (around.contains("контакт") || around.contains("связ")) score += 6;
             if (around.contains("лс") || around.contains("личк")) score += 5;
-            if (m.start() > text.length() * 0.50) score += 4;
+            if (around.contains("telegram") || around.contains("телеграм")) score += 4;
+            if (m.start() > text.length() * 0.45) score += 4;
             if (score > bestScore) {
                 bestScore = score;
                 best = user;
@@ -279,16 +329,34 @@ public final class LeadScanner {
         return m.group(1).replace('\u00A0', ' ') + " " + m.group(2);
     }
 
-    private boolean isFresh(Element message) {
+    private static Instant parsePostedAt(Element message) {
         try {
             Element time = message.selectFirst("time[datetime]");
-            if (time == null) return true;
-            OffsetDateTime posted = OffsetDateTime.parse(time.attr("datetime"));
-            long hours = Duration.between(posted.toInstant(), OffsetDateTime.now(ZoneOffset.UTC).toInstant()).toHours();
-            return hours >= -2 && hours <= 72;
+            if (time == null) return null;
+            return OffsetDateTime.parse(time.attr("datetime")).toInstant();
         } catch (Exception ignored) {
-            return true;
+            return null;
         }
+    }
+
+    private static long parsePostId(String dataPost) {
+        try {
+            int slash = dataPost.lastIndexOf('/');
+            if (slash < 0 || slash + 1 >= dataPost.length()) return -1L;
+            return Long.parseLong(dataPost.substring(slash + 1));
+        } catch (Exception ignored) {
+            return -1L;
+        }
+    }
+
+    private static String normalizeForDedup(String text) {
+        if (text == null) return "";
+        return text.toLowerCase(Locale.ROOT)
+                .replaceAll("https?://\\S+", " ")
+                .replaceAll("@[a-z0-9_]{5,32}", " ")
+                .replaceAll("[^а-яёa-z0-9]+", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
     }
 
     private static boolean containsAny(String s, String[] needles) {
@@ -308,10 +376,15 @@ public final class LeadScanner {
     public static String normalizeChannel(String raw) {
         if (raw == null) return "";
         String s = raw.trim();
-        s = s.replace("https://t.me/s/", "").replace("https://t.me/", "");
+        if (s.startsWith("https://t.me/s/")) s = s.substring("https://t.me/s/".length());
+        else if (s.startsWith("http://t.me/s/")) s = s.substring("http://t.me/s/".length());
+        else if (s.startsWith("https://t.me/")) s = s.substring("https://t.me/".length());
+        else if (s.startsWith("http://t.me/")) s = s.substring("http://t.me/".length());
         if (s.startsWith("@")) s = s.substring(1);
+        int q = s.indexOf('?');
+        if (q >= 0) s = s.substring(0, q);
         int slash = s.indexOf('/');
         if (slash >= 0) s = s.substring(0, slash);
-        return s.replaceAll("[^A-Za-z0-9_]", "");
+        return s.matches("[A-Za-z0-9_]{5,32}") ? s : "";
     }
 }
