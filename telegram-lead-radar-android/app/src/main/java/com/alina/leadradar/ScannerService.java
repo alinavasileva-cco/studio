@@ -77,16 +77,14 @@ public final class ScannerService extends Service {
 
                 List<String> channels = parseChannels(store.channels());
                 updateNotification(store.previewMode()
-                        ? "ТЕСТ: проверяю " + channels.size() + " Telegram-каналов…"
+                        ? "ТЕСТ v3: разбираю задания в " + channels.size() + " каналах…"
                         : "Проверяю " + channels.size() + " Telegram-каналов…");
 
                 if (store.previewMode()) {
                     int found = runPreviewScan(scanner, channels);
-                    if (found == 0) {
-                        updateNotification("ТЕСТ: новых подходящих заявок нет");
-                    } else {
-                        updateNotification("ТЕСТ: найдено новых заявок: " + found + ". Ничего не отправлено");
-                    }
+                    updateNotification(found == 0
+                            ? "ТЕСТ v3: новых релевантных заданий нет"
+                            : "ТЕСТ v3: найдено заданий: " + found + ". Ничего не отправлено");
                     sleep(store.scanMinutes() * 60_000L);
                 } else {
                     boolean queued = runAutoScan(scanner, channels);
@@ -113,11 +111,11 @@ public final class ScannerService extends Service {
                 List<Lead> leads = scanner.scanChannel(channel, store);
                 for (int i = leads.size() - 1; i >= 0; i--) {
                     Lead lead = leads.get(i);
-                    if (store.wasSent(lead.postUrl) || store.wasPreviewed(lead.postUrl)) continue;
+                    if (store.wasSent(lead.dedupKey) || store.wasPreviewed(lead.dedupKey)) continue;
                     String message = MessageComposer.compose(lead, store.profileUrl());
                     store.addPreview(lead, message);
                     found++;
-                    if (found >= 10) return found;
+                    if (found >= 15) return found;
                 }
             } catch (Exception ignored) {
                 updateNotification("ТЕСТ: не удалось проверить @" + channel + "; продолжаю");
@@ -133,7 +131,7 @@ public final class ScannerService extends Service {
                 List<Lead> leads = scanner.scanChannel(channel, store);
                 for (int i = leads.size() - 1; i >= 0; i--) {
                     Lead lead = leads.get(i);
-                    if (store.wasSent(lead.postUrl)) continue;
+                    if (store.wasSent(lead.dedupKey)) continue;
                     String message = MessageComposer.compose(lead, store.profileUrl());
                     store.setPending(lead, message);
                     updateNotification("Найдена заявка: " + categoryName(lead.category) + " → @" + lead.username);
@@ -161,6 +159,7 @@ public final class ScannerService extends Service {
     private String categoryName(Lead.Category c) {
         if (c == Lead.Category.SITE) return "сайт";
         if (c == Lead.Category.PRESENTATION) return "презентация";
+        if (c == Lead.Category.AI) return "AI / ИИ";
         return "консалтинг";
     }
 
@@ -170,8 +169,7 @@ public final class ScannerService extends Service {
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID, "Lead Radar", NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Lead Radar", NotificationManager.IMPORTANCE_LOW);
             channel.setDescription("Поиск и обработка заявок");
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
@@ -184,7 +182,7 @@ public final class ScannerService extends Service {
         Notification.Builder b = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
                 ? new Notification.Builder(this, CHANNEL_ID)
                 : new Notification.Builder(this);
-        String title = store != null && store.previewMode() ? "Lead Radar — ТЕСТ" : "Lead Radar работает";
+        String title = store != null && store.previewMode() ? "Lead Radar v3 — ТЕСТ" : "Lead Radar работает";
         return b.setContentTitle(title)
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.stat_notify_sync)
