@@ -29,7 +29,7 @@ public final class ScannerService extends Service {
         super.onCreate();
         store = new LeadStore(this);
         createNotificationChannel();
-        startForeground(NOTIFICATION_ID, notification("Подготовка ручного поиска быстрых заказов…", true));
+        startForeground(NOTIFICATION_ID, notification("Подготовка ручного поиска…", true));
     }
 
     @Override
@@ -42,9 +42,10 @@ public final class ScannerService extends Service {
             stopSelf();
             return START_NOT_STICKY;
         }
+
         if (workerStarted.compareAndSet(false, true)) {
             keepRunning = true;
-            Thread t = new Thread(this::runOneManualPass, "lead-radar-manual-scan-v7");
+            Thread t = new Thread(this::runOneManualPass, "lead-radar-manual-scan-v8");
             t.setDaemon(true);
             t.start();
         }
@@ -52,16 +53,19 @@ public final class ScannerService extends Service {
     }
 
     private void runOneManualPass() {
-        LeadScannerV7 scanner = new LeadScannerV7();
+        LeadScannerV8 scanner = new LeadScannerV8();
         List<String> channels = parseChannels(store.channels());
         store.beginRun(channels.size());
         int checked = 0;
+
         try {
             for (String channel : channels) {
                 if (!keepRunning || !store.running()) break;
+
                 store.setProgress(checked, channels.size(), channel);
                 updateNotification("Проверено " + checked + " из " + channels.size()
                         + " · найдено " + store.runFound() + " · @" + channel, true);
+
                 try {
                     List<Lead> leads = scanner.scanChannel(channel, store);
                     for (int i = leads.size() - 1; i >= 0; i--) {
@@ -74,8 +78,9 @@ public final class ScannerService extends Service {
                         store.addPreview(lead, message);
                     }
                 } catch (Exception ignored) {
-                    // Dead/private/renamed source does not stop the manual pass.
+                    // Закрытый, переименованный или временно недоступный канал не останавливает общий проход.
                 }
+
                 checked++;
                 store.setProgress(checked, channels.size(), "");
             }
@@ -83,12 +88,13 @@ public final class ScannerService extends Service {
             boolean stoppedByUser = checked < channels.size() && !store.running();
             int found = store.runFound();
             store.finishRun();
+
             if (stoppedByUser) {
                 updateNotification("Поиск остановлен. Проверено " + checked + " из " + channels.size()
                         + ", найдено " + found, false);
             } else {
                 updateNotification("Поиск завершён за " + periodLabel(store.lookbackDays()) + ". Проверено "
-                        + checked + " источников, найдено быстрых заказов: " + found, false);
+                        + checked + " источников, найдено заявок с прямым Telegram-контактом: " + found, false);
             }
             stopForeground(true);
             stopSelf();
@@ -101,7 +107,7 @@ public final class ScannerService extends Service {
         String[] pieces = raw.split("[\\n,; ]+");
         Set<String> seen = new HashSet<>();
         for (String piece : pieces) {
-            String c = LeadScannerV7.normalizeChannel(piece);
+            String c = LeadScannerV8.normalizeChannel(piece);
             if (!c.isEmpty() && seen.add(c.toLowerCase(java.util.Locale.ROOT))) result.add(c);
         }
         return result;
@@ -118,19 +124,19 @@ public final class ScannerService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID, "Lead Radar — ручной поиск", NotificationManager.IMPORTANCE_LOW);
-            channel.setDescription("Ручной поиск быстрых заказов на презентации и сайты");
+            channel.setDescription("Ручной поиск заказов с прямым Telegram-контактом");
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
     }
 
     private Notification notification(String text, boolean ongoing) {
-        Intent open = new Intent(this, MainActivity.class);
+        Intent open = new Intent(this, MainActivityV8.class);
         PendingIntent pi = PendingIntent.getActivity(this, 0, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder b = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
                 ? new Notification.Builder(this, CHANNEL_ID)
                 : new Notification.Builder(this);
-        return b.setContentTitle("Lead Radar v7 — быстрые заказы · " + periodLabel(store.lookbackDays()))
+        return b.setContentTitle("Lead Radar v8 — Telegram-контакты · " + periodLabel(store.lookbackDays()))
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.stat_notify_sync)
                 .setContentIntent(pi)
@@ -145,5 +151,9 @@ public final class ScannerService extends Service {
     }
 
     @Override public IBinder onBind(Intent intent) { return null; }
-    @Override public void onDestroy() { keepRunning = false; workerStarted.set(false); super.onDestroy(); }
+    @Override public void onDestroy() {
+        keepRunning = false;
+        workerStarted.set(false);
+        super.onDestroy();
+    }
 }
