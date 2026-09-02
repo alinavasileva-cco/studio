@@ -6,10 +6,13 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
+import android.text.util.Linkify;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -22,9 +25,11 @@ import android.widget.Toast;
 public final class MainActivity extends Activity {
     private LeadStore store;
     private TextView status;
+    private TextView previewHistory;
     private CheckBox sites;
     private CheckBox presentations;
     private CheckBox consulting;
+    private CheckBox previewMode;
     private EditText channels;
     private EditText scanMinutes;
     private EditText sendPause;
@@ -34,7 +39,7 @@ public final class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         store = new LeadStore(this);
-        setTitle("Universal Lead Radar");
+        setTitle("Universal Lead Radar v2");
         setContentView(buildUi());
         loadSettings();
         if (store.enabled()) startScannerService();
@@ -44,6 +49,7 @@ public final class MainActivity extends Activity {
     protected void onResume() {
         super.onResume();
         updateStatus();
+        updatePreviewHistory();
     }
 
     private View buildUi() {
@@ -55,13 +61,13 @@ public final class MainActivity extends Activity {
         scroll.addView(root);
 
         TextView title = new TextView(this);
-        title.setText("Universal Telegram Lead Radar");
+        title.setText("Universal Telegram Lead Radar v2");
         title.setTextSize(24);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         root.addView(title);
 
         TextView subtitle = new TextView(this);
-        subtitle.setText("Сайты · Презентации · Консалтинг\nИщет только публичные русскоязычные запросы с прямым контактом для отклика. Локального дневного лимита нет.");
+        subtitle.setText("Сайты · Презентации · Консалтинг\nПерсонализирует сообщение по содержанию конкретной заявки. Тестовый режим ничего не отправляет.");
         subtitle.setTextSize(15);
         subtitle.setPadding(0, dp(8), 0, dp(14));
         root.addView(subtitle);
@@ -71,8 +77,12 @@ public final class MainActivity extends Activity {
         status.setPadding(0, 0, 0, dp(12));
         root.addView(status);
 
-        TextView catLabel = label("Что искать");
-        root.addView(catLabel);
+        previewMode = new CheckBox(this);
+        previewMode.setText("ТЕСТОВЫЙ РЕЖИМ — искать и показывать, НИЧЕГО НЕ ОТПРАВЛЯТЬ");
+        previewMode.setTypeface(Typeface.DEFAULT_BOLD);
+        root.addView(previewMode);
+
+        root.addView(label("Что искать"));
         sites = new CheckBox(this); sites.setText("Сайты-визитки / простые лендинги"); root.addView(sites);
         presentations = new CheckBox(this); presentations.setText("Презентации"); root.addView(presentations);
         consulting = new CheckBox(this); consulting.setText("Бизнес-консалтинг / трекинг"); root.addView(consulting);
@@ -88,35 +98,36 @@ public final class MainActivity extends Activity {
         scanMinutes.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         root.addView(scanMinutes, fullWidth());
 
-        root.addView(label("Техническая пауза между отправками, секунд (минимум 30)"));
+        root.addView(label("Пауза между автоотправками, секунд (используется только в авто-режиме, минимум 30)"));
         sendPause = new EditText(this);
         sendPause.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
         root.addView(sendPause, fullWidth());
 
-        root.addView(label("Ссылка, которую добавлять в сообщение"));
+        root.addView(label("Ссылка на портфолио (можно менять или оставить пустой)"));
         profileUrl = new EditText(this);
         profileUrl.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_URI);
         root.addView(profileUrl, fullWidth());
 
         Button accessibility = new Button(this);
-        accessibility.setText("1. Включить Accessibility для Lead Radar");
+        accessibility.setText("1. Проверить / включить Accessibility для Lead Radar");
         accessibility.setOnClickListener(v -> startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)));
         root.addView(accessibility, buttonParams());
 
         Button start = new Button(this);
-        start.setText("2. Сохранить и запустить автоматический режим");
+        start.setText("2. Сохранить и запустить поиск");
         start.setOnClickListener(v -> {
             saveSettings();
             store.setEnabled(true);
+            if (store.previewMode()) store.clearPending();
             requestNotificationsIfNeeded();
             startScannerService();
             updateStatus();
-            Toast.makeText(this, "Lead Radar запущен", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, store.previewMode() ? "Тестовый поиск запущен — отправки отключены" : "Автоматический режим запущен", Toast.LENGTH_LONG).show();
         });
         root.addView(start, buttonParams());
 
         Button stop = new Button(this);
-        stop.setText("Остановить");
+        stop.setText("Остановить поиск");
         stop.setOnClickListener(v -> {
             store.setEnabled(false);
             Intent i = new Intent(this, ScannerService.class);
@@ -126,13 +137,56 @@ public final class MainActivity extends Activity {
         });
         root.addView(stop, buttonParams());
 
+        Button refresh = new Button(this);
+        refresh.setText("Обновить найденные заявки на экране");
+        refresh.setOnClickListener(v -> {
+            updateStatus();
+            updatePreviewHistory();
+        });
+        root.addView(refresh, buttonParams());
+
+        Button openLast = new Button(this);
+        openLast.setText("Открыть исходный пост последней заявки");
+        openLast.setOnClickListener(v -> {
+            String url = store.lastPreviewPost();
+            if (url == null || url.isEmpty()) {
+                Toast.makeText(this, "Пока нет найденных заявок", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+        });
+        root.addView(openLast, buttonParams());
+
+        Button clearHistory = new Button(this);
+        clearHistory.setText("Очистить тестовую историю на экране");
+        clearHistory.setOnClickListener(v -> {
+            store.clearPreviewHistory();
+            updatePreviewHistory();
+        });
+        root.addView(clearHistory, buttonParams());
+
         Button retry = new Button(this);
-        retry.setText("Повторить текущую ожидающую отправку");
-        retry.setOnClickListener(v -> AutoSendAccessibilityService.requestProcess(this));
+        retry.setText("Повторить ожидающую автоотправку");
+        retry.setOnClickListener(v -> {
+            if (store.previewMode()) {
+                Toast.makeText(this, "В тестовом режиме отправка отключена", Toast.LENGTH_SHORT).show();
+            } else {
+                AutoSendAccessibilityService.requestProcess(this);
+            }
+        });
         root.addView(retry, buttonParams());
 
+        root.addView(label("Последние тестовые заявки и подготовленные сообщения"));
+        previewHistory = new TextView(this);
+        previewHistory.setTextSize(14);
+        previewHistory.setTextIsSelectable(true);
+        previewHistory.setAutoLinkMask(Linkify.WEB_URLS);
+        previewHistory.setMovementMethod(LinkMovementMethod.getInstance());
+        previewHistory.setPadding(dp(10), dp(10), dp(10), dp(16));
+        root.addView(previewHistory, fullWidth());
+
         TextView note = new TextView(this);
-        note.setText("Автоотправка выполняется только если в публичном посте есть явный запрос на исполнителя и прямой @username для связи. Вакансии в штат, самореклама исполнителей, англоязычные посты и сложные маркетплейсы отсекаются. Ограничения/антиспам Telegram приложение не обходит.");
+        note.setText("Автоотправка разрешается только после отключения галочки ТЕСТОВЫЙ РЕЖИМ и повторного нажатия «Сохранить и запустить поиск». Бот берёт только публичные русскоязычные запросы с прямым @username для отклика. Ограничения и антиспам Telegram не обходит.");
         note.setTextSize(13);
         note.setPadding(0, dp(14), 0, dp(20));
         root.addView(note);
@@ -144,15 +198,18 @@ public final class MainActivity extends Activity {
         sites.setChecked(store.sitesEnabled());
         presentations.setChecked(store.presentationsEnabled());
         consulting.setChecked(store.consultingEnabled());
+        previewMode.setChecked(store.previewMode());
         channels.setText(store.channels());
         scanMinutes.setText(String.valueOf(store.scanMinutes()));
         sendPause.setText(String.valueOf(store.sendPauseSeconds()));
         profileUrl.setText(store.profileUrl());
         updateStatus();
+        updatePreviewHistory();
     }
 
     private void saveSettings() {
         store.setCategories(sites.isChecked(), presentations.isChecked(), consulting.isChecked());
+        store.setPreviewMode(previewMode.isChecked());
         store.setChannels(channels.getText().toString());
         store.setScanMinutes(parseInt(scanMinutes.getText().toString(), 5));
         store.setSendPauseSeconds(parseInt(sendPause.getText().toString(), 90));
@@ -163,8 +220,19 @@ public final class MainActivity extends Activity {
         if (status == null) return;
         String accessibility = isAccessibilityEnabled() ? "ВКЛ" : "ВЫКЛ";
         String engine = store.enabled() ? "РАБОТАЕТ" : "ОСТАНОВЛЕН";
-        String pending = store.hasPending() ? "\nОжидает отправки: @" + store.pendingUser() : "";
-        status.setText("Поиск: " + engine + "\nAccessibility: " + accessibility + "\nОтправлено: " + store.sentCount() + pending);
+        String mode = store.previewMode() ? "ТЕСТ — НЕ ОТПРАВЛЯЕТ" : "АВТООТПРАВКА";
+        String pending = !store.previewMode() && store.hasPending() ? "\nОжидает отправки: @" + store.pendingUser() : "";
+        status.setText("Поиск: " + engine + "\nРежим: " + mode + "\nAccessibility: " + accessibility
+                + "\nНайдено в тесте: " + store.previewCount() + "\nОтправлено: " + store.sentCount() + pending);
+    }
+
+    private void updatePreviewHistory() {
+        if (previewHistory == null) return;
+        String history = store.previewHistory();
+        previewHistory.setText(history == null || history.isEmpty()
+                ? "Пока ничего не найдено. Запусти поиск в тестовом режиме и нажми «Обновить найденные заявки на экране»."
+                : history);
+        Linkify.addLinks(previewHistory, Linkify.WEB_URLS);
     }
 
     private boolean isAccessibilityEnabled() {
