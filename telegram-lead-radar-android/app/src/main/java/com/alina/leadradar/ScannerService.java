@@ -54,7 +54,7 @@ public final class ScannerService extends Service {
         LeadScanner scanner = new LeadScanner();
         while (running && store.enabled()) {
             try {
-                if (store.hasPending()) {
+                if (!store.previewMode() && store.hasPending()) {
                     long age = System.currentTimeMillis() - store.pendingSince();
                     if (age > 15_000L) {
                         updateNotification("Ожидаю отправку в @" + store.pendingUser());
@@ -64,44 +64,38 @@ public final class ScannerService extends Service {
                     continue;
                 }
 
-                long minPauseMs = store.sendPauseSeconds() * 1000L;
-                long sinceLastSend = System.currentTimeMillis() - store.lastSendAt();
-                if (store.lastSendAt() > 0 && sinceLastSend < minPauseMs) {
-                    long left = Math.max(1, (minPauseMs - sinceLastSend) / 1000L);
-                    updateNotification("Следующая отправка через ~" + left + " сек.");
-                    sleep(Math.min(10_000L, minPauseMs - sinceLastSend));
-                    continue;
+                if (!store.previewMode()) {
+                    long minPauseMs = store.sendPauseSeconds() * 1000L;
+                    long sinceLastSend = System.currentTimeMillis() - store.lastSendAt();
+                    if (store.lastSendAt() > 0 && sinceLastSend < minPauseMs) {
+                        long left = Math.max(1, (minPauseMs - sinceLastSend) / 1000L);
+                        updateNotification("Следующая отправка через ~" + left + " сек.");
+                        sleep(Math.min(10_000L, minPauseMs - sinceLastSend));
+                        continue;
+                    }
                 }
 
                 List<String> channels = parseChannels(store.channels());
-                boolean queued = false;
-                updateNotification("Проверяю " + channels.size() + " Telegram-каналов…");
+                updateNotification(store.previewMode()
+                        ? "ТЕСТ: проверяю " + channels.size() + " Telegram-каналов…"
+                        : "Проверяю " + channels.size() + " Telegram-каналов…");
 
-                for (String channel : channels) {
-                    if (!running || !store.enabled() || store.hasPending()) break;
-                    try {
-                        List<Lead> leads = scanner.scanChannel(channel, store);
-                        for (int i = leads.size() - 1; i >= 0; i--) {
-                            Lead lead = leads.get(i);
-                            if (store.wasSent(lead.postUrl)) continue;
-                            String message = MessageComposer.compose(lead, store.profileUrl());
-                            store.setPending(lead, message);
-                            updateNotification("Найдена заявка: " + categoryName(lead.category) + " → @" + lead.username);
-                            AutoSendAccessibilityService.requestProcess(this);
-                            queued = true;
-                            break;
-                        }
-                    } catch (Exception ignored) {
-                        updateNotification("Не удалось проверить @" + channel + "; продолжаю");
+                if (store.previewMode()) {
+                    int found = runPreviewScan(scanner, channels);
+                    if (found == 0) {
+                        updateNotification("ТЕСТ: новых подходящих заявок нет");
+                    } else {
+                        updateNotification("ТЕСТ: найдено новых заявок: " + found + ". Ничего не отправлено");
                     }
-                    if (queued) break;
-                }
-
-                if (!queued) {
-                    updateNotification("Новых подходящих заявок нет. Отправлено: " + store.sentCount());
                     sleep(store.scanMinutes() * 60_000L);
                 } else {
-                    sleep(10_000L);
+                    boolean queued = runAutoScan(scanner, channels);
+                    if (!queued) {
+                        updateNotification("Новых подходящих заявок нет. Отправлено: " + store.sentCount());
+                        sleep(store.scanMinutes() * 60_000L);
+                    } else {
+                        sleep(10_000L);
+                    }
                 }
             } catch (Throwable ignored) {
                 updateNotification("Временная ошибка. Повторю автоматически");
@@ -109,6 +103,48 @@ public final class ScannerService extends Service {
             }
         }
         stopSelf();
+    }
+
+    private int runPreviewScan(LeadScanner scanner, List<String> channels) {
+        int found = 0;
+        for (String channel : channels) {
+            if (!running || !store.enabled()) break;
+            try {
+                List<Lead> leads = scanner.scanChannel(channel, store);
+                for (int i = leads.size() - 1; i >= 0; i--) {
+                    Lead lead = leads.get(i);
+                    if (store.wasSent(lead.postUrl) || store.wasPreviewed(lead.postUrl)) continue;
+                    String message = MessageComposer.compose(lead, store.profileUrl());
+                    store.addPreview(lead, message);
+                    found++;
+                    if (found >= 10) return found;
+                }
+            } catch (Exception ignored) {
+                updateNotification("ТЕСТ: не удалось проверить @" + channel + "; продолжаю");
+            }
+        }
+        return found;
+    }
+
+    private boolean runAutoScan(LeadScanner scanner, List<String> channels) {
+        for (String channel : channels) {
+            if (!running || !store.enabled() || store.hasPending()) break;
+            try {
+                List<Lead> leads = scanner.scanChannel(channel, store);
+                for (int i = leads.size() - 1; i >= 0; i--) {
+                    Lead lead = leads.get(i);
+                    if (store.wasSent(lead.postUrl)) continue;
+                    String message = MessageComposer.compose(lead, store.profileUrl());
+                    store.setPending(lead, message);
+                    updateNotification("Найдена заявка: " + categoryName(lead.category) + " → @" + lead.username);
+                    AutoSendAccessibilityService.requestProcess(this);
+                    return true;
+                }
+            } catch (Exception ignored) {
+                updateNotification("Не удалось проверить @" + channel + "; продолжаю");
+            }
+        }
+        return false;
     }
 
     private List<String> parseChannels(String raw) {
@@ -136,7 +172,7 @@ public final class ScannerService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID, "Lead Radar", NotificationManager.IMPORTANCE_LOW);
-            channel.setDescription("Поиск и автоматическая обработка заявок");
+            channel.setDescription("Поиск и обработка заявок");
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
     }
@@ -148,7 +184,8 @@ public final class ScannerService extends Service {
         Notification.Builder b = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
                 ? new Notification.Builder(this, CHANNEL_ID)
                 : new Notification.Builder(this);
-        return b.setContentTitle("Lead Radar работает")
+        String title = store != null && store.previewMode() ? "Lead Radar — ТЕСТ" : "Lead Radar работает";
+        return b.setContentTitle(title)
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.stat_notify_sync)
                 .setContentIntent(pi)
