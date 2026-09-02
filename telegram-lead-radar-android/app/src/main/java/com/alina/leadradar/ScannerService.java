@@ -77,19 +77,19 @@ public final class ScannerService extends Service {
 
                 List<String> channels = parseChannels(store.channels());
                 updateNotification(store.previewMode()
-                        ? "ТЕСТ v3: разбираю задания в " + channels.size() + " каналах…"
-                        : "Проверяю " + channels.size() + " Telegram-каналов…");
+                        ? "ТЕСТ v4: проверяю " + channels.size() + " профильных каналов…"
+                        : "Проверяю " + channels.size() + " профильных каналов…");
 
                 if (store.previewMode()) {
                     int found = runPreviewScan(scanner, channels);
                     updateNotification(found == 0
-                            ? "ТЕСТ v3: новых релевантных заданий нет"
-                            : "ТЕСТ v3: найдено заданий: " + found + ". Ничего не отправлено");
+                            ? "ТЕСТ v4: новых релевантных заказов нет"
+                            : "ТЕСТ v4: найдено релевантных заказов: " + found + ". Ничего не отправлено");
                     sleep(store.scanMinutes() * 60_000L);
                 } else {
                     boolean queued = runAutoScan(scanner, channels);
                     if (!queued) {
-                        updateNotification("Новых подходящих заявок нет. Отправлено: " + store.sentCount());
+                        updateNotification("Новых подходящих заказов нет. Отправлено: " + store.sentCount());
                         sleep(store.scanMinutes() * 60_000L);
                     } else {
                         sleep(10_000L);
@@ -111,11 +111,13 @@ public final class ScannerService extends Service {
                 List<Lead> leads = scanner.scanChannel(channel, store);
                 for (int i = leads.size() - 1; i >= 0; i--) {
                     Lead lead = leads.get(i);
+                    if (lead.category != Lead.Category.SITE && lead.category != Lead.Category.PRESENTATION) continue;
                     if (store.wasSent(lead.dedupKey) || store.wasPreviewed(lead.dedupKey)) continue;
                     String message = MessageComposer.compose(lead, store.profileUrl());
+                    if (message == null || message.trim().isEmpty()) continue;
                     store.addPreview(lead, message);
                     found++;
-                    if (found >= 15) return found;
+                    if (found >= 20) return found;
                 }
             } catch (Exception ignored) {
                 updateNotification("ТЕСТ: не удалось проверить @" + channel + "; продолжаю");
@@ -131,10 +133,12 @@ public final class ScannerService extends Service {
                 List<Lead> leads = scanner.scanChannel(channel, store);
                 for (int i = leads.size() - 1; i >= 0; i--) {
                     Lead lead = leads.get(i);
+                    if (lead.category != Lead.Category.SITE && lead.category != Lead.Category.PRESENTATION) continue;
                     if (store.wasSent(lead.dedupKey)) continue;
                     String message = MessageComposer.compose(lead, store.profileUrl());
+                    if (message == null || message.trim().isEmpty()) continue;
                     store.setPending(lead, message);
-                    updateNotification("Найдена заявка: " + categoryName(lead.category) + " → @" + lead.username);
+                    updateNotification("Найден заказ: " + categoryName(lead.category) + " → @" + lead.username);
                     AutoSendAccessibilityService.requestProcess(this);
                     return true;
                 }
@@ -157,10 +161,8 @@ public final class ScannerService extends Service {
     }
 
     private String categoryName(Lead.Category c) {
-        if (c == Lead.Category.SITE) return "сайт";
-        if (c == Lead.Category.PRESENTATION) return "презентация";
-        if (c == Lead.Category.AI) return "AI / ИИ";
-        return "консалтинг";
+        if (c == Lead.Category.SITE) return "сайт / лендинг";
+        return "презентация";
     }
 
     private void sleep(long ms) {
@@ -170,7 +172,7 @@ public final class ScannerService extends Service {
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Lead Radar", NotificationManager.IMPORTANCE_LOW);
-            channel.setDescription("Поиск и обработка заявок");
+            channel.setDescription("Поиск релевантных заказов на сайты и презентации");
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
     }
@@ -182,7 +184,7 @@ public final class ScannerService extends Service {
         Notification.Builder b = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
                 ? new Notification.Builder(this, CHANNEL_ID)
                 : new Notification.Builder(this);
-        String title = store != null && store.previewMode() ? "Lead Radar v3 — ТЕСТ" : "Lead Radar работает";
+        String title = store != null && store.previewMode() ? "Lead Radar v4 — ТЕСТ" : "Lead Radar v4 работает";
         return b.setContentTitle(title)
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.stat_notify_sync)
