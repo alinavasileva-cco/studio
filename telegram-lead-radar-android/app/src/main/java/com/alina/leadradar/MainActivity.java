@@ -2,7 +2,9 @@ package com.alina.leadradar;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.ComponentName;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
@@ -11,8 +13,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.Settings;
-import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.view.View;
@@ -27,20 +27,18 @@ import android.widget.Toast;
 public final class MainActivity extends Activity {
     private LeadStore store;
     private TextView status;
-    private TextView previewHistory;
+    private TextView results;
     private CheckBox sites;
     private CheckBox presentations;
-    private CheckBox previewMode;
     private EditText channels;
-    private EditText scanMinutes;
-    private EditText sendPause;
     private EditText profileUrl;
+
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
     private final Runnable autoRefresh = new Runnable() {
         @Override public void run() {
             updateStatus();
-            updatePreviewHistory();
-            uiHandler.postDelayed(this, 3000L);
+            updateResults();
+            uiHandler.postDelayed(this, 2500L);
         }
     };
 
@@ -48,19 +46,18 @@ public final class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         store = new LeadStore(this);
-        setTitle("Universal Lead Radar v4");
+        setTitle("Universal Lead Radar v5");
         setContentView(buildUi());
         loadSettings();
-        if (store.enabled()) startScannerService();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         updateStatus();
-        updatePreviewHistory();
+        updateResults();
         uiHandler.removeCallbacks(autoRefresh);
-        uiHandler.postDelayed(autoRefresh, 1000L);
+        uiHandler.postDelayed(autoRefresh, 800L);
     }
 
     @Override
@@ -78,13 +75,15 @@ public final class MainActivity extends Activity {
         scroll.addView(root);
 
         TextView title = new TextView(this);
-        title.setText("Universal Telegram Lead Radar v4");
+        title.setText("Universal Telegram Lead Radar v5");
         title.setTextSize(24);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         root.addView(title);
 
         TextView subtitle = new TextView(this);
-        subtitle.setText("ТОЛЬКО: создание презентаций + создание лендингов / простых сайтов.\nИсключено: Tilda, WordPress, AI/ИИ, логотипы, айдентика, фирменный стиль и обычные вакансии.");
+        subtitle.setText("РУЧНОЙ РЕЖИМ. Бот никогда не отправляет сообщения сам.\n"
+                + "Ты сама запускаешь один поиск, сама останавливаешь его при необходимости и сама решаешь, кому писать.\n"
+                + "Ищем только создание презентаций и создание лендингов / простых сайтов; Tilda и WordPress исключены.");
         subtitle.setTextSize(15);
         subtitle.setPadding(0, dp(8), 0, dp(14));
         root.addView(subtitle);
@@ -94,11 +93,6 @@ public final class MainActivity extends Activity {
         status.setPadding(0, 0, 0, dp(12));
         root.addView(status);
 
-        previewMode = new CheckBox(this);
-        previewMode.setText("ТЕСТОВЫЙ РЕЖИМ — искать и показывать, НИЧЕГО НЕ ОТПРАВЛЯТЬ");
-        previewMode.setTypeface(Typeface.DEFAULT_BOLD);
-        root.addView(previewMode);
-
         root.addView(label("Что искать"));
         sites = new CheckBox(this);
         sites.setText("Создание лендинга / простого сайта — НЕ Tilda и НЕ WordPress");
@@ -107,67 +101,44 @@ public final class MainActivity extends Activity {
         presentations.setText("Создание / оформление презентации, PowerPoint / PDF / pitch deck");
         root.addView(presentations);
 
-        root.addView(label("Публичные Telegram-каналы (расширенный профильный пул)"));
+        root.addView(label("Публичные Telegram-каналы"));
+        TextView channelHelp = new TextView(this);
+        channelHelp.setText("По одному каналу на строке. Можно вставлять большой список — сотни и тысячи каналов. "
+                + "Один ручной запуск проходит весь список один раз и после завершения сам останавливается.");
+        channelHelp.setTextSize(13);
+        root.addView(channelHelp);
+
         channels = new EditText(this);
-        channels.setMinLines(8);
+        channels.setMinLines(10);
         channels.setGravity(android.view.Gravity.TOP);
         root.addView(channels, fullWidth());
-
-        root.addView(label("Проверять каждые N минут (минимум 2)"));
-        scanMinutes = new EditText(this);
-        scanMinutes.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        root.addView(scanMinutes, fullWidth());
-
-        root.addView(label("Пауза между автоотправками, секунд (только авто-режим, минимум 30)"));
-        sendPause = new EditText(this);
-        sendPause.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
-        root.addView(sendPause, fullWidth());
 
         root.addView(label("Ссылка на портфолио"));
         profileUrl = new EditText(this);
         profileUrl.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_URI);
         root.addView(profileUrl, fullWidth());
 
-        Button accessibility = new Button(this);
-        accessibility.setText("1. Проверить / включить Accessibility для Lead Radar");
-        accessibility.setOnClickListener(v -> startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)));
-        root.addView(accessibility, buttonParams());
-
         Button start = new Button(this);
-        start.setText("2. Сохранить и запустить поиск");
-        start.setOnClickListener(v -> {
-            saveSettings();
-            store.setEnabled(true);
-            if (store.previewMode()) store.clearPending();
-            requestNotificationsIfNeeded();
-            startScannerService();
-            updateStatus();
-            Toast.makeText(this, store.previewMode() ? "Тестовый поиск запущен — отправки отключены" : "Автоматический режим запущен", Toast.LENGTH_LONG).show();
-        });
+        start.setText("ЗАПУСТИТЬ ОДИН РУЧНОЙ ПОИСК");
+        start.setOnClickListener(v -> startManualSearch());
         root.addView(start, buttonParams());
 
         Button stop = new Button(this);
-        stop.setText("Остановить поиск");
-        stop.setOnClickListener(v -> {
-            store.setEnabled(false);
-            Intent i = new Intent(this, ScannerService.class);
-            i.setAction(ScannerService.ACTION_STOP);
-            startService(i);
-            updateStatus();
-        });
+        stop.setText("ОСТАНОВИТЬ ТЕКУЩИЙ ПОИСК");
+        stop.setOnClickListener(v -> stopManualSearch());
         root.addView(stop, buttonParams());
 
         Button refresh = new Button(this);
-        refresh.setText("Обновить найденные заявки на экране");
+        refresh.setText("ОБНОВИТЬ РЕЗУЛЬТАТЫ НА ЭКРАНЕ");
         refresh.setOnClickListener(v -> {
             updateStatus();
-            updatePreviewHistory();
+            updateResults();
         });
         root.addView(refresh, buttonParams());
 
-        Button openLast = new Button(this);
-        openLast.setText("Открыть исходный пост последней заявки");
-        openLast.setOnClickListener(v -> {
+        Button openPost = new Button(this);
+        openPost.setText("ОТКРЫТЬ ИСХОДНЫЙ ПОСТ ПОСЛЕДНЕЙ ЗАЯВКИ");
+        openPost.setOnClickListener(v -> {
             String url = store.lastPreviewPost();
             if (url == null || url.isEmpty()) {
                 Toast.makeText(this, "Пока нет найденных заявок", Toast.LENGTH_SHORT).show();
@@ -175,36 +146,67 @@ public final class MainActivity extends Activity {
             }
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
         });
-        root.addView(openLast, buttonParams());
+        root.addView(openPost, buttonParams());
 
-        Button clearHistory = new Button(this);
-        clearHistory.setText("Очистить тестовую историю и проверить заново");
-        clearHistory.setOnClickListener(v -> {
+        Button openContact = new Button(this);
+        openContact.setText("ОТКРЫТЬ TELEGRAM-КОНТАКТ ПОСЛЕДНЕЙ ЗАЯВКИ");
+        openContact.setOnClickListener(v -> {
+            String user = store.lastPreviewUser();
+            if (user == null || user.isEmpty()) {
+                Toast.makeText(this, "Пока нет найденного контакта", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/" + user)));
+        });
+        root.addView(openContact, buttonParams());
+
+        Button copyMessage = new Button(this);
+        copyMessage.setText("СКОПИРОВАТЬ ОТКЛИК ПОСЛЕДНЕЙ ЗАЯВКИ");
+        copyMessage.setOnClickListener(v -> {
+            String message = store.lastPreviewMessage();
+            if (message == null || message.isEmpty()) {
+                Toast.makeText(this, "Пока нет подготовленного отклика", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+            cm.setPrimaryClip(ClipData.newPlainText("Отклик", message));
+            Toast.makeText(this, "Отклик скопирован. Отправляешь его только ты сама.", Toast.LENGTH_LONG).show();
+        });
+        root.addView(copyMessage, buttonParams());
+
+        Button clear = new Button(this);
+        clear.setText("ОЧИСТИТЬ СОХРАНЁННЫЕ РЕЗУЛЬТАТЫ");
+        clear.setOnClickListener(v -> {
+            if (store.running()) {
+                Toast.makeText(this, "Сначала останови текущий поиск", Toast.LENGTH_SHORT).show();
+                return;
+            }
             store.clearPreviewHistory();
-            updatePreviewHistory();
-            Toast.makeText(this, "История очищена — можно повторить проверку", Toast.LENGTH_SHORT).show();
+            updateStatus();
+            updateResults();
+            Toast.makeText(this, "Результаты очищены. Эти заявки можно найти заново.", Toast.LENGTH_SHORT).show();
         });
-        root.addView(clearHistory, buttonParams());
+        root.addView(clear, buttonParams());
 
-        Button retry = new Button(this);
-        retry.setText("Повторить ожидающую автоотправку");
-        retry.setOnClickListener(v -> {
-            if (store.previewMode()) Toast.makeText(this, "В тестовом режиме отправка отключена", Toast.LENGTH_SHORT).show();
-            else AutoSendAccessibilityService.requestProcess(this);
-        });
-        root.addView(retry, buttonParams());
+        root.addView(label("Найденные заявки"));
+        TextView manualHint = new TextView(this);
+        manualHint.setText("В каждой заявке есть кликабельный Telegram-контакт, исходный пост и подготовленный текст. "
+                + "Ничего не отправляется автоматически. Текст результатов можно выделять и копировать.");
+        manualHint.setTextSize(13);
+        root.addView(manualHint);
 
-        root.addView(label("Последние релевантные заявки и подготовленные сообщения"));
-        previewHistory = new TextView(this);
-        previewHistory.setTextSize(14);
-        previewHistory.setTextIsSelectable(true);
-        previewHistory.setAutoLinkMask(Linkify.WEB_URLS);
-        previewHistory.setMovementMethod(LinkMovementMethod.getInstance());
-        previewHistory.setPadding(dp(10), dp(10), dp(10), dp(16));
-        root.addView(previewHistory, fullWidth());
+        results = new TextView(this);
+        results.setTextSize(14);
+        results.setTextIsSelectable(true);
+        results.setAutoLinkMask(Linkify.WEB_URLS);
+        results.setMovementMethod(LinkMovementMethod.getInstance());
+        results.setPadding(dp(10), dp(10), dp(10), dp(18));
+        root.addView(results, fullWidth());
 
         TextView note = new TextView(this);
-        note.setText("v4 использует расширенный набор профильных каналов и пропускает только конкретные заказы на презентации или создание сайта/лендинга. Если в задаче требуется Tilda, WordPress, логотип, айдентика, фирменный стиль или это штатная/долгосрочная вакансия — заявка отбрасывается.");
+        note.setText("Нет расписания, таймера повторного запуска, автоотправки и фонового автозапуска после перезагрузки. "
+                + "Поиск работает только после твоего нажатия и делает один полный проход по указанному списку. "
+                + "Приложение не ставит искусственный лимит на число найденных заявок; фактический объём ограничен только ресурсами устройства и доступностью публичных страниц Telegram.");
         note.setTextSize(13);
         note.setPadding(0, dp(14), 0, dp(20));
         root.addView(note);
@@ -215,63 +217,79 @@ public final class MainActivity extends Activity {
     private void loadSettings() {
         sites.setChecked(store.sitesEnabled());
         presentations.setChecked(store.presentationsEnabled());
-        previewMode.setChecked(store.previewMode());
         channels.setText(store.channels());
-        scanMinutes.setText(String.valueOf(store.scanMinutes()));
-        sendPause.setText(String.valueOf(store.sendPauseSeconds()));
         profileUrl.setText(store.profileUrl());
         updateStatus();
-        updatePreviewHistory();
+        updateResults();
     }
 
     private void saveSettings() {
         store.setCategories(sites.isChecked(), presentations.isChecked());
-        store.setPreviewMode(previewMode.isChecked());
         store.setChannels(channels.getText().toString());
-        store.setScanMinutes(parseInt(scanMinutes.getText().toString(), 5));
-        store.setSendPauseSeconds(parseInt(sendPause.getText().toString(), 90));
         store.setProfileUrl(profileUrl.getText().toString());
+    }
+
+    private void startManualSearch() {
+        if (store.running()) {
+            Toast.makeText(this, "Поиск уже идёт. Дождись завершения или нажми «Остановить».", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if (!sites.isChecked() && !presentations.isChecked()) {
+            Toast.makeText(this, "Выбери хотя бы одно направление поиска", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (channels.getText().toString().trim().isEmpty()) {
+            Toast.makeText(this, "Список каналов пуст", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        saveSettings();
+        requestNotificationsIfNeeded();
+        Intent i = new Intent(this, ScannerService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(i); else startService(i);
+        Toast.makeText(this, "Ручной поиск запущен. После одного полного прохода он остановится сам.", Toast.LENGTH_LONG).show();
+        uiHandler.postDelayed(this::updateStatus, 500L);
+    }
+
+    private void stopManualSearch() {
+        if (!store.running()) {
+            Toast.makeText(this, "Сейчас поиск не запущен", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        store.requestStop();
+        Intent i = new Intent(this, ScannerService.class);
+        i.setAction(ScannerService.ACTION_STOP);
+        startService(i);
+        updateStatus();
     }
 
     private void updateStatus() {
         if (status == null) return;
-        String accessibility = isAccessibilityEnabled() ? "ВКЛ" : "ВЫКЛ";
-        String engine = store.enabled() ? "РАБОТАЕТ" : "ОСТАНОВЛЕН";
-        String mode = store.previewMode() ? "ТЕСТ — НЕ ОТПРАВЛЯЕТ" : "АВТООТПРАВКА";
-        String pending = !store.previewMode() && store.hasPending() ? "\nОжидает отправки: @" + store.pendingUser() : "";
-        status.setText("Поиск: " + engine + "\nРежим: " + mode + "\nAccessibility: " + accessibility
-                + "\nНайдено в тесте: " + store.previewCount() + "\nОтправлено: " + store.sentCount() + pending);
+        boolean running = store.running();
+        int checked = store.checkedChannels();
+        int total = store.totalChannels();
+        String current = store.currentChannel();
+        StringBuilder s = new StringBuilder();
+        s.append("Режим: ТОЛЬКО РУЧНОЙ · АВТООТПРАВКИ НЕТ\n");
+        s.append("Поиск: ").append(running ? "ИДЁТ" : "НЕ ЗАПУЩЕН").append("\n");
+        if (total > 0) s.append("Проверено каналов: ").append(checked).append(" / ").append(total).append("\n");
+        if (running && current != null && !current.isEmpty()) s.append("Сейчас: @").append(current).append("\n");
+        s.append("Найдено за текущий запуск: ").append(store.runFound()).append("\n");
+        s.append("Всего сохранено: ").append(store.previewCount());
+        status.setText(s.toString());
     }
 
-    private void updatePreviewHistory() {
-        if (previewHistory == null) return;
+    private void updateResults() {
+        if (results == null) return;
         String history = store.previewHistory();
-        previewHistory.setText(history == null || history.isEmpty()
-                ? "Пока релевантных заявок нет. После запуска результаты появятся здесь автоматически."
+        results.setText(history == null || history.isEmpty()
+                ? "Пока ничего не найдено. Нажми «Запустить один ручной поиск»."
                 : history);
-        Linkify.addLinks(previewHistory, Linkify.WEB_URLS);
-    }
-
-    private boolean isAccessibilityEnabled() {
-        ComponentName expected = new ComponentName(this, AutoSendAccessibilityService.class);
-        String enabled = Settings.Secure.getString(getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
-        if (enabled == null) return false;
-        TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(':');
-        splitter.setString(enabled);
-        while (splitter.hasNext()) {
-            ComponentName actual = ComponentName.unflattenFromString(splitter.next());
-            if (expected.equals(actual)) return true;
-        }
-        return false;
-    }
-
-    private void startScannerService() {
-        Intent i = new Intent(this, ScannerService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(i); else startService(i);
+        Linkify.addLinks(results, Linkify.WEB_URLS);
     }
 
     private void requestNotificationsIfNeeded() {
-        if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= 33
+                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 100);
         }
     }
@@ -293,10 +311,6 @@ public final class MainActivity extends Activity {
         LinearLayout.LayoutParams p = fullWidth();
         p.topMargin = dp(10);
         return p;
-    }
-
-    private int parseInt(String s, int fallback) {
-        try { return Integer.parseInt(s.trim()); } catch (Exception ignored) { return fallback; }
     }
 
     private int dp(int n) {
