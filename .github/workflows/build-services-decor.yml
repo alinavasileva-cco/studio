@@ -1,0 +1,48 @@
+name: Build services decor
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'assets/services-decor-b64/**'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: ${{ !contains(github.event.head_commit.message, '[services-decor-built]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Rebuild original WebP losslessly
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat assets/services-decor-b64/part-01.txt \
+              assets/services-decor-b64/part-02.txt \
+              assets/services-decor-b64/part-03.txt \
+              assets/services-decor-b64/part-04.txt \
+              assets/services-decor-b64/part-05.txt \
+              assets/services-decor-b64/part-06.txt \
+              assets/services-decor-b64/part-07.txt \
+              assets/services-decor-b64/part-08.txt \
+            | tr -d '\r\n' | base64 --decode > assets/services-decor.webp
+          test "$(wc -c < assets/services-decor.webp)" -eq 106026
+          echo '2a5c9d07fbdb6254276e5573250602986c53eb933bce4049e2344bd67dcaacd3  assets/services-decor.webp' | sha256sum -c -
+          file assets/services-decor.webp
+      - name: Commit verified HD decor
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/services-decor.webp
+          if git diff --cached --quiet; then
+            echo 'Decor already matches source.'
+            exit 0
+          fi
+          git commit -m 'Install verified services decor [services-decor-built]'
+          git push
