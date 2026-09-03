@@ -9,14 +9,25 @@ public final class MessageComposer {
 
     private MessageComposer() {}
 
-    public static String compose(Lead lead, String profileUrl) {
-        String link = profileUrl == null ? "" : profileUrl.trim();
-        String suffix = link.isEmpty() ? "" : "\n\nПортфолио: " + link;
+    public static String compose(Lead lead, String siteProfileUrl, String presentationPortfolioUrl) {
         int variant = Math.abs((lead.dedupKey == null ? lead.text : lead.dedupKey).hashCode()) % 4;
 
-        if (lead.category == Lead.Category.SITE) return siteMessage(lead, variant) + suffix;
-        if (lead.category == Lead.Category.PRESENTATION) return presentationMessage(lead, variant) + suffix;
+        if (lead.category == Lead.Category.SITE) {
+            String link = clean(siteProfileUrl);
+            String suffix = link.isEmpty() ? "" : "\n\nПортфолио: " + link;
+            return siteMessage(lead, variant) + suffix;
+        }
+        if (lead.category == Lead.Category.PRESENTATION) {
+            String link = clean(presentationPortfolioUrl);
+            String suffix = link.isEmpty() ? "" : "\n\nПортфолио презентаций: " + link;
+            return presentationMessage(lead, variant) + suffix;
+        }
         return "";
+    }
+
+    // Backward-compatible overload for older call sites during migration.
+    public static String compose(Lead lead, String profileUrl) {
+        return compose(lead, profileUrl, profileUrl);
     }
 
     private static String siteMessage(Lead lead, int variant) {
@@ -101,5 +112,9 @@ public final class MessageComposer {
 
     private static String lower(String s) {
         return s == null ? "" : s.toLowerCase(Locale.ROOT);
+    }
+
+    private static String clean(String s) {
+        return s == null ? "" : s.trim();
     }
 }
