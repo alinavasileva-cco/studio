@@ -12,10 +12,9 @@ import java.util.Set;
 
 public final class LeadStore {
     private static final String PREFS = "lead_radar";
-    private static final int RULES_VERSION = 8;
+    private static final int RULES_VERSION = 9;
     private static final String RESULTS_FILE = "manual_lead_results.txt";
 
-    // v8: only Telegram sources. Marketplace-only Kwork/YouDo feeds were removed.
     private static final String DEFAULT_CHANNELS =
             "rueventjob\n"
             + "mskeventjob\n"
@@ -73,17 +72,16 @@ public final class LeadStore {
     public LeadStore(Context context) {
         appContext = context.getApplicationContext();
         p = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        migrateToV8();
+        migrateToV9();
     }
 
-    private void migrateToV8() {
+    private void migrateToV9() {
         if (p.getInt("rules_version", 0) >= RULES_VERSION) return;
+        String existingChannels = p.getString("channels", DEFAULT_CHANNELS);
+        if (existingChannels == null || existingChannels.trim().isEmpty()) existingChannels = DEFAULT_CHANNELS;
         p.edit()
                 .putInt("rules_version", RULES_VERSION)
-                .putString("channels", DEFAULT_CHANNELS)
-                .putInt("lookback_days", 7)
-                .putBoolean("sites_enabled", true)
-                .putBoolean("presentations_enabled", true)
+                .putString("channels", existingChannels)
                 .putBoolean("running", false)
                 .putInt("checked_channels", 0)
                 .putInt("total_channels", 0)
@@ -109,7 +107,7 @@ public final class LeadStore {
         previewed.add(lead.dedupKey);
 
         String budget = lead.budget == null || lead.budget.trim().isEmpty() ? "не указан" : lead.budget.trim();
-        String original = cleanExcerpt(lead.text, 900);
+        String original = cleanExcerpt(lead.text, 1200);
         String contactUrl = contactUrl(lead.username);
         String entry = "[" + categoryName(lead.category) + "]\n"
                 + "Telegram-контакт: " + contactUrl
@@ -146,7 +144,7 @@ public final class LeadStore {
         return "https://t.me/" + u;
     }
 
-    public void clearPreviewHistory() {
+    public synchronized void clearPreviewHistory() {
         try { resultsFile().delete(); } catch (Exception ignored) {}
         p.edit()
                 .remove("previewed_posts")
@@ -184,10 +182,19 @@ public final class LeadStore {
         p.edit().putBoolean("sites_enabled", sites).putBoolean("presentations_enabled", presentations).apply();
     }
 
+    /** Every manual launch is a fresh snapshot of the chosen period. */
     public synchronized void beginRun(int totalChannels) {
-        p.edit().putBoolean("running", true).putInt("checked_channels", 0).putInt("total_channels", totalChannels)
-                .putInt("run_found", 0).putString("current_channel", "").putLong("run_started_at", System.currentTimeMillis())
-                .remove("run_finished_at").apply();
+        clearPreviewHistory();
+        p.edit()
+                .putBoolean("running", true)
+                .putInt("checked_channels", 0)
+                .putInt("total_channels", totalChannels)
+                .putInt("run_found", 0)
+                .putInt("preview_count", 0)
+                .putString("current_channel", "")
+                .putLong("run_started_at", System.currentTimeMillis())
+                .remove("run_finished_at")
+                .apply();
     }
 
     public void setProgress(int checked, int total, String currentChannel) {
