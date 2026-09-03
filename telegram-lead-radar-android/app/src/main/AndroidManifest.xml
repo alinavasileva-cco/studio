@@ -10,7 +10,7 @@
         android:usesCleartextTraffic="false">
 
         <activity
-            android:name=".MainActivityV10"
+            android:name=".MainActivityV11"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
