@@ -43,4 +43,4 @@ jobs:
         with:
           name: services-qa-screenshots
           path: qa-output/
-          retention-days: 3
+          retention-days: 4
