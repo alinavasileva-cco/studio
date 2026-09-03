@@ -1,0 +1,54 @@
+name: Apply final hero CTA and static services markup
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/apply-final-hero-services.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply approved markup changes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Load the final override stylesheet after all inline styles.
+          link = '<link rel="stylesheet" href="services-final.css?v=20260903-hero-final">'
+          if 'services-final.css' not in s:
+              s = s.replace('</head>', link + '</head>', 1)
+
+          # Remove the secondary hero CTA completely.
+          s = re.sub(r'\s*<a class="button" href="#sites">\s*СМОТРЕТЬ РАБОТЫ\s*↓\s*</a>', '', s, count=1)
+
+          # Remove visible block numbering from markup, not merely via CSS.
+          s = re.sub(r'<span class="section-index">\s*\d+\s*/\s*\d+\s*</span>', '', s)
+
+          # Remove the animated duplicate hair image from the DOM completely.
+          s = re.sub(r'<img class="services-decor services-decor-wind"[^>]*>', '', s)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit approved changes
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Move hero CTA left, remove second CTA and section numbering"
+          git push
