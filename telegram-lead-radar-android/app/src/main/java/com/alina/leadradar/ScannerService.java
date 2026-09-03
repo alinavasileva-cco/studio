@@ -121,7 +121,7 @@ public final class ScannerService extends Service {
     }
 
     private Notification notification(String text, boolean ongoing) {
-        Intent open = new Intent(this, MainActivityV11.class);
+        Intent open = new Intent(this, MainActivityV12.class);
         PendingIntent pi = PendingIntent.getActivity(
                 this, 0, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
