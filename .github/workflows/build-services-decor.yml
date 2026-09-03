@@ -38,87 +38,74 @@ jobs:
               7: (20000, '2378c43539d49274f3d508ea77aea65e12dd75514edb26b17fd4c08306d1d0e2', 'T'),
               8: (1368,  'db2d09a2c2d3e852581fc26cb35da1a45d6c879ae3c3e2a979609452f801466b', ''),
           }
-          part3_blocks = [
-            '880e36ba860f972a7d028683b1257f54953c57299817da7309fac887b0407ade','5f0b32a913f20cf7225a144bfad0400ed6f69b19cfca5fd3777e6e95b5782e21','7145476c790197b4e7847f00cc2b30383d9b93276577f8628edb6015338f4f3c','305cc07aa2cd292a8e81e07dbaf723da8708d32ea18c4645d4e38322072591df','52dddf66df416bca180880413d40e045ddb249ab1196f69d06fd1b33063aabcf','1122213ff84b1af7756f68a57c18e919d271b2c4a3704f06bad510f87b65b8a6','3aafcdc211d8cd111a56cd34cb35db28bdf29172fdb43d0f92a7a7c8b2d85d5d','5cbe4597a0e2f2116dc54a6a061fe2edb6f1d1d231beb27fe8dd36c7439fb4f2','9943acbb56beb990905825fa9202eafe9a43ec927d39d71256a0f32d291125a5','8949f7fbcb4f4b85fbe0a2b4d5b38bbdf4a6c1aa9da9f64acc7f888a0f000b78','6427458f7b4ce5354468354e97b0d38a82bd56d77193b0665b5008d9481dec7d','6ed837ea5ff762bc07479c7cc207b3932114a0d6bc20f6dd796036418e03f7d6','b8b637e67cf874a1e4a8ff59d635fefbf19a59f2a89e649f8a00794559101080','d95777db03cc34d5dd8d672133867c70cb3a9ad8eb503a663684f4829ffe4b8f','4560d74e656c97cf6a00b21077c692cb5bf1f1b0d18f644c686da83dbed03813','9e267fd8f4899d42efe00e8a4f8f2098b3312c85948cafcff2069bbc81f862dd','944905e9f69b7375c417eb5e0cbd9708382ba61539f13f9581bb3599b89a2713','049705e713a193546204795302bfc05354f83ae463437d26d70791b7cbbdff61','fbec825d15b2fea4e036e9cdf291b736b287ea498186d8962d02074d9cbc048b','669f157ef4fd2c82e03bd4c567beb938464c5d3201ea36e9553d7ccc27fe45e6','7aeb5a2f6a531ba14a6656dce613f56ef446c42adbd8f2cce39f0054e7bff0a7','9e30b0c79280af994c8cd28e29d31f68af3d543aa80e42080c14cd802d6a8afb','2949d0ebc01c23262b2dfb6ae91b916b97d37359a607ae09e33a7560e3f51591','45bea1d32754bcdd5fd20ec2856f0afcaff1d1d30f29d0f4ad6043fd13d68f29','92ea41c6eeccfe420ad7cf176565e9a6c90fe5a8aa5eaf9863f75db0ad3150dc','3184d182107ced4260dcc35e5c504ceb3cced80da3ef0a0bbe43635504ee1610','5ad12d0ae60a307b2a7a51f2d438855f0a65104f7338a16b1984ceac40cb9716','c3d868bd4cbb2d9258f77417a3ffaebe6329f9cb7a2a15572422559c4b803c2d','d036a7aa57c30c4fcd473988c7edb09ddad034c72825b07d1d4801c7b43ead50','46f880a4669917ab2a48d7fd68cf4ec96ea78daca9c0b167af0bbbfc87046f8b','ae8f6ffb4ea7061b20fa740f4027f9e831670660ce2a297a95a370d3003e3179','eb92a0b144500db8958a924d0353a75f3d6133202869478a5214b541ad15dd45','a17aec5487b20b31b18730a01b4b111032b6d77c1dd3725a3141f0a9d4ea50f0','23df026f3d59790fe78f0e398db8ff7cb5df70b746ebca985d66f7a201ad52b0','24f94f3562bdfac247ea01fd3095cb69111add66de45c75cd59e4a6e1bdb7d47','37b8ff34384e6395386a5ac38929dc3b3a20f369fe867b9cab2eb25929d59c95','ad2d8d0f21d7460a49e728d28f9e1af7e5e8a1498384fa1dfc3cacc9819fd174','f49fa047e0128fbf6db047c256685070a64d018867178b371cc8573973762195','2d74acd0b4ae71fcf76122ad0018206427ce982d5f487df3a2e4adab04030e1c','854ecaebfce47ae674595e5df7cb528f68199d046fd3840d30154dfa1103ed5a'
-          ]
+          block_targets = {
+            3: [
+              '880e36ba860f972a7d028683b1257f54953c57299817da7309fac887b0407ade','5f0b32a913f20cf7225a144bfad0400ed6f69b19cfca5fd3777e6e95b5782e21','7145476c790197b4e7847f00cc2b30383d9b93276577f8628edb6015338f4f3c','305cc07aa2cd292a8e81e07dbaf723da8708d32ea18c4645d4e38322072591df','52dddf66df416bca180880413d40e045ddb249ab1196f69d06fd1b33063aabcf','1122213ff84b1af7756f68a57c18e919d271b2c4a3704f06bad510f87b65b8a6','3aafcdc211d8cd111a56cd34cb35db28bdf29172fdb43d0f92a7a7c8b2d85d5d','5cbe4597a0e2f2116dc54a6a061fe2edb6f1d1d231beb27fe8dd36c7439fb4f2','9943acbb56beb990905825fa9202eafe9a43ec927d39d71256a0f32d291125a5','8949f7fbcb4f4b85fbe0a2b4d5b38bbdf4a6c1aa9da9f64acc7f888a0f000b78','6427458f7b4ce5354468354e97b0d38a82bd56d77193b0665b5008d9481dec7d','6ed837ea5ff762bc07479c7cc207b3932114a0d6bc20f6dd796036418e03f7d6','b8b637e67cf874a1e4a8ff59d635fefbf19a59f2a89e649f8a00794559101080','d95777db03cc34d5dd8d672133867c70cb3a9ad8eb503a663684f4829ffe4b8f','4560d74e656c97cf6a00b21077c692cb5bf1f1b0d18f644c686da83dbed03813','9e267fd8f4899d42efe00e8a4f8f2098b3312c85948cafcff2069bbc81f862dd','944905e9f69b7375c417eb5e0cbd9708382ba61539f13f9581bb3599b89a2713','049705e713a193546204795302bfc05354f83ae463437d26d70791b7cbbdff61','fbec825d15b2fea4e036e9cdf291b736b287ea498186d8962d02074d9cbc048b','669f157ef4fd2c82e03bd4c567beb938464c5d3201ea36e9553d7ccc27fe45e6','7aeb5a2f6a531ba14a6656dce613f56ef446c42adbd8f2cce39f0054e7bff0a7','9e30b0c79280af994c8cd28e29d31f68af3d543aa80e42080c14cd802d6a8afb','2949d0ebc01c23262b2dfb6ae91b916b97d37359a607ae09e33a7560e3f51591','45bea1d32754bcdd5fd20ec2856f0afcaff1d1d30f29d0f4ad6043fd13d68f29','92ea41c6eeccfe420ad7cf176565e9a6c90fe5a8aa5eaf9863f75db0ad3150dc','3184d182107ced4260dcc35e5c504ceb3cced80da3ef0a0bbe43635504ee1610','5ad12d0ae60a307b2a7a51f2d438855f0a65104f7338a16b1984ceac40cb9716','c3d868bd4cbb2d9258f77417a3ffaebe6329f9cb7a2a15572422559c4b803c2d','d036a7aa57c30c4fcd473988c7edb09ddad034c72825b07d1d4801c7b43ead50','46f880a4669917ab2a48d7fd68cf4ec96ea78daca9c0b167af0bbbfc87046f8b','ae8f6ffb4ea7061b20fa740f4027f9e831670660ce2a297a95a370d3003e3179','eb92a0b144500db8958a924d0353a75f3d6133202869478a5214b541ad15dd45','a17aec5487b20b31b18730a01b4b111032b6d77c1dd3725a3141f0a9d4ea50f0','23df026f3d59790fe78f0e398db8ff7cb5df70b746ebca985d66f7a201ad52b0','24f94f3562bdfac247ea01fd3095cb69111add66de45c75cd59e4a6e1bdb7d47','37b8ff34384e6395386a5ac38929dc3b3a20f369fe867b9cab2eb25929d59c95','ad2d8d0f21d7460a49e728d28f9e1af7e5e8a1498384fa1dfc3cacc9819fd174','f49fa047e0128fbf6db047c256685070a64d018867178b371cc8573973762195','2d74acd0b4ae71fcf76122ad0018206427ce982d5f487df3a2e4adab04030e1c','854ecaebfce47ae674595e5df7cb528f68199d046fd3840d30154dfa1103ed5a'
+            ],
+            4: [
+              'b72fe04cbbd4358f751552bd5e57dc0bf12ecebe3c348bb1b36dcfd1116d5037','9b3b7bfdcd03a6d22183910f75b43d29ce221146ba6ebb814be96d4a1b9b3813','a374a936e31bea65e774bc2660ee616f4b94caa42064d27ab8dbb8ae2b82fb3e','26c9d7edd91663d3a4335580f1d19a9db13b2c7c10500b269c000cdb3b9d5bc7','2bb3836a24f8349ef709033b51ca50f8a558f736955278bc15304d7dc5d29ed6','fbcea0a8304e487e3ff98ae7a7f141aa7d98e868b3b58bc1921c1325f24bdf25','c81e77bad621ccce76289dac60f8810f9be2c1dc90c4a9b0799875b17942f07b','eddd8300e4a24f608aa2ba6d21df119ad618fc202b33af5178ad3e300df434a7','1144f9c285c9c8d29a7748c6876e1775e9c3df0eacde72ac3e702b2f5fe9a2fb','54b1d7b9aba553cfc6e4999037fb758c893b55e8bc32d7bbed29cc489271c9b7','1d11a008586f3fb6e96461a141fb7a355237346b495ce85ba80e1f7cded4bb89','ae7b801da59b6210f6af7b59bf14d2d672a0b6d9d91ec9f8d6bec1d0694132ae','35a49ccc888f8d7ee7573fa189f4419ec4c9730ca747715d34b7fd505c1bbf9b','7d79a7966d3dcb5e3ffd4318dc1050514ca54907cd9ae243337080538ad60467','ad6e57743c78103b3860ebec3e1cfb72a11bf34a6d591ae7afa9ebaf68d8a7b4','ebe14c659cb6430fef18f9181f20e5613ebdf28f1d5977e5b5f609492929c820','e07ee597f5bebc286eab43aa968be954f3183a431e385d0a50eba7f41e096cd0','eced6acbab8bcb1e903151a4169859c3a0633bb33727493458929f526f9af0f5','a58a5b32248f410f00f372f20da9b14ae3c80732255e654f7e9ac09178b5e308','1b82ffa4ab5f06dddff8cc47a76f5401996845490c24f7c1cd8fbbe4614de5ab','671ec5d33cd25675db5a4fbe8039989f71d663c00210b7440639f634456f4f94','5f16555b344e3f98f7f22bd3759e7c557de9c6946e6ade40c5d9f279c556df6e','7846f1b5e0ab19281a4f5850c0338c54c113c00da194d3c7ecc20f4fb3659b71','f59cccb582e288e2dab7971f6a07628559d1f29f9241ce9280968f7a4f494c7a','14e14c7ad87784359b4d0344657293cf290abd2aafbc40192ea423bc3388b6a1','11ee3824b33cfd5448e39e8d5d4b7e63d734cef1aa2b4bff1d8b6a02d473471d','52547470a333f7c6e39769547f7a6c1af474e4c3c26aaa83a7aff4f6cc018ad0','da1af9c027a066cc98ba9af538a18d90611218676551e0f5e28df85a59be4f61','612e65b018db9fa5ed2210a00911e2940d488e67bce51d85ae3eb47a597786f9','3d06493bd8564eb5320b2ff2ceb1e78fb5d9eb8a16e538b4d00e122bc4c79c21','6811e0716827d61d7f3c9fce5a0fd07d6d31784379a8980e39580d5dcbce7a32','f15b21d51143f969ef81754d00809c98a1a902fb8f24d0ab68ed5c4fd39f94bf','f34770735594f731e83562bdf91bfd97e60f03f0a4086bdbcca65d5b67ef5979','f98e1a2e91c38a89008fc925c9582a5fa44066c4eca82af908e93a9ef8d01064','2bc913963db4353ea99931e8b2bd03815362400f6d7839e61180fcd65fc9ef3e','ebf5c1c514d8438e2ff94ff56882e3e53b44cf83f6ee4335f401127302de2ec6','d298952b034e3c14be3c90541794ab944e333ed462515acf544bdfbbf5c71f12','bfe1c110a6002262400e850fc4b6be1639192b22dbdb18ef40853fe5f5575e81','c1523605e6954eab79f74f657cacab2e07a6441e5be5b2ed3d123482ce4c5003','49133bf1e08c5017e60ac9e09f957a3c47be2ab61091cadabedc7fbd393fa8a9'
+            ]
+          }
           alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-          def h(s):
-              return hashlib.sha256(s.encode('ascii')).hexdigest()
+          def h(s): return hashlib.sha256(s.encode('ascii')).hexdigest()
           def remove_one(text, target):
               for pos in range(len(text)):
                   c = text[:pos] + text[pos+1:]
-                  if h(c) == target:
-                      return c, pos
+                  if h(c) == target: return c, pos
               return None, None
           def substitute_one(text, target):
               for pos, old in enumerate(text):
                   left, right = text[:pos], text[pos+1:]
                   for ch in alphabet:
-                      if ch == old:
-                          continue
-                      c = left + ch + right
-                      if h(c) == target:
-                          return c, pos, old, ch
+                      if ch != old:
+                          c = left + ch + right
+                          if h(c) == target: return c, pos, old, ch
               return None, None, None, None
-          def repair_part3_blocks(text):
-              block_size = 500
-              blocks = []
-              bad = []
-              for bi, target in enumerate(part3_blocks):
-                  block = text[bi*block_size:(bi+1)*block_size]
+          def repair_blocks(text, targets, label):
+              out, bad = [], []
+              for bi, target in enumerate(targets):
+                  block = text[bi*500:(bi+1)*500]
                   if h(block) != target:
                       bad.append(bi)
                       fixed, pos, old, new = substitute_one(block, target)
                       if fixed is None:
-                          raise SystemExit(f'part-03 block {bi} cannot be repaired by one substitution')
+                          raise SystemExit(f'{label} block {bi} cannot be repaired exactly by one substitution')
                       block = fixed
-                      print(f'part-03 block {bi}: substitution {pos}: {old!r}->{new!r}')
-                  blocks.append(block)
-              print('part-03 mismatching blocks:', bad)
-              return ''.join(blocks)
+                      print(f'{label} block {bi}: {pos}: {old!r}->{new!r}')
+                  out.append(block)
+              print(f'{label} mismatching blocks: {bad}')
+              return ''.join(out)
 
           parts = []
           for i, (length, target, prefix) in expected.items():
               p = root / f'part-{i:02d}.txt'
               text = ''.join(p.read_text().split())
-              if h(text) != target:
-                  if len(text) == length + 1:
-                      fixed, pos = remove_one(text, target)
-                      if fixed is not None:
-                          text = fixed
-                          print(f'repaired {p}: removed transport char at {pos}')
-                  elif len(text) == length - 1 and prefix:
-                      text = prefix + text
-                      print(f'{p}: restored leading {prefix!r}')
-                      if i == 3 and h(text) != target:
-                          text = repair_part3_blocks(text)
-                      elif h(text) != target:
-                          fixed, pos, old, new = substitute_one(text, target)
-                          if fixed is not None:
-                              text = fixed
-                              print(f'repaired {p}: substitution {pos}: {old!r}->{new!r}')
-                  elif len(text) == length:
-                      if i == 3:
-                          text = repair_part3_blocks(text)
-                      else:
-                          fixed, pos, old, new = substitute_one(text, target)
-                          if fixed is not None:
-                              text = fixed
-                              print(f'repaired {p}: substitution {pos}: {old!r}->{new!r}')
+              if h(text) != target and len(text) == length + 1:
+                  fixed, pos = remove_one(text, target)
+                  if fixed is not None:
+                      text = fixed
+                      print(f'{p}: removed transport char at {pos}')
+              if h(text) != target and len(text) == length - 1 and prefix:
+                  text = prefix + text
+                  print(f'{p}: restored leading {prefix!r}')
+              if h(text) != target and len(text) == length and i in block_targets:
+                  text = repair_blocks(text, block_targets[i], f'part-{i:02d}')
+              if h(text) != target and len(text) == length:
+                  fixed, pos, old, new = substitute_one(text, target)
+                  if fixed is not None:
+                      text = fixed
+                      print(f'{p}: substitution {pos}: {old!r}->{new!r}')
               if len(text) != length or h(text) != target:
                   raise SystemExit(f'{p} exact repair failed: len={len(text)} sha256={h(text)}')
               p.write_text(text, encoding='ascii')
               parts.append(text)
               print(f'VERIFIED {p}: {length} chars')
 
-          encoded = ''.join(parts)
-          raw = base64.b64decode(encoded, validate=True)
-          if len(raw) != 106026:
-              raise SystemExit(f'wrong WebP size: {len(raw)}')
-          final_sha = hashlib.sha256(raw).hexdigest()
+          raw = base64.b64decode(''.join(parts), validate=True)
           expected_final = '2a5c9d07fbdb6254276e5573250602986c53eb933bce4049e2344bd67dcaacd3'
-          if final_sha != expected_final:
-              raise SystemExit(f'wrong WebP sha256: {final_sha}')
+          final_sha = hashlib.sha256(raw).hexdigest()
+          if len(raw) != 106026 or final_sha != expected_final:
+              raise SystemExit(f'final verification failed: bytes={len(raw)} sha256={final_sha}')
           Path('assets/services-decor.webp').write_bytes(raw)
           print('VERIFIED FINAL services-decor.webp: 106026 bytes sha256=' + final_sha)
           PY
