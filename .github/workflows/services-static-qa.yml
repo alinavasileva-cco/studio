@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/services-static-qa.yml'
+      - 'tools/run_services_static_qa.js'
+      - 'index.html'
 
 jobs:
   qa:
@@ -23,6 +25,7 @@ jobs:
       - name: Run static services checks
         run: node tools/run_services_static_qa.js
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: static-services-final
           path: qa-static/
