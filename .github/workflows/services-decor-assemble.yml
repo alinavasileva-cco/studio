@@ -19,7 +19,7 @@ jobs:
         run: |
           set -euo pipefail
           {
-            cat assets/services-decor-b64/part-01.txt
+            head -c 20000 assets/services-decor-b64/part-01.txt
             printf 'g'; cat assets/services-decor-b64/part-02.txt
             printf 'o'; cat assets/services-decor-b64/part-03.txt
             cat assets/services-decor-b64/part-04.txt
@@ -28,14 +28,8 @@ jobs:
             printf 'T'; cat assets/services-decor-b64/part-07.txt
             cat assets/services-decor-b64/part-08.txt
           } | tr -d '\r\n\t ' > /tmp/services-decor.b64
-          echo "CLEAN_B64_BYTES=$(wc -c < /tmp/services-decor.b64)"
-          echo "INVALID_CHARS_BEGIN"
-          LC_ALL=C grep -abo '[^A-Za-z0-9+/=]' /tmp/services-decor.b64 | head -20 || true
-          echo "INVALID_CHARS_END"
-          echo -n "TAIL="; tail -c 24 /tmp/services-decor.b64; echo
+          test "$(wc -c < /tmp/services-decor.b64)" = "141368"
           base64 -d /tmp/services-decor.b64 > assets/services-decor.webp
-          echo "WEBP_BYTES=$(stat -c%s assets/services-decor.webp)"
-          sha256sum assets/services-decor.webp
           test "$(stat -c%s assets/services-decor.webp)" = "106026"
           echo "2a5c9d07fbdb6254276e5573250602986c53eb933bce4049e2344bd67dcaacd3  assets/services-decor.webp" | sha256sum -c -
           file assets/services-decor.webp
