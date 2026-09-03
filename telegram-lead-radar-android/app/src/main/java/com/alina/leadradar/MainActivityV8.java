@@ -41,14 +41,14 @@ public final class MainActivityV8 extends Activity {
         @Override public void run() {
             updateStatus();
             updateResults();
-            uiHandler.postDelayed(this, 2500L);
+            uiHandler.postDelayed(this, 2000L);
         }
     };
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         store = new LeadStore(this);
-        setTitle("Universal Lead Radar v8");
+        setTitle("Universal Lead Radar v10");
         setContentView(buildUi());
         loadSettings();
     }
@@ -58,7 +58,7 @@ public final class MainActivityV8 extends Activity {
         updateStatus();
         updateResults();
         uiHandler.removeCallbacks(autoRefresh);
-        uiHandler.postDelayed(autoRefresh, 800L);
+        uiHandler.postDelayed(autoRefresh, 700L);
     }
 
     @Override protected void onPause() {
@@ -75,16 +75,15 @@ public final class MainActivityV8 extends Activity {
         scroll.addView(root);
 
         TextView title = new TextView(this);
-        title.setText("Universal Telegram Lead Radar v8");
+        title.setText("Universal Telegram Lead Radar v10");
         title.setTextSize(24);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         root.addView(title);
 
         TextView subtitle = new TextView(this);
-        subtitle.setText("РУЧНОЙ ПОИСК БЫСТРЫХ ЗАКАЗОВ.\n"
-                + "Только создание презентаций и создание лендингов / простых сайтов. "
-                + "В результат попадает только заявка с прямым Telegram-контактом: @username или t.me/username. "
-                + "Kwork, YouDo и любые другие внешние биржи как контакт запрещены.");
+        subtitle.setText("РУЧНОЙ ПОИСК · ГИБКИЙ РАЗБОР ЗАЯВОК.\n"
+                + "Каждый запуск перечитывает выбранный период заново. Большие Telegram-дайджесты разбиваются по отдельным контактам и заданиям. "
+                + "Фразы вроде «кто сделает быстро красивую презентацию» теперь распознаются. Только прямой Telegram-контакт; Kwork/YouDo исключены.");
         subtitle.setTextSize(15);
         subtitle.setPadding(0, dp(8), 0, dp(14));
         root.addView(subtitle);
@@ -102,7 +101,7 @@ public final class MainActivityV8 extends Activity {
         presentations.setText("Создание / оформление презентации, PowerPoint / PDF / pitch deck");
         root.addView(presentations);
 
-        root.addView(label("За какой период проверить историю"));
+        root.addView(label("За какой период полностью перечитать историю"));
         lookback = new Spinner(this);
         String[] periods = {"24 часа", "3 дня", "7 дней", "14 дней"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, periods);
@@ -111,14 +110,13 @@ public final class MainActivityV8 extends Activity {
         root.addView(lookback, fullWidth());
 
         TextView periodHelp = new TextView(this);
-        periodHelp.setText("По умолчанию 7 дней. Каждый публичный канал листается назад до выбранной даты.");
+        periodHelp.setText("По умолчанию — 3 дня. Для твоей задачи это основной режим: каждый канал листается назад до границы периода.");
         periodHelp.setTextSize(13);
         root.addView(periodHelp);
 
         root.addView(label("Telegram-каналы с заказами"));
         TextView channelHelp = new TextView(this);
-        channelHelp.setText("Возвращены удачные старые Telegram-источники. Потоки, ведущие только на Kwork/YouDo, удалены. "
-                + "Даже если в другом канале встретится внешняя биржа, такая заявка не попадёт в результат без прямого Telegram-контакта. Список можно редактировать.");
+        channelHelp.setText("Список можно редактировать. В результат попадает только отдельная задача на презентацию или простой сайт/лендинг с прямым Telegram-контактом.");
         channelHelp.setTextSize(13);
         root.addView(channelHelp);
 
@@ -133,7 +131,7 @@ public final class MainActivityV8 extends Activity {
         root.addView(profileUrl, fullWidth());
 
         Button start = new Button(this);
-        start.setText("ЗАПУСТИТЬ ОДИН РУЧНОЙ ПОИСК");
+        start.setText("ЗАПУСТИТЬ СВЕЖИЙ РУЧНОЙ ПОИСК");
         start.setOnClickListener(v -> startManualSearch());
         root.addView(start, buttonParams());
 
@@ -149,11 +147,7 @@ public final class MainActivityV8 extends Activity {
 
         Button openContact = new Button(this);
         openContact.setText("ОТКРЫТЬ TELEGRAM-КОНТАКТ ПОСЛЕДНЕЙ ЗАЯВКИ");
-        openContact.setOnClickListener(v -> {
-            String user = store.lastPreviewUser();
-            String url = LeadStore.contactUrl(user);
-            openUrl(url, "Пока нет прямого Telegram-контакта");
-        });
+        openContact.setOnClickListener(v -> openUrl(LeadStore.contactUrl(store.lastPreviewUser()), "Пока нет прямого Telegram-контакта"));
         root.addView(openContact, buttonParams());
 
         Button copyMessage = new Button(this);
@@ -171,7 +165,7 @@ public final class MainActivityV8 extends Activity {
         root.addView(copyMessage, buttonParams());
 
         Button clear = new Button(this);
-        clear.setText("ОЧИСТИТЬ СОХРАНЁННЫЕ РЕЗУЛЬТАТЫ");
+        clear.setText("ОЧИСТИТЬ РЕЗУЛЬТАТЫ");
         clear.setOnClickListener(v -> {
             if (store.running()) {
                 Toast.makeText(this, "Сначала останови текущий поиск", Toast.LENGTH_SHORT).show();
@@ -183,9 +177,9 @@ public final class MainActivityV8 extends Activity {
         });
         root.addView(clear, buttonParams());
 
-        root.addView(label("Найденные быстрые заказы"));
+        root.addView(label("Найденные заявки текущего запуска"));
         TextView hint = new TextView(this);
-        hint.setText("Каждый результат обязан содержать прямой Telegram-контакт, исходный Telegram-пост, бюджет если указан и подготовленный отклик. Внешние биржи не показываются.");
+        hint.setText("Диагностика наверху показывает, читает ли бот реальные посты и на каком этапе заявки отсеиваются.");
         hint.setTextSize(13);
         root.addView(hint);
 
@@ -218,30 +212,18 @@ public final class MainActivityV8 extends Activity {
     }
 
     private void startManualSearch() {
-        if (store.running()) {
-            Toast.makeText(this, "Поиск уже идёт", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (!sites.isChecked() && !presentations.isChecked()) {
-            Toast.makeText(this, "Выбери хотя бы одно направление", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (channels.getText().toString().trim().isEmpty()) {
-            Toast.makeText(this, "Список источников пуст", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (store.running()) { Toast.makeText(this, "Поиск уже идёт", Toast.LENGTH_SHORT).show(); return; }
+        if (!sites.isChecked() && !presentations.isChecked()) { Toast.makeText(this, "Выбери хотя бы одно направление", Toast.LENGTH_SHORT).show(); return; }
+        if (channels.getText().toString().trim().isEmpty()) { Toast.makeText(this, "Список источников пуст", Toast.LENGTH_SHORT).show(); return; }
         saveSettings();
         requestNotificationsIfNeeded();
         Intent i = new Intent(this, ScannerService.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(i); else startService(i);
-        Toast.makeText(this, "Ручной поиск заявок с Telegram-контактами запущен", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Свежий поиск запущен", Toast.LENGTH_LONG).show();
     }
 
     private void stopManualSearch() {
-        if (!store.running()) {
-            Toast.makeText(this, "Сейчас поиск не запущен", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (!store.running()) { Toast.makeText(this, "Сейчас поиск не запущен", Toast.LENGTH_SHORT).show(); return; }
         store.requestStop();
         Intent i = new Intent(this, ScannerService.class);
         i.setAction(ScannerService.ACTION_STOP);
@@ -260,8 +242,11 @@ public final class MainActivityV8 extends Activity {
         if (total > 0) s.append("Проверено источников: ").append(store.checkedChannels()).append(" / ").append(total).append("\n");
         else s.append("Источников в списке: ").append(countChannels(store.channels())).append("\n");
         if (store.running() && !store.currentChannel().isEmpty()) s.append("Сейчас: @").append(store.currentChannel()).append("\n");
-        s.append("Найдено за запуск: ").append(store.runFound()).append("\n");
-        s.append("Всего сохранено: ").append(store.previewCount());
+        s.append("Прочитано свежих постов: ").append(store.diagnosticPosts()).append("\n");
+        s.append("Разобрано блоков/задач: ").append(store.diagnosticBlocks()).append("\n");
+        s.append("Похожи на наши задачи: ").append(store.diagnosticCandidates()).append("\n");
+        s.append("Из них без прямого TG-контакта: ").append(store.diagnosticNoContact()).append("\n");
+        s.append("Найдено в текущем проходе: ").append(store.runFound());
         status.setText(s.toString());
     }
 
@@ -269,21 +254,18 @@ public final class MainActivityV8 extends Activity {
         if (results == null) return;
         String history = store.previewHistory();
         results.setText(history == null || history.isEmpty()
-                ? "Пока подходящих заявок с прямым Telegram-контактом нет. Выбери период и запусти поиск."
+                ? "Пока подходящих заявок нет. Для первого теста оставь 3 дня и запусти свежий ручной поиск."
                 : history);
         Linkify.addLinks(results, Linkify.WEB_URLS);
     }
 
     private void openUrl(String url, String emptyMessage) {
-        if (url == null || url.isEmpty()) {
-            Toast.makeText(this, emptyMessage, Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (url == null || url.isEmpty()) { Toast.makeText(this, emptyMessage, Toast.LENGTH_SHORT).show(); return; }
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
     }
 
     private int selectedLookbackDays() {
-        int pos = lookback == null ? 2 : lookback.getSelectedItemPosition();
+        int pos = lookback == null ? 1 : lookback.getSelectedItemPosition();
         return pos == 0 ? 1 : pos == 1 ? 3 : pos == 3 ? 14 : 7;
     }
 
@@ -299,15 +281,14 @@ public final class MainActivityV8 extends Activity {
         if (raw == null || raw.trim().isEmpty()) return 0;
         java.util.HashSet<String> unique = new java.util.HashSet<>();
         for (String piece : raw.split("[\\n,; ]+")) {
-            String c = LeadScannerV8.normalizeChannel(piece);
+            String c = LeadScannerV10.normalizeChannel(piece);
             if (!c.isEmpty()) unique.add(c.toLowerCase(java.util.Locale.ROOT));
         }
         return unique.size();
     }
 
     private void requestNotificationsIfNeeded() {
-        if (Build.VERSION.SDK_INT >= 33
-                && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, 100);
         }
     }
@@ -331,7 +312,5 @@ public final class MainActivityV8 extends Activity {
         return p;
     }
 
-    private int dp(int n) {
-        return Math.round(n * getResources().getDisplayMetrics().density);
-    }
+    private int dp(int n) { return Math.round(n * getResources().getDisplayMetrics().density); }
 }
