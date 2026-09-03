@@ -1,0 +1,36 @@
+name: Assemble final services decor
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/services-decor-assemble.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode and verify original WebP
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat assets/services-decor-b64/part-[0-9][0-9].txt | tr -d '\r\n\t ' | base64 -d > assets/services-decor.webp
+          test "$(stat -c%s assets/services-decor.webp)" = "106026"
+          echo "2a5c9d07fbdb6254276e5573250602986c53eb933bce4049e2344bd67dcaacd3  assets/services-decor.webp" | sha256sum -c -
+          file assets/services-decor.webp
+      - name: Commit verified HD decor and clean staging chunks
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/services-decor.webp
+          git rm -r assets/services-decor-b64
+          if [ -f assets/services-decor-1.b64 ]; then git rm assets/services-decor-1.b64; fi
+          git rm .github/workflows/services-decor-assemble.yml
+          git commit -m "Install verified HD services decor"
+          git push
