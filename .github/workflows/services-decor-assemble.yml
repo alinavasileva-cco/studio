@@ -27,7 +27,15 @@ jobs:
             printf 'b'; cat assets/services-decor-b64/part-06.txt
             printf 'T'; cat assets/services-decor-b64/part-07.txt
             cat assets/services-decor-b64/part-08.txt
-          } | tr -d '\r\n\t ' | base64 -d > assets/services-decor.webp
+          } | tr -d '\r\n\t ' > /tmp/services-decor.b64
+          echo "CLEAN_B64_BYTES=$(wc -c < /tmp/services-decor.b64)"
+          echo "INVALID_CHARS_BEGIN"
+          LC_ALL=C grep -abo '[^A-Za-z0-9+/=]' /tmp/services-decor.b64 | head -20 || true
+          echo "INVALID_CHARS_END"
+          echo -n "TAIL="; tail -c 24 /tmp/services-decor.b64; echo
+          base64 -d /tmp/services-decor.b64 > assets/services-decor.webp
+          echo "WEBP_BYTES=$(stat -c%s assets/services-decor.webp)"
+          sha256sum assets/services-decor.webp
           test "$(stat -c%s assets/services-decor.webp)" = "106026"
           echo "2a5c9d07fbdb6254276e5573250602986c53eb933bce4049e2344bd67dcaacd3  assets/services-decor.webp" | sha256sum -c -
           file assets/services-decor.webp
