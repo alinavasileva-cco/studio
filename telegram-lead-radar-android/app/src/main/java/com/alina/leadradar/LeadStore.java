@@ -12,7 +12,7 @@ import java.util.Set;
 
 public final class LeadStore {
     private static final String PREFS = "lead_radar";
-    private static final int RULES_VERSION = 9;
+    private static final int RULES_VERSION = 10;
     private static final String RESULTS_FILE = "manual_lead_results.txt";
 
     private static final String DEFAULT_CHANNELS =
@@ -72,21 +72,26 @@ public final class LeadStore {
     public LeadStore(Context context) {
         appContext = context.getApplicationContext();
         p = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        migrateToV9();
+        migrateToV10();
     }
 
-    private void migrateToV9() {
+    private void migrateToV10() {
         if (p.getInt("rules_version", 0) >= RULES_VERSION) return;
         String existingChannels = p.getString("channels", DEFAULT_CHANNELS);
         if (existingChannels == null || existingChannels.trim().isEmpty()) existingChannels = DEFAULT_CHANNELS;
         p.edit()
                 .putInt("rules_version", RULES_VERSION)
                 .putString("channels", existingChannels)
+                .putInt("lookback_days", 3)
                 .putBoolean("running", false)
                 .putInt("checked_channels", 0)
                 .putInt("total_channels", 0)
                 .putInt("run_found", 0)
                 .putInt("preview_count", 0)
+                .putInt("diag_posts", 0)
+                .putInt("diag_blocks", 0)
+                .putInt("diag_candidates", 0)
+                .putInt("diag_no_contact", 0)
                 .remove("previewed_posts")
                 .remove("last_preview_post")
                 .remove("last_preview_user")
@@ -131,6 +136,20 @@ public final class LeadStore {
                 .apply();
     }
 
+    public synchronized void addDiagnostics(int posts, int blocks, int candidates, int noContact) {
+        p.edit()
+                .putInt("diag_posts", p.getInt("diag_posts", 0) + Math.max(0, posts))
+                .putInt("diag_blocks", p.getInt("diag_blocks", 0) + Math.max(0, blocks))
+                .putInt("diag_candidates", p.getInt("diag_candidates", 0) + Math.max(0, candidates))
+                .putInt("diag_no_contact", p.getInt("diag_no_contact", 0) + Math.max(0, noContact))
+                .apply();
+    }
+
+    public int diagnosticPosts() { return p.getInt("diag_posts", 0); }
+    public int diagnosticBlocks() { return p.getInt("diag_blocks", 0); }
+    public int diagnosticCandidates() { return p.getInt("diag_candidates", 0); }
+    public int diagnosticNoContact() { return p.getInt("diag_no_contact", 0); }
+
     public String previewHistory() { return readResultsFile(); }
     public String lastPreviewPost() { return p.getString("last_preview_post", ""); }
     public String lastPreviewUser() { return p.getString("last_preview_user", ""); }
@@ -161,12 +180,12 @@ public final class LeadStore {
     public void setChannels(String channels) { p.edit().putString("channels", channels == null ? "" : channels.trim()).apply(); }
 
     public int lookbackDays() {
-        int d = p.getInt("lookback_days", 7);
-        return (d == 1 || d == 3 || d == 7 || d == 14) ? d : 7;
+        int d = p.getInt("lookback_days", 3);
+        return (d == 1 || d == 3 || d == 7 || d == 14) ? d : 3;
     }
 
     public void setLookbackDays(int days) {
-        int d = (days == 1 || days == 3 || days == 7 || days == 14) ? days : 7;
+        int d = (days == 1 || days == 3 || days == 7 || days == 14) ? days : 3;
         p.edit().putInt("lookback_days", d).apply();
     }
 
@@ -182,7 +201,6 @@ public final class LeadStore {
         p.edit().putBoolean("sites_enabled", sites).putBoolean("presentations_enabled", presentations).apply();
     }
 
-    /** Every manual launch is a fresh snapshot of the chosen period. */
     public synchronized void beginRun(int totalChannels) {
         clearPreviewHistory();
         p.edit()
@@ -191,6 +209,10 @@ public final class LeadStore {
                 .putInt("total_channels", totalChannels)
                 .putInt("run_found", 0)
                 .putInt("preview_count", 0)
+                .putInt("diag_posts", 0)
+                .putInt("diag_blocks", 0)
+                .putInt("diag_candidates", 0)
+                .putInt("diag_no_contact", 0)
                 .putString("current_channel", "")
                 .putLong("run_started_at", System.currentTimeMillis())
                 .remove("run_finished_at")
