@@ -1,0 +1,37 @@
+name: Repair services decor part 04 prefix
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/repair-part4-prefix.yml'
+permissions:
+  contents: write
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore exact verified prefix
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          prefix='''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'''
+          p=Path('assets/services-decor-b64/part-04.txt')
+          s=''.join(p.read_text().split())
+          assert len(prefix)==4500, len(prefix)
+          fixed=prefix+s[4500:]
+          target='ac06601a2f17c5dc6465e9c330c0fd619d776f0365fbcf92bd29efaf914cab7c'
+          assert len(fixed)==20000, len(fixed)
+          assert hashlib.sha256(fixed.encode()).hexdigest()==target
+          p.write_text(fixed,encoding='ascii')
+          print('VERIFIED part-04 exact sha256='+target)
+          PY
+      - name: Commit exact part 04
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/services-decor-b64/part-04.txt
+          git commit -m 'Install exact services decor part 04'
+          git push
