@@ -1,0 +1,36 @@
+/* Final services-only overrides. Hero and other approved blocks are untouched. */
+.section-index{display:none!important}
+.services-showcase{background:var(--ice)!important}
+.services-showcase .section-head{justify-content:flex-start!important}
+.services-panel{
+  background:linear-gradient(145deg,rgba(251,253,255,.99),rgba(238,243,246,.97))!important;
+  border:1px solid rgba(18,23,27,.12)!important;
+  box-shadow:0 24px 58px rgba(32,44,52,.10),inset 0 1px 0 rgba(255,255,255,.96)!important
+}
+.services-panel:before{border-color:rgba(216,92,43,.72)!important}
+.services-panel:after{display:none!important}
+.service-icon{background:rgba(251,253,255,.96)!important;box-shadow:0 7px 18px rgba(32,44,52,.08),inset 0 1px 0 rgba(255,255,255,.96)!important}
+.service-offer h3{font-weight:300!important;letter-spacing:-.045em!important}
+.service-desc{color:#495760!important}
+.service-pill{background:rgba(216,92,43,.07)!important;border:1px solid rgba(216,92,43,.16)!important}
+/* No animation: keep one crisp static hair mass behind the card and one crisp static hand above its edge. */
+.services-decor-wind{display:none!important;animation:none!important;opacity:0!important}
+.services-decor-base{
+  animation:none!important;
+  transform:none!important;
+  opacity:1!important;
+  filter:none!important;
+  z-index:1!important
+}
+.services-decor-hand{
+  animation:none!important;
+  transform:none!important;
+  opacity:1!important;
+  filter:none!important;
+  z-index:4!important
+}
+@media(max-width:640px){
+  .services-panel{background:linear-gradient(160deg,rgba(251,253,255,.99),rgba(238,243,246,.98))!important}
+  .services-decor{width:292px!important;left:-118px!important;top:122px!important;bottom:auto!important}
+}
+@media(max-width:360px){.services-decor{width:274px!important;left:-112px!important;top:118px!important}}
