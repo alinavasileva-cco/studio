@@ -41,7 +41,7 @@ public final class ScannerService extends Service {
         }
         if (workerStarted.compareAndSet(false, true)) {
             keepRunning = true;
-            Thread t = new Thread(this::runOneManualPass, "lead-radar-v11");
+            Thread t = new Thread(this::runOneManualPass, "lead-radar-v12");
             t.setDaemon(true);
             t.start();
         }
@@ -49,7 +49,7 @@ public final class ScannerService extends Service {
     }
 
     private void runOneManualPass() {
-        LeadScannerV11 scanner = new LeadScannerV11();
+        LeadScannerV12 scanner = new LeadScannerV12();
         List<String> channels = parseChannels(store.channels());
         store.beginRun(channels.size());
         int checked = 0;
@@ -102,7 +102,7 @@ public final class ScannerService extends Service {
         if (raw == null || raw.trim().isEmpty()) return r;
         Set<String> seen = new HashSet<>();
         for (String p : raw.split("[\\n,; ]+")) {
-            String c = LeadScannerV11.normalizeChannel(p);
+            String c = LeadScannerV12.normalizeChannel(p);
             if (!c.isEmpty() && seen.add(c.toLowerCase(java.util.Locale.ROOT))) r.add(c);
         }
         return r;
@@ -129,7 +129,7 @@ public final class ScannerService extends Service {
         Notification.Builder b = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL_ID)
                 : new Notification.Builder(this);
-        return b.setContentTitle("Lead Radar v11")
+        return b.setContentTitle("Lead Radar v12")
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.stat_notify_sync)
                 .setContentIntent(pi)
