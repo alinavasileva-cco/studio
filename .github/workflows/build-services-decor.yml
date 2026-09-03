@@ -36,22 +36,31 @@ jobs:
               7: (20000, '2378c43539d49274f3d508ea77aea65e12dd75514edb26b17fd4c08306d1d0e2', 'T'),
               8: (1368,  'db2d09a2c2d3e852581fc26cb35da1a45d6c879ae3c3e2a979609452f801466b', ''),
           }
+          def h(s):
+              return hashlib.sha256(s.encode('ascii')).hexdigest()
+
           all_parts = []
-          for i, (length, sha, missing_prefix) in expected.items():
+          for i, (length, sha, known_prefix) in expected.items():
               p = root / f'part-{i:02d}.txt'
               text = ''.join(p.read_text().split())
-              digest = hashlib.sha256(text.encode('ascii')).hexdigest()
-              if digest != sha:
-                  candidate = missing_prefix + text
-                  candidate_digest = hashlib.sha256(candidate.encode('ascii')).hexdigest()
-                  if missing_prefix and len(candidate) == length and candidate_digest == sha:
-                      text = candidate
-                      p.write_text(text, encoding='ascii')
-                      print(f'repaired {p}: prepended {missing_prefix!r}')
-                  else:
-                      raise SystemExit(f'{p} does not match expected source: len={len(text)} sha256={digest}')
-              assert len(text) == length
-              assert hashlib.sha256(text.encode('ascii')).hexdigest() == sha
+              if h(text) != sha:
+                  fixed = None
+                  if len(text) == length - 1 and known_prefix and h(known_prefix + text) == sha:
+                      fixed = known_prefix + text
+                      print(f'repaired {p}: restored missing leading {known_prefix!r}')
+                  elif len(text) == length + 1:
+                      for pos in range(len(text)):
+                          candidate = text[:pos] + text[pos+1:]
+                          if h(candidate) == sha:
+                              fixed = candidate
+                              print(f'repaired {p}: removed one transport char at position {pos}')
+                              break
+                  if fixed is None:
+                      raise SystemExit(f'{p} cannot be repaired exactly: len={len(text)} sha256={h(text)}')
+                  text = fixed
+                  p.write_text(text, encoding='ascii')
+              assert len(text) == length, (p, len(text))
+              assert h(text) == sha, (p, h(text))
               all_parts.append(text)
 
           encoded = ''.join(all_parts)
@@ -60,7 +69,7 @@ jobs:
           final_sha = hashlib.sha256(raw).hexdigest()
           assert final_sha == '2a5c9d07fbdb6254276e5573250602986c53eb933bce4049e2344bd67dcaacd3', final_sha
           Path('assets/services-decor.webp').write_bytes(raw)
-          print('verified services-decor.webp: 106026 bytes, sha256=' + final_sha)
+          print('VERIFIED services-decor.webp: 106026 bytes sha256=' + final_sha)
           PY
           file assets/services-decor.webp
       - name: Commit verified HD decor
