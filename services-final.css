@@ -1,4 +1,4 @@
-/* Final services-only overrides. Hero and other approved blocks are untouched. */
+/* Final services-only overrides plus the approved mobile hero CTA adjustment. */
 .section-index{display:none!important}
 .services-showcase{background:var(--ice)!important}
 .services-showcase .section-head{justify-content:flex-start!important}
@@ -13,7 +13,7 @@
 .service-offer h3{font-weight:300!important;letter-spacing:-.045em!important}
 .service-desc{color:#495760!important}
 .service-pill{background:rgba(216,92,43,.07)!important;border:1px solid rgba(216,92,43,.16)!important}
-/* No animation: keep one crisp static hair mass behind the card and one crisp static hand above its edge. */
+/* Static and crisp: no duplicated animated hair layer. */
 .services-decor-wind{display:none!important;animation:none!important;opacity:0!important}
 .services-decor-base{
   animation:none!important;
@@ -32,5 +32,15 @@
 @media(max-width:640px){
   .services-panel{background:linear-gradient(160deg,rgba(251,253,255,.99),rgba(238,243,246,.98))!important}
   .services-decor{width:292px!important;left:-118px!important;top:122px!important;bottom:auto!important}
+  /* Keep the single hero CTA entirely inside the left text column and away from the face. */
+  .hero .actions{display:block!important;width:46vw!important;max-width:220px!important;margin-top:18px!important}
+  .hero .actions .button.primary{width:100%!important;min-width:0!important;padding-left:10px!important;padding-right:10px!important}
 }
-@media(max-width:360px){.services-decor{width:274px!important;left:-112px!important;top:118px!important}}
+@media(max-width:390px){
+  .hero .actions{width:45vw!important;max-width:176px!important;margin-top:15px!important}
+}
+@media(max-width:360px){
+  .services-decor{width:274px!important;left:-112px!important;top:118px!important}
+  .hero .actions{width:44vw!important;max-width:158px!important}
+  .hero .actions .button.primary{font-size:8.5px!important;padding-left:7px!important;padding-right:7px!important}
+}
