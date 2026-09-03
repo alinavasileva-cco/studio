@@ -17,21 +17,51 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-      - name: Rebuild original WebP losslessly
+      - name: Repair transport chars and verify source
         shell: bash
         run: |
           set -euo pipefail
-          cat assets/services-decor-b64/part-01.txt \
-              assets/services-decor-b64/part-02.txt \
-              assets/services-decor-b64/part-03.txt \
-              assets/services-decor-b64/part-04.txt \
-              assets/services-decor-b64/part-05.txt \
-              assets/services-decor-b64/part-06.txt \
-              assets/services-decor-b64/part-07.txt \
-              assets/services-decor-b64/part-08.txt \
-            | tr -d '\r\n' | base64 --decode > assets/services-decor.webp
-          test "$(wc -c < assets/services-decor.webp)" -eq 106026
-          echo '2a5c9d07fbdb6254276e5573250602986c53eb933bce4049e2344bd67dcaacd3  assets/services-decor.webp' | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, hashlib
+
+          root = Path('assets/services-decor-b64')
+          expected = {
+              1: (20000, 'a316b5d0d22fb62851f0fad6b2488d24f8f37be63615f0a212c34fd22eb559d4', ''),
+              2: (20000, '288d64e502d9e8f38d3cb5c9d09b8404e299efb296c2dcabba8c9c548f072561', 'g'),
+              3: (20000, 'af3d53edd2251acd1ab700bf894d23e95484517c8481c54d6eb93de93ee21308', 'o'),
+              4: (20000, 'ac06601a2f17c5dc6465e9c330c0fd619d776f0365fbcf92bd29efaf914cab7c', ''),
+              5: (20000, 'a055577e8495808c023dded478ac1164fa471ced7661ac3d5ad16c3015047e4e', 'Q'),
+              6: (20000, '8bcf3b6af0032127d6e7bf2971de8c8a2555c0887b4757e34878e63e36baab25', 'b'),
+              7: (20000, '2378c43539d49274f3d508ea77aea65e12dd75514edb26b17fd4c08306d1d0e2', 'T'),
+              8: (1368,  'db2d09a2c2d3e852581fc26cb35da1a45d6c879ae3c3e2a979609452f801466b', ''),
+          }
+          all_parts = []
+          for i, (length, sha, missing_prefix) in expected.items():
+              p = root / f'part-{i:02d}.txt'
+              text = ''.join(p.read_text().split())
+              digest = hashlib.sha256(text.encode('ascii')).hexdigest()
+              if digest != sha:
+                  candidate = missing_prefix + text
+                  candidate_digest = hashlib.sha256(candidate.encode('ascii')).hexdigest()
+                  if missing_prefix and len(candidate) == length and candidate_digest == sha:
+                      text = candidate
+                      p.write_text(text, encoding='ascii')
+                      print(f'repaired {p}: prepended {missing_prefix!r}')
+                  else:
+                      raise SystemExit(f'{p} does not match expected source: len={len(text)} sha256={digest}')
+              assert len(text) == length
+              assert hashlib.sha256(text.encode('ascii')).hexdigest() == sha
+              all_parts.append(text)
+
+          encoded = ''.join(all_parts)
+          raw = base64.b64decode(encoded, validate=True)
+          assert len(raw) == 106026, len(raw)
+          final_sha = hashlib.sha256(raw).hexdigest()
+          assert final_sha == '2a5c9d07fbdb6254276e5573250602986c53eb933bce4049e2344bd67dcaacd3', final_sha
+          Path('assets/services-decor.webp').write_bytes(raw)
+          print('verified services-decor.webp: 106026 bytes, sha256=' + final_sha)
+          PY
           file assets/services-decor.webp
       - name: Commit verified HD decor
         shell: bash
@@ -39,7 +69,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add assets/services-decor.webp
+          git add assets/services-decor-b64/part-*.txt assets/services-decor.webp
           if git diff --cached --quiet; then
             echo 'Decor already matches source.'
             exit 0
