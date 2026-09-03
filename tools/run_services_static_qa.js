@@ -8,9 +8,9 @@ const fs = require('fs');
   fs.mkdirSync('qa-static',{recursive:true});
   for(const width of widths){
     const page=await browser.newPage({viewport:{width,height:1200},deviceScaleFactor:1});
-    await page.goto('http://127.0.0.1:8000',{waitUntil:'networkidle'});
+    await page.goto('http://127.0.0.1:8000',{waitUntil:'domcontentloaded'});
     await page.locator('#services').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(700);
     const data=await page.evaluate(()=>{
       const sec=document.querySelector('#services');
       const panel=document.querySelector('.services-panel');
@@ -19,9 +19,13 @@ const fs = require('fs');
       const wind=document.querySelector('.services-decor-wind');
       const index=document.querySelector('.section-index');
       const all=[...sec.querySelectorAll('*')];
-      const overflowing=all.filter(el=>el.scrollWidth>el.clientWidth+2).map(el=>el.className||el.tagName).slice(0,10);
+      const overflowing=all.filter(el=>{
+        const cs=getComputedStyle(el);
+        if(cs.overflowX==='hidden' || cs.overflow==='hidden') return false;
+        return el.scrollWidth>el.clientWidth+2;
+      }).map(el=>el.className||el.tagName).slice(0,10);
       return {
-        innerWidth:innerWidth,
+        innerWidth,
         docWidth:document.documentElement.scrollWidth,
         panelBg:getComputedStyle(panel).backgroundColor,
         baseAnimation:getComputedStyle(base).animationName,
