@@ -1,6 +1,5 @@
 const { chromium } = require('playwright-core');
 const fs = require('fs');
-const path = require('path');
 
 const candidates = ['/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium', '/usr/bin/chromium-browser'];
 const executablePath = candidates.find(fs.existsSync);
@@ -14,9 +13,15 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
 
   for (const width of widths) {
     const page = await browser.newPage({ viewport: { width, height: width >= 1000 ? 1000 : 1100 }, deviceScaleFactor: 1 });
-    await page.goto('http://127.0.0.1:8000/', { waitUntil: 'networkidle' });
+    await page.route('**/*', async route => {
+      const url = route.request().url();
+      if (url.startsWith('http://127.0.0.1:8000/') || url.startsWith('data:') || url.startsWith('blob:')) return route.continue();
+      return route.abort();
+    });
+    await page.goto('http://127.0.0.1:8000/', { waitUntil: 'domcontentloaded', timeout: 10000 });
     await page.locator('#services').scrollIntoViewIfNeeded();
-    await page.waitForTimeout(250);
+    await page.locator('.services-decor-base').waitFor({ state: 'attached', timeout: 5000 });
+    await page.waitForTimeout(350);
 
     const data = await page.evaluate(() => {
       const panel = document.querySelector('.services-panel');
@@ -40,18 +45,15 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
       };
     });
 
-    const pass = data.documentScrollWidth <= width + 1 && data.panelLeft >= -1 && data.panelRight <= width + 1 && data.decorLoaded && data.overflowingText.length === 0;
+    const pass = data.documentScrollWidth <= width + 1 && data.panelLeft >= -1 && data.panelRight <= width + 1 && data.decorLoaded && data.overflowingText.length === 0 && data.hairAnimation === 'servicesHairWind';
     results.push({ width, pass, ...data });
 
-    if (width === 390 || width === 1440) {
-      await page.locator('#services').screenshot({ path: `qa-output/services-${width}.png` });
-    }
+    if (width === 390 || width === 1440) await page.locator('#services').screenshot({ path: `qa-output/services-${width}.png` });
     await page.close();
   }
 
   fs.writeFileSync('qa-output/results.json', JSON.stringify(results, null, 2));
   console.log('SERVICES_QA_RESULTS=' + JSON.stringify(results));
   await browser.close();
-
   if (results.some(r => !r.pass)) process.exit(1);
 })();
