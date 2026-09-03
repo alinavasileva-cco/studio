@@ -27,7 +27,7 @@ public final class ScannerService extends Service {
         super.onCreate();
         store = new LeadStore(this);
         createNotificationChannel();
-        startForeground(NOTIFICATION_ID, notification("Подготовка свежего поиска…", true));
+        startForeground(NOTIFICATION_ID, notification("Подготовка полного поиска по истории…", true));
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
@@ -41,7 +41,7 @@ public final class ScannerService extends Service {
         }
         if (workerStarted.compareAndSet(false, true)) {
             keepRunning = true;
-            Thread t = new Thread(this::runOneManualPass, "lead-radar-v12");
+            Thread t = new Thread(this::runOneManualPass, "lead-radar-v13");
             t.setDaemon(true);
             t.start();
         }
@@ -129,7 +129,7 @@ public final class ScannerService extends Service {
         Notification.Builder b = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL_ID)
                 : new Notification.Builder(this);
-        return b.setContentTitle("Lead Radar v12")
+        return b.setContentTitle("Lead Radar v13")
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.stat_notify_sync)
                 .setContentIntent(pi)
