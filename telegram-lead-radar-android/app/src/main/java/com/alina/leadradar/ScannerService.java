@@ -24,16 +24,14 @@ public final class ScannerService extends Service {
     private volatile boolean keepRunning = true;
     private LeadStore store;
 
-    @Override
-    public void onCreate() {
+    @Override public void onCreate() {
         super.onCreate();
         store = new LeadStore(this);
         createNotificationChannel();
         startForeground(NOTIFICATION_ID, notification("Подготовка свежего ручного поиска…", true));
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    @Override public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && ACTION_STOP.equals(intent.getAction())) {
             keepRunning = false;
             store.requestStop();
@@ -42,10 +40,9 @@ public final class ScannerService extends Service {
             stopSelf();
             return START_NOT_STICKY;
         }
-
         if (workerStarted.compareAndSet(false, true)) {
             keepRunning = true;
-            Thread t = new Thread(this::runOneManualPass, "lead-radar-manual-scan-v9");
+            Thread t = new Thread(this::runOneManualPass, "lead-radar-manual-scan-v10");
             t.setDaemon(true);
             t.start();
         }
@@ -53,19 +50,15 @@ public final class ScannerService extends Service {
     }
 
     private void runOneManualPass() {
-        LeadScannerV9 scanner = new LeadScannerV9();
+        LeadScannerV10Fixed scanner = new LeadScannerV10Fixed();
         List<String> channels = parseChannels(store.channels());
         store.beginRun(channels.size());
         int checked = 0;
-
         try {
             for (String channel : channels) {
                 if (!keepRunning || !store.running()) break;
-
                 store.setProgress(checked, channels.size(), channel);
-                updateNotification("Проверено " + checked + " из " + channels.size()
-                        + " · найдено " + store.runFound() + " · @" + channel, true);
-
+                updateNotification("Проверено " + checked + " из " + channels.size() + " · найдено " + store.runFound() + " · @" + channel, true);
                 try {
                     List<Lead> leads = scanner.scanChannel(channel, store);
                     for (int i = leads.size() - 1; i >= 0; i--) {
@@ -77,10 +70,7 @@ public final class ScannerService extends Service {
                         if (message == null || message.trim().isEmpty()) continue;
                         store.addPreview(lead, message);
                     }
-                } catch (Exception ignored) {
-                    // Закрытый, переименованный или временно недоступный канал не останавливает общий проход.
-                }
-
+                } catch (Exception ignored) {}
                 checked++;
                 store.setProgress(checked, channels.size(), "");
             }
@@ -88,13 +78,10 @@ public final class ScannerService extends Service {
             boolean stoppedByUser = checked < channels.size() && !store.running();
             int found = store.runFound();
             store.finishRun();
-
             if (stoppedByUser) {
-                updateNotification("Поиск остановлен. Проверено " + checked + " из " + channels.size()
-                        + ", найдено " + found, false);
+                updateNotification("Поиск остановлен. Проверено " + checked + " из " + channels.size() + ", найдено " + found, false);
             } else {
-                updateNotification("Свежий поиск завершён за " + periodLabel(store.lookbackDays()) + ". Проверено "
-                        + checked + " источников, найдено отдельных заявок: " + found, false);
+                updateNotification("Свежий поиск завершён за " + periodLabel(store.lookbackDays()) + ". Проверено " + checked + " источников, найдено заявок: " + found, false);
             }
             stopForeground(true);
             stopSelf();
@@ -107,7 +94,7 @@ public final class ScannerService extends Service {
         String[] pieces = raw.split("[\\n,; ]+");
         Set<String> seen = new HashSet<>();
         for (String piece : pieces) {
-            String c = LeadScannerV9.normalizeChannel(piece);
+            String c = LeadScannerV10Fixed.normalizeChannel(piece);
             if (!c.isEmpty() && seen.add(c.toLowerCase(java.util.Locale.ROOT))) result.add(c);
         }
         return result;
@@ -122,8 +109,7 @@ public final class ScannerService extends Service {
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID, "Lead Radar — ручной поиск", NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "Lead Radar — ручной поиск", NotificationManager.IMPORTANCE_LOW);
             channel.setDescription("Свежий ручной поиск заказов с прямым Telegram-контактом");
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
@@ -131,12 +117,9 @@ public final class ScannerService extends Service {
 
     private Notification notification(String text, boolean ongoing) {
         Intent open = new Intent(this, MainActivityV9.class);
-        PendingIntent pi = PendingIntent.getActivity(this, 0, open,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        Notification.Builder b = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-                ? new Notification.Builder(this, CHANNEL_ID)
-                : new Notification.Builder(this);
-        return b.setContentTitle("Lead Radar v9 · " + periodLabel(store.lookbackDays()))
+        PendingIntent pi = PendingIntent.getActivity(this, 0, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        Notification.Builder b = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this);
+        return b.setContentTitle("Lead Radar v10 · " + periodLabel(store.lookbackDays()))
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.stat_notify_sync)
                 .setContentIntent(pi)
@@ -151,10 +134,5 @@ public final class ScannerService extends Service {
     }
 
     @Override public IBinder onBind(Intent intent) { return null; }
-
-    @Override public void onDestroy() {
-        keepRunning = false;
-        workerStarted.set(false);
-        super.onDestroy();
-    }
+    @Override public void onDestroy() { keepRunning = false; workerStarted.set(false); super.onDestroy(); }
 }
