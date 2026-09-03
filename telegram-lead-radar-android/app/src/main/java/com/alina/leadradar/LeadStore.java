@@ -3,17 +3,25 @@ package com.alina.leadradar;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public final class LeadStore {
     private static final String PREFS = "lead_radar";
-    private static final int RULES_VERSION = 10;
-    private static final String RESULTS_FILE = "manual_lead_results.txt";
+    private static final int RULES_VERSION = 11;
+    private static final String RESULTS_FILE = "manual_lead_results_v11.json";
+    private static final String OLD_RESULTS_FILE = "manual_lead_results.txt";
+    private static final String DEFAULT_PRESENTATION_PORTFOLIO =
+            "https://drive.google.com/drive/folders/1e7F1UzYrb0wCvmVzVuNK_htp1Kd5JHQf";
 
     private static final String DEFAULT_CHANNELS =
             "rueventjob\n"
@@ -72,17 +80,23 @@ public final class LeadStore {
     public LeadStore(Context context) {
         appContext = context.getApplicationContext();
         p = appContext.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        migrateToV10();
+        migrateToV11();
     }
 
-    private void migrateToV10() {
+    private void migrateToV11() {
         if (p.getInt("rules_version", 0) >= RULES_VERSION) return;
         String existingChannels = p.getString("channels", DEFAULT_CHANNELS);
         if (existingChannels == null || existingChannels.trim().isEmpty()) existingChannels = DEFAULT_CHANNELS;
+        String siteProfile = p.getString("profile_url", "https://alinavasileva-cco.github.io/studio/");
+        if (siteProfile == null) siteProfile = "";
         p.edit()
                 .putInt("rules_version", RULES_VERSION)
                 .putString("channels", existingChannels)
+                .putString("profile_url", siteProfile)
+                .putString("presentation_portfolio_url", DEFAULT_PRESENTATION_PORTFOLIO)
                 .putInt("lookback_days", 3)
+                .putBoolean("sites_enabled", true)
+                .putBoolean("presentations_enabled", true)
                 .putBoolean("running", false)
                 .putInt("checked_channels", 0)
                 .putInt("total_channels", 0)
@@ -92,12 +106,15 @@ public final class LeadStore {
                 .putInt("diag_blocks", 0)
                 .putInt("diag_candidates", 0)
                 .putInt("diag_no_contact", 0)
+                .putInt("diag_errors", 0)
                 .remove("previewed_posts")
+                .remove("selected_ids")
                 .remove("last_preview_post")
                 .remove("last_preview_user")
                 .remove("last_preview_message")
                 .remove("last_preview_text")
                 .apply();
+        try { new File(appContext.getFilesDir(), OLD_RESULTS_FILE).delete(); } catch (Exception ignored) {}
         try { resultsFile().delete(); } catch (Exception ignored) {}
     }
 
@@ -111,29 +128,49 @@ public final class LeadStore {
         Set<String> previewed = new HashSet<>(p.getStringSet("previewed_posts", new HashSet<>()));
         previewed.add(lead.dedupKey);
 
-        String budget = lead.budget == null || lead.budget.trim().isEmpty() ? "не указан" : lead.budget.trim();
-        String original = cleanExcerpt(lead.text, 1200);
-        String contactUrl = contactUrl(lead.username);
-        String entry = "[" + categoryName(lead.category) + "]\n"
-                + "Telegram-контакт: " + contactUrl
-                + "\nБюджет: " + budget
-                + "\nИсходный пост: " + lead.postUrl
-                + "\n\nЗАДАЧА:\n" + original
-                + "\n\nПОДГОТОВЛЕННЫЙ ОТКЛИК:\n" + message;
-
-        String old = readResultsFile();
-        String combined = old.isEmpty() ? entry : entry + "\n\n━━━━━━━━━━━━━━━━━━\n\n" + old;
-        writeResultsFile(combined);
+        List<LeadRecord> list = readRecords();
+        String budget = lead.budget == null ? "" : lead.budget.trim();
+        String original = cleanExcerpt(lead.text, 1800);
+        list.add(0, new LeadRecord(
+                lead.dedupKey,
+                lead.category,
+                lead.username,
+                lead.postUrl,
+                budget,
+                original,
+                message == null ? "" : message.trim()
+        ));
+        writeRecords(list);
 
         p.edit()
                 .putStringSet("previewed_posts", previewed)
                 .putString("last_preview_post", lead.postUrl)
                 .putString("last_preview_user", lead.username)
-                .putString("last_preview_message", message)
+                .putString("last_preview_message", message == null ? "" : message)
                 .putString("last_preview_text", original)
-                .putInt("preview_count", p.getInt("preview_count", 0) + 1)
+                .putInt("preview_count", list.size())
                 .putInt("run_found", p.getInt("run_found", 0) + 1)
                 .apply();
+    }
+
+    public synchronized List<LeadRecord> resultRecords() {
+        return new ArrayList<>(readRecords());
+    }
+
+    public synchronized void setSelected(String id, boolean selected) {
+        if (id == null || id.isEmpty()) return;
+        Set<String> ids = new HashSet<>(p.getStringSet("selected_ids", new HashSet<>()));
+        if (selected) ids.add(id); else ids.remove(id);
+        p.edit().putStringSet("selected_ids", ids).apply();
+    }
+
+    public boolean isSelected(String id) {
+        if (id == null || id.isEmpty()) return false;
+        return new HashSet<>(p.getStringSet("selected_ids", new HashSet<>())).contains(id);
+    }
+
+    public int selectedCount() {
+        return new HashSet<>(p.getStringSet("selected_ids", new HashSet<>())).size();
     }
 
     public synchronized void addDiagnostics(int posts, int blocks, int candidates, int noContact) {
@@ -145,12 +182,27 @@ public final class LeadStore {
                 .apply();
     }
 
+    public void addReadError() { p.edit().putInt("diag_errors", p.getInt("diag_errors", 0) + 1).apply(); }
     public int diagnosticPosts() { return p.getInt("diag_posts", 0); }
     public int diagnosticBlocks() { return p.getInt("diag_blocks", 0); }
     public int diagnosticCandidates() { return p.getInt("diag_candidates", 0); }
     public int diagnosticNoContact() { return p.getInt("diag_no_contact", 0); }
+    public int diagnosticErrors() { return p.getInt("diag_errors", 0); }
 
-    public String previewHistory() { return readResultsFile(); }
+    public String previewHistory() {
+        StringBuilder out = new StringBuilder();
+        for (LeadRecord r : readRecords()) {
+            if (out.length() > 0) out.append("\n\n━━━━━━━━━━━━━━━━━━\n\n");
+            out.append("[").append(categoryName(r.category)).append("]\n")
+                    .append("Telegram-контакт: ").append(contactUrl(r.username)).append("\n")
+                    .append("Бюджет: ").append(r.budget == null || r.budget.isEmpty() ? "не указан" : r.budget).append("\n")
+                    .append("Исходный пост: ").append(r.postUrl).append("\n\n")
+                    .append("ЗАДАЧА:\n").append(r.task).append("\n\n")
+                    .append("ПОДГОТОВЛЕННЫЙ ОТКЛИК:\n").append(r.message);
+        }
+        return out.toString();
+    }
+
     public String lastPreviewPost() { return p.getString("last_preview_post", ""); }
     public String lastPreviewUser() { return p.getString("last_preview_user", ""); }
     public String lastPreviewMessage() { return p.getString("last_preview_message", ""); }
@@ -167,6 +219,7 @@ public final class LeadStore {
         try { resultsFile().delete(); } catch (Exception ignored) {}
         p.edit()
                 .remove("previewed_posts")
+                .remove("selected_ids")
                 .remove("last_preview_post")
                 .remove("last_preview_user")
                 .remove("last_preview_message")
@@ -191,6 +244,8 @@ public final class LeadStore {
 
     public String profileUrl() { return p.getString("profile_url", "https://alinavasileva-cco.github.io/studio/"); }
     public void setProfileUrl(String url) { p.edit().putString("profile_url", url == null ? "" : url.trim()).apply(); }
+    public String presentationPortfolioUrl() { return p.getString("presentation_portfolio_url", DEFAULT_PRESENTATION_PORTFOLIO); }
+    public void setPresentationPortfolioUrl(String url) { p.edit().putString("presentation_portfolio_url", url == null ? "" : url.trim()).apply(); }
 
     public boolean sitesEnabled() { return p.getBoolean("sites_enabled", true); }
     public boolean presentationsEnabled() { return p.getBoolean("presentations_enabled", true); }
@@ -213,6 +268,7 @@ public final class LeadStore {
                 .putInt("diag_blocks", 0)
                 .putInt("diag_candidates", 0)
                 .putInt("diag_no_contact", 0)
+                .putInt("diag_errors", 0)
                 .putString("current_channel", "")
                 .putLong("run_started_at", System.currentTimeMillis())
                 .remove("run_finished_at")
@@ -238,9 +294,35 @@ public final class LeadStore {
 
     private File resultsFile() { return new File(appContext.getFilesDir(), RESULTS_FILE); }
 
-    private String readResultsFile() {
-        File file = resultsFile();
-        if (!file.exists()) return "";
+    private List<LeadRecord> readRecords() {
+        List<LeadRecord> list = new ArrayList<>();
+        File f = resultsFile();
+        if (!f.exists()) return list;
+        try {
+            String raw = readFile(f);
+            if (raw == null || raw.trim().isEmpty()) return list;
+            JSONArray a = new JSONArray(raw);
+            for (int i = 0; i < a.length(); i++) {
+                JSONObject o = a.optJSONObject(i);
+                LeadRecord r = LeadRecord.fromJson(o);
+                if (r != null) list.add(r);
+            }
+        } catch (Exception ignored) {}
+        return list;
+    }
+
+    private void writeRecords(List<LeadRecord> list) {
+        try {
+            JSONArray a = new JSONArray();
+            for (LeadRecord r : list) a.put(r.toJson());
+            try (FileOutputStream out = new FileOutputStream(resultsFile(), false)) {
+                out.write(a.toString().getBytes("UTF-8"));
+                out.flush();
+            }
+        } catch (Exception ignored) {}
+    }
+
+    private String readFile(File file) {
         try (FileInputStream in = new FileInputStream(file); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[8192];
             int read;
@@ -249,20 +331,13 @@ public final class LeadStore {
         } catch (Exception ignored) { return ""; }
     }
 
-    private void writeResultsFile(String text) {
-        try (FileOutputStream out = new FileOutputStream(resultsFile(), false)) {
-            out.write(text.getBytes("UTF-8"));
-            out.flush();
-        } catch (Exception ignored) {}
-    }
-
     private static String cleanExcerpt(String text, int limit) {
         if (text == null) return "";
         String s = text.replaceAll("\\s+", " ").trim();
         return s.length() <= limit ? s : s.substring(0, limit - 1).trim() + "…";
     }
 
-    private static String categoryName(Lead.Category c) {
+    public static String categoryName(Lead.Category c) {
         if (c == Lead.Category.SITE) return "САЙТ / ЛЕНДИНГ";
         if (c == Lead.Category.PRESENTATION) return "ПРЕЗЕНТАЦИЯ";
         return "ИСКЛЮЧЕНО";
