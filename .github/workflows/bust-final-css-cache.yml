@@ -1,0 +1,34 @@
+name: Force final CSS refresh
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bust-final-css-cache.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update final stylesheet version
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s=re.sub(r'services-final\.css\?v=[^"\']+', 'services-final.css?v=20260903-cta-final', s)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit cache bust
+        run: |
+          if git diff --quiet -- index.html; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Refresh final services and hero CTA stylesheet"
+          git push
