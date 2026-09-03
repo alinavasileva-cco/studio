@@ -1,0 +1,81 @@
+name: Final static services styling
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/services-static-final.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply services-only final changes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Remove visible section numbering everywhere; no other section content changes.
+          s = re.sub(r'<span class="section-index">\s*\d+\s*/\s*\d+\s*</span>', '', s)
+
+          marker = '/* SERVICES_STATIC_FINAL */'
+          if marker not in s:
+              css = r'''
+/* SERVICES_STATIC_FINAL */
+.services-showcase{background:var(--ice)}
+.services-showcase .section-head{justify-content:flex-start}
+.services-panel{
+  background:linear-gradient(145deg,rgba(251,253,255,.98),rgba(238,243,246,.96));
+  border-color:rgba(18,23,27,.12);
+  box-shadow:0 24px 58px rgba(32,44,52,.10),inset 0 1px 0 rgba(255,255,255,.96)
+}
+.services-panel:before{border-color:rgba(216,92,43,.72)}
+.services-panel:after{display:none!important}
+.service-icon{background:rgba(251,253,255,.92);box-shadow:0 7px 18px rgba(32,44,52,.08),inset 0 1px 0 rgba(255,255,255,.95)}
+.service-offer h3{font-weight:300;letter-spacing:-.045em}
+.service-pill{background:rgba(216,92,43,.08);border:1px solid rgba(216,92,43,.14)}
+.services-decor-base{
+  z-index:4!important;
+  width:min(500px,40vw)!important;
+  left:-72px!important;
+  bottom:-54px!important;
+  top:auto!important;
+  opacity:1!important;
+  filter:none!important;
+  clip-path:none!important;
+  animation:none!important;
+  transform:none!important;
+  image-rendering:auto
+}
+.services-decor-wind{display:none!important;animation:none!important;opacity:0!important}
+@media(max-width:640px){
+  .services-panel{background:linear-gradient(160deg,rgba(251,253,255,.99),rgba(238,243,246,.97))}
+  .services-decor-base{width:286px!important;left:-112px!important;top:122px!important;bottom:auto!important;filter:none!important}
+}
+@media(max-width:360px){.services-decor-base{width:270px!important;left:-108px!important;top:118px!important}}
+@media(prefers-reduced-motion:reduce){.services-decor-base{animation:none!important;transform:none!important}}
+'''
+              s = s.replace('</style>', css + '</style>', 1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit final services changes
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Make services static, sharp and remove section numbering"
+          git push
