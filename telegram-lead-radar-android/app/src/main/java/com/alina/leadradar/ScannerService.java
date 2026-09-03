@@ -49,7 +49,7 @@ public final class ScannerService extends Service {
     }
 
     private void runOneManualPass() {
-        LeadScannerV12 scanner = new LeadScannerV12();
+        LeadScannerV13 scanner = new LeadScannerV13();
         List<String> channels = parseChannels(store.channels());
         store.beginRun(channels.size());
         int checked = 0;
@@ -102,7 +102,7 @@ public final class ScannerService extends Service {
         if (raw == null || raw.trim().isEmpty()) return r;
         Set<String> seen = new HashSet<>();
         for (String p : raw.split("[\\n,; ]+")) {
-            String c = LeadScannerV12.normalizeChannel(p);
+            String c = LeadScannerV13.normalizeChannel(p);
             if (!c.isEmpty() && seen.add(c.toLowerCase(java.util.Locale.ROOT))) r.add(c);
         }
         return r;
