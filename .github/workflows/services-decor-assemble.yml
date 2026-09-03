@@ -14,20 +14,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Decode and verify original WebP
+      - name: Verify reconstructed base64 segments
         shell: bash
         run: |
           set -euo pipefail
-          {
-            head -c 20000 assets/services-decor-b64/part-01.txt
-            printf 'g'; cat assets/services-decor-b64/part-02.txt
-            printf 'o'; cat assets/services-decor-b64/part-03.txt
-            cat assets/services-decor-b64/part-04.txt
-            printf 'Q'; cat assets/services-decor-b64/part-05.txt
-            printf 'b'; cat assets/services-decor-b64/part-06.txt
-            printf 'T'; cat assets/services-decor-b64/part-07.txt
-            cat assets/services-decor-b64/part-08.txt
-          } | tr -d '\r\n\t ' > /tmp/services-decor.b64
+          head -c 20000 assets/services-decor-b64/part-01.txt | tr -d '\r\n\t ' > /tmp/p01
+          { printf 'g'; cat assets/services-decor-b64/part-02.txt; } | tr -d '\r\n\t ' > /tmp/p02
+          { printf 'o'; cat assets/services-decor-b64/part-03.txt; } | tr -d '\r\n\t ' > /tmp/p03
+          cat assets/services-decor-b64/part-04.txt | tr -d '\r\n\t ' > /tmp/p04
+          { printf 'Q'; cat assets/services-decor-b64/part-05.txt; } | tr -d '\r\n\t ' > /tmp/p05
+          { printf 'b'; cat assets/services-decor-b64/part-06.txt; } | tr -d '\r\n\t ' > /tmp/p06
+          { printf 'T'; cat assets/services-decor-b64/part-07.txt; } | tr -d '\r\n\t ' > /tmp/p07
+          cat assets/services-decor-b64/part-08.txt | tr -d '\r\n\t ' > /tmp/p08
+          echo 'a316b5d0d22fb62851f0fad6b2488d24f8f37be63615f0a212c34fd22eb559d4  /tmp/p01' | sha256sum -c - || true
+          echo '288d64e502d9e8f38d3cb5c9d09b8404e299efb296c2dcabba8c9c548f072561  /tmp/p02' | sha256sum -c - || true
+          echo 'af3d53edd2251acd1ab700bf894d23e95484517c8481c54d6eb93de93ee21308  /tmp/p03' | sha256sum -c - || true
+          echo 'ac06601a2f17c5dc6465e9c330c0fd619d776f0365fbcf92bd29efaf914cab7c  /tmp/p04' | sha256sum -c - || true
+          echo 'a055577e8495808c023dded478ac1164fa471ced7661ac3d5ad16c3015047e4e  /tmp/p05' | sha256sum -c - || true
+          echo '8bcf3b6af0032127d6e7bf2971de8c8a2555c0887b4757e34878e63e36baab25  /tmp/p06' | sha256sum -c - || true
+          echo '2378c43539d49274f3d508ea77aea65e12dd75514edb26b17fd4c08306d1d0e2  /tmp/p07' | sha256sum -c - || true
+          echo 'db2d09a2c2d3e852581fc26cb35da1a45d6c879ae3c3e2a979609452f801466b  /tmp/p08' | sha256sum -c - || true
+          cat /tmp/p0{1,2,3,4,5,6,7,8} > /tmp/services-decor.b64
           test "$(wc -c < /tmp/services-decor.b64)" = "141368"
           base64 -d /tmp/services-decor.b64 > assets/services-decor.webp
           test "$(stat -c%s assets/services-decor.webp)" = "106026"
