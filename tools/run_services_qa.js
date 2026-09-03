@@ -1,6 +1,15 @@
 const { chromium } = require('playwright-core');
 const fs = require('fs');
 
+const htmlPath = 'index.html';
+let html = fs.readFileSync(htmlPath, 'utf8');
+const tabletMarker = '/* SERVICES_V2_TABLET_FIX */';
+if (!html.includes(tabletMarker)) {
+  const tabletCss = `/* SERVICES_V2_TABLET_FIX */@media(min-width:641px) and (max-width:980px){.service-offer{padding:54px 34px 46px}.service-offer h3{font-size:22px}.service-desc{font-size:15px}.service-pill{font-size:11px;padding:8px 10px}.service-result{font-size:14px}.service-result b{font-size:16px}.services-decor{width:min(430px,52vw);left:-100px}}`;
+  html = html.replace('</style>', tabletCss + '</style>');
+  fs.writeFileSync(htmlPath, html);
+}
+
 const candidates = ['/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium', '/usr/bin/chromium-browser'];
 const executablePath = candidates.find(fs.existsSync);
 if (!executablePath) throw new Error('No system Chrome/Chromium found');
@@ -48,7 +57,7 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
     const pass = data.documentScrollWidth <= width + 1 && data.panelLeft >= -1 && data.panelRight <= width + 1 && data.decorLoaded && data.overflowingText.length === 0 && data.hairAnimation === 'servicesHairWind';
     results.push({ width, pass, ...data });
 
-    if (width === 390 || width === 1440) await page.locator('#services').screenshot({ path: `qa-output/services-${width}.png` });
+    if (width === 390 || width === 768 || width === 1440) await page.locator('#services').screenshot({ path: `qa-output/services-${width}.png` });
     await page.close();
   }
 
