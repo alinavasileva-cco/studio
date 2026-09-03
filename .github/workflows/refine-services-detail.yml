@@ -1,0 +1,43 @@
+name: Refine services detail
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/refine-services-detail.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tighten hand mask and hair motion
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          old='.services-decor-base{z-index:1}.services-decor-hand{z-index:4;clip-path:polygon(43% 18%,64% 18%,66% 50%,58% 59%,54% 100%,13% 100%,30% 74%,40% 51%);filter:drop-shadow(0 18px 26px rgba(48,46,41,.08))}.services-decor-wind{z-index:2;opacity:.16;clip-path:polygon(0 0,58% 0,56% 42%,47% 54%,40% 100%,0 100%);animation:servicesHairWind 7s ease-in-out infinite;transform-origin:28% 72%;filter:saturate(1.03)}@keyframes servicesHairWind{0%,100%{transform:translate3d(-4px,3px,0) rotate(-.25deg) scale(1.015)}50%{transform:translate3d(15px,-5px,0) rotate(.35deg) scale(1.025)}}'
+          new='.services-decor-base{z-index:1;filter:saturate(1.04) contrast(1.035)}.services-decor-hand{z-index:4;clip-path:polygon(54% 21%,59% 21%,59% 44%,56% 49%,52% 53%,50% 64%,47% 78%,43% 100%,15% 100%,22% 91%,30% 81%,37% 70%,43% 60%,47% 52%,47% 45%,45% 38%,47% 31%,50% 25%);filter:drop-shadow(0 14px 22px rgba(48,46,41,.07))}.services-decor-wind{z-index:2;opacity:.08;clip-path:polygon(0 0,37% 0,35% 24%,31% 48%,27% 74%,32% 100%,0 100%);animation:servicesHairWind 7s ease-in-out infinite;transform-origin:16% 72%;filter:saturate(1.05) contrast(1.02)}@keyframes servicesHairWind{0%,100%{transform:translate3d(-2px,1px,0) rotate(-.18deg) scale(1.008)}50%{transform:translate3d(8px,-3px,0) rotate(.22deg) scale(1.015)}}'
+          if s.count(old)!=1:
+              raise SystemExit('refined services CSS signature not found exactly once')
+          s=s.replace(old,new)
+          old_mobile='.services-decor-wind{z-index:2;opacity:.14;animation-duration:6.5s}'
+          new_mobile='.services-decor-wind{z-index:2;opacity:.07;animation-duration:6.5s}'
+          if s.count(old_mobile)!=1:
+              raise SystemExit('mobile wind CSS signature not found exactly once')
+          s=s.replace(old_mobile,new_mobile)
+          p.write_text(s)
+          print('Final services detail refinement applied; hero untouched.')
+          PY
+      - name: Commit services detail refinement
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Polish services hand and hair motion'
+          git push
