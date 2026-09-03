@@ -1,0 +1,39 @@
+name: Diagnose part 04
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/part4-diagnose.yml'
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate multi-error 500-char blocks
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          target=[
+          'b72fe04cbbd4358f751552bd5e57dc0bf12ecebe3c348bb1b36dcfd1116d5037','9b3b7bfdcd03a6d22183910f75b43d29ce221146ba6ebb814be96d4a1b9b3813','a374a936e31bea65e774bc2660ee616f4b94caa42064d27ab8dbb8ae2b82fb3e','26c9d7edd91663d3a4335580f1d19a9db13b2c7c10500b269c000cdb3b9d5bc7','2bb3836a24f8349ef709033b51ca50f8a558f736955278bc15304d7dc5d29ed6','fbcea0a8304e487e3ff98ae7a7f141aa7d98e868b3b58bc1921c1325f24bdf25','c81e77bad621ccce76289dac60f8810f9be2c1dc90c4a9b0799875b17942f07b','eddd8300e4a24f608aa2ba6d21df119ad618fc202b33af5178ad3e300df434a7','1144f9c285c9c8d29a7748c6876e1775e9c3df0eacde72ac3e702b2f5fe9a2fb','54b1d7b9aba553cfc6e4999037fb758c893b55e8bc32d7bbed29cc489271c9b7','1d11a008586f3fb6e96461a141fb7a355237346b495ce85ba80e1f7cded4bb89','ae7b801da59b6210f6af7b59bf14d2d672a0b6d9d91ec9f8d6bec1d0694132ae','35a49ccc888f8d7ee7573fa189f4419ec4c9730ca747715d34b7fd505c1bbf9b','7d79a7966d3dcb5e3ffd4318dc1050514ca54907cd9ae243337080538ad60467','ad6e57743c78103b3860ebec3e1cfb72a11bf34a6d591ae7afa9ebaf68d8a7b4','ebe14c659cb6430fef18f9181f20e5613ebdf28f1d5977e5b5f609492929c820','e07ee597f5bebc286eab43aa968be954f3183a431e385d0a50eba7f41e096cd0','eced6acbab8bcb1e903151a4169859c3a0633bb33727493458929f526f9af0f5','a58a5b32248f410f00f372f20da9b14ae3c80732255e654f7e9ac09178b5e308','1b82ffa4ab5f06dddff8cc47a76f5401996845490c24f7c1cd8fbbe4614de5ab','671ec5d33cd25675db5a4fbe8039989f71d663c00210b7440639f634456f4f94','5f16555b344e3f98f7f22bd3759e7c557de9c6946e6ade40c5d9f279c556df6e','7846f1b5e0ab19281a4f5850c0338c54c113c00da194d3c7ecc20f4fb3659b71','f59cccb582e288e2dab7971f6a07628559d1f29f9241ce9280968f7a4f494c7a','14e14c7ad87784359b4d0344657293cf290abd2aafbc40192ea423bc3388b6a1','11ee3824b33cfd5448e39e8d5d4b7e63d734cef1aa2b4bff1d8b6a02d473471d','52547470a333f7c6e39769547f7a6c1af474e4c3c26aaa83a7aff4f6cc018ad0','da1af9c027a066cc98ba9af538a18d90611218676551e0f5e28df85a59be4f61','612e65b018db9fa5ed2210a00911e2940d488e67bce51d85ae3eb47a597786f9','3d06493bd8564eb5320b2ff2ceb1e78fb5d9eb8a16e538b4d00e122bc4c79c21','6811e0716827d61d7f3c9fce5a0fd07d6d31784379a8980e39580d5dcbce7a32','f15b21d51143f969ef81754d00809c98a1a902fb8f24d0ab68ed5c4fd39f94bf','f34770735594f731e83562bdf91bfd97e60f03f0a4086bdbcca65d5b67ef5979','f98e1a2e91c38a89008fc925c9582a5fa44066c4eca82af908e93a9ef8d01064','2bc913963db4353ea99931e8b2bd03815362400f6d7839e61180fcd65fc9ef3e','ebf5c1c514d8438e2ff94ff56882e3e53b44cf83f6ee4335f401127302de2ec6','d298952b034e3c14be3c90541794ab944e333ed462515acf544bdfbbf5c71f12','bfe1c110a6002262400e850fc4b6be1639192b22dbdb18ef40853fe5f5575e81','c1523605e6954eab79f74f657cacab2e07a6441e5be5b2ed3d123482ce4c5003','49133bf1e08c5017e60ac9e09f957a3c47be2ab61091cadabedc7fbd393fa8a9']
+          alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+          def h(s): return hashlib.sha256(s.encode()).hexdigest()
+          s=''.join(Path('assets/services-decor-b64/part-04.txt').read_text().split())
+          multi=[]; single=[]; good=[]
+          for bi,t in enumerate(target):
+              b=s[bi*500:(bi+1)*500]
+              if h(b)==t:
+                  good.append(bi); continue
+              found=None
+              for p,o in enumerate(b):
+                  for c in alpha:
+                      if c!=o and h(b[:p]+c+b[p+1:])==t:
+                          found=(p,o,c); break
+                  if found: break
+              if found: single.append((bi,found))
+              else: multi.append(bi)
+          print('GOOD',good)
+          print('SINGLE',single)
+          print('MULTI',multi)
+          PY
