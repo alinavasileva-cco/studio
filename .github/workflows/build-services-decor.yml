@@ -36,8 +36,33 @@ jobs:
               7: (20000, '2378c43539d49274f3d508ea77aea65e12dd75514edb26b17fd4c08306d1d0e2', 'T'),
               8: (1368,  'db2d09a2c2d3e852581fc26cb35da1a45d6c879ae3c3e2a979609452f801466b', ''),
           }
+          part3_blocks = [
+            '880e36ba860f972a7d028683b1257f54953c57299817da7309fac887b0407ade','5f0b32a913f20cf7225a144bfad0400ed6f69b19cfca5fd3777e6e95b5782e21','7145476c790197b4e7847f00cc2b30383d9b93276577f8628edb6015338f4f3c','305cc07aa2cd292a8e81e07dbaf723da8708d32ea18c4645d4e38322072591df','52dddf66df416bca180880413d40e045ddb249ab1196f69d06fd1b33063aabcf','1122213ff84b1af7756f68a57c18e919d271b2c4a3704f06bad510f87b65b8a6','3aafcdc211d8cd111a56cd34cb35db28bdf29172fdb43d0f92a7a7c8b2d85d5d','5cbe4597a0e2f2116dc54a6a061fe2edb6f1d1d231beb27fe8dd36c7439fb4f2','9943acbb56beb990905825fa9202eafe9a43ec927d39d71256a0f32d291125a5','8949f7fbcb4f4b85fbe0a2b4d5b38bbdf4a6c1aa9da9f64acc7f888a0f000b78','6427458f7b4ce5354468354e97b0d38a82bd56d77193b0665b5008d9481dec7d','6ed837ea5ff762bc07479c7cc207b3932114a0d6bc20f6dd796036418e03f7d6','b8b637e67cf874a1e4a8ff59d635fefbf19a59f2a89e649f8a00794559101080','d95777db03cc34d5dd8d672133867c70cb3a9ad8eb503a663684f4829ffe4b8f','4560d74e656c97cf6a00b21077c692cb5bf1f1b0d18f644c686da83dbed03813','9e267fd8f4899d42efe00e8a4f8f2098b3312c85948cafcff2069bbc81f862dd','944905e9f69b7375c417eb5e0cbd9708382ba61539f13f9581bb3599b89a2713','049705e713a193546204795302bfc05354f83ae463437d26d70791b7cbbdff61','fbec825d15b2fea4e036e9cdf291b736b287ea498186d8962d02074d9cbc048b','669f157ef4fd2c82e03bd4c567beb938464c5d3201ea36e9553d7ccc27fe45e6','7aeb5a2f6a531ba14a6656dce613f56ef446c42adbd8f2cce39f0054e7bff0a7','9e30b0c79280af994c8cd28e29d31f68af3d543aa80e42080c14cd802d6a8afb','2949d0ebc01c23262b2dfb6ae91b916b97d37359a607ae09e33a7560e3f51591','45bea1d32754bcdd5fd20ec2856f0afcaff1d1d30f29d0f4ad6043fd13d68f29','92ea41c6eeccfe420ad7cf176565e9a6c90fe5a8aa5eaf9863f75db0ad3150dc','3184d182107ced4260dcc35e5c504ceb3cced80da3ef0a0bbe43635504ee1610','5ad12d0ae60a307b2a7a51f2d438855f0a65104f7338a16b1984ceac40cb9716','c3d868bd4cbb2d9258f77417a3ffaebe6329f9cb7a2a15572422559c4b803c2d','d036a7aa57c30c4fcd473988c7edb09ddad034c72825b07d1d4801c7b43ead50','46f880a4669917ab2a48d7fd68cf4ec96ea78daca9c0b167af0bbbfc87046f8b','ae8f6ffb4ea7061b20fa740f4027f9e831670660ce2a297a95a370d3003e3179','eb92a0b144500db8958a924d0353a75f3d6133202869478a5214b541ad15dd45','a17aec5487b20b31b18730a01b4b111032b6d77c1dd3725a3141f0a9d4ea50f0','23df026f3d59790fe78f0e398db8ff7cb5df70b746ebca985d66f7a201ad52b0','24f94f3562bdfac247ea01fd3095cb69111add66de45c75cd59e4a6e1bdb7d47','37b8ff34384e6395386a5ac38929dc3b3a20f369fe867b9cab2eb25929d59c95','ad2d8d0f21d7460a49e728d28f9e1af7e5e8a1498384fa1dfc3cacc9819fd174','f49fa047e0128fbf6db047c256685070a64d018867178b371cc8573973762195','2d74acd0b4ae71fcf76122ad0018206427ce982d5f487df3a2e4adab04030e1c','854ecaebfce47ae674595e5df7cb528f68199d046fd3840d30154dfa1103ed5a'
+          ]
+          alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
           def h(s):
               return hashlib.sha256(s.encode('ascii')).hexdigest()
+          def repair_one_substitution(text, target_hashes, block_size=500):
+              bad = []
+              for bi, target in enumerate(target_hashes):
+                  block = text[bi*block_size:(bi+1)*block_size]
+                  if h(block) != target:
+                      bad.append(bi)
+              if len(bad) != 1:
+                  return None, bad
+              bi = bad[0]
+              start = bi * block_size
+              block = text[start:start+block_size]
+              target = target_hashes[bi]
+              for pos, old in enumerate(block):
+                  for ch in alphabet:
+                      if ch == old:
+                          continue
+                      candidate_block = block[:pos] + ch + block[pos+1:]
+                      if h(candidate_block) == target:
+                          fixed = text[:start] + candidate_block + text[start+block_size:]
+                          return fixed, bad
+              return None, bad
 
           all_parts = []
           for i, (length, sha, known_prefix) in expected.items():
@@ -45,9 +70,16 @@ jobs:
               text = ''.join(p.read_text().split())
               if h(text) != sha:
                   fixed = None
-                  if len(text) == length - 1 and known_prefix and h(known_prefix + text) == sha:
-                      fixed = known_prefix + text
-                      print(f'repaired {p}: restored missing leading {known_prefix!r}')
+                  if len(text) == length - 1 and known_prefix:
+                      candidate = known_prefix + text
+                      if h(candidate) == sha:
+                          fixed = candidate
+                          print(f'repaired {p}: restored missing leading {known_prefix!r}')
+                      elif i == 3 and len(candidate) == length:
+                          candidate2, bad = repair_one_substitution(candidate, part3_blocks)
+                          if candidate2 is not None and h(candidate2) == sha:
+                              fixed = candidate2
+                              print(f'repaired {p}: restored leading {known_prefix!r} and one exact substitution in block {bad[0]}')
                   elif len(text) == length + 1:
                       for pos in range(len(text)):
                           candidate = text[:pos] + text[pos+1:]
