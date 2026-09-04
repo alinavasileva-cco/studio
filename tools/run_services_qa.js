@@ -31,6 +31,8 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
       const wind = document.querySelector('.services-decor-wind');
       const windStyle = stage ? getComputedStyle(stage, '::after') : null;
       const panelRect = panel.getBoundingClientRect();
+      const decorRect = decor.getBoundingClientRect();
+      const decorStyle = getComputedStyle(decor);
       const overflowingText = [...document.querySelectorAll('#services h2,#services h3,#services p,#services span,#services b,#services small')]
         .filter(el => el.clientWidth > 0 && el.scrollWidth > el.clientWidth + 2)
         .map(el => ({ tag: el.tagName, text: (el.textContent || '').trim().slice(0, 80), clientWidth: el.clientWidth, scrollWidth: el.scrollWidth }));
@@ -42,11 +44,21 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
         panelLeft: Math.round(panelRect.left * 10) / 10,
         panelRight: Math.round(panelRect.right * 10) / 10,
         panelWidth: Math.round(panelRect.width * 10) / 10,
+        decorLeft: Math.round(decorRect.left * 10) / 10,
+        decorTop: Math.round(decorRect.top * 10) / 10,
+        decorRight: Math.round(decorRect.right * 10) / 10,
+        decorBottom: Math.round(decorRect.bottom * 10) / 10,
+        decorWidth: Math.round(decorRect.width * 10) / 10,
+        decorHeight: Math.round(decorRect.height * 10) / 10,
+        decorDisplay: decorStyle.display,
+        decorVisibility: decorStyle.visibility,
+        decorOpacity: decorStyle.opacity,
+        decorZIndex: decorStyle.zIndex,
         decorLoaded: !!decor && decor.complete && decor.naturalWidth > 0,
         decorNaturalWidth: decor ? decor.naturalWidth : 0,
         decorNaturalHeight: decor ? decor.naturalHeight : 0,
         decorSrc: decor ? decor.getAttribute('src') : null,
-        decorAnimation: decor ? getComputedStyle(decor).animationName : null,
+        decorAnimation: decor ? decorStyle.animationName : null,
         windAnimation: windStyle ? windStyle.animationName : null,
         windBackground: windStyle ? windStyle.backgroundImage : null,
         basePresent: !!base,
@@ -62,7 +74,10 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
     const pass = data.documentScrollWidth <= width + 1 && data.panelLeft >= -1 && data.panelRight <= width + 1 && data.decorLoaded && data.overflowingText.length === 0 && copyOk && assetOk && staticOk;
     results.push({ width, pass, ...data });
 
-    if (width === 390 || width === 1440) await page.locator('#services').screenshot({ path: `qa-output/services-${width}.png` });
+    if (width === 390 || width === 1440) {
+      await page.locator('#services').screenshot({ path: `qa-output/services-${width}.png` });
+      await page.locator('.services-decor-hand').screenshot({ path: `qa-output/decor-${width}.png` });
+    }
     await page.close();
   }
 
