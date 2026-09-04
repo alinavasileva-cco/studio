@@ -32,10 +32,9 @@
 .service-desc{color:#495760!important}
 .service-pill{background:rgba(216,92,43,.07)!important;border:1px solid rgba(216,92,43,.16)!important}
 
-/* Static art direction. The raster source is sharpened inside SVG; there is no motion layer. */
+/* One static raster layer only. No animation, no duplicate moving hair. */
 .services-decor-base,.services-decor-wind{display:none!important}
 .services-decor-hand{
-  content:url('assets/services-decor-desktop.svg')!important;
   display:block!important;
   width:355px!important;
   height:auto!important;
@@ -46,7 +45,7 @@
   z-index:6!important;
   clip-path:none!important;
   opacity:1!important;
-  filter:none!important;
+  filter:saturate(1.16) contrast(1.065) brightness(1.015)!important;
   animation:none!important;
   transform:translateY(-50%)!important;
   transform-origin:center!important;
@@ -65,11 +64,7 @@
 
 @media(max-width:640px){
   .services-showcase{background:var(--ice)!important}
-  .services-stage{
-    min-height:0!important;
-    display:block!important;
-    padding:18px 0 12px!important;
-  }
+  .services-stage{min-height:0!important;display:block!important;padding:18px 0 12px!important}
   .services-panel{
     width:100%!important;
     min-height:0!important;
@@ -83,7 +78,6 @@
   .service-offer:first-child{padding-left:134px!important;min-height:430px!important}
   .service-offer+.service-offer{border-left:0!important;border-top:1px solid var(--line)!important}
   .services-decor-hand{
-    content:url('assets/services-decor-mobile.svg')!important;
     width:228px!important;
     height:auto!important;
     left:-105px!important;
@@ -92,7 +86,7 @@
     z-index:6!important;
     clip-path:inset(0 0 30% 0)!important;
     opacity:1!important;
-    filter:none!important;
+    filter:saturate(1.18) contrast(1.075) brightness(1.02)!important;
     animation:none!important;
     transform:none!important;
   }
@@ -113,6 +107,4 @@
   .hero .actions .button.primary{font-size:8.5px!important;padding-left:7px!important;padding-right:7px!important}
 }
 
-@media(prefers-reduced-motion:reduce){
-  .services-decor-hand{animation:none!important}
-}
+@media(prefers-reduced-motion:reduce){.services-decor-hand{animation:none!important}}
