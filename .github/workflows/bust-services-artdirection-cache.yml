@@ -1,0 +1,33 @@
+name: Bust services art-direction cache
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/bust-services-artdirection-cache.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update services stylesheet version
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          import re
+          s=re.sub(r'services-final\.css\?v=[^"\']+', 'services-final.css?v=20260904-artdirect-static-2', s, count=1)
+          p.write_text(s,encoding='utf-8')
+          PY
+          rm -f .github/workflows/bust-services-artdirection-cache.yml
+      - name: Commit cache bust
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/bust-services-artdirection-cache.yml
+          git commit -m "Publish art-directed static services block"
+          git push
