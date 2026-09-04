@@ -18,6 +18,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          echo 'Chunk checksums:'
+          sha256sum assets/services-avif-b64/part-*.txt
           cat assets/services-avif-b64/part-01.txt assets/services-avif-b64/part-02.txt assets/services-avif-b64/part-03.txt assets/services-avif-b64/part-04.txt | tr -d '\r\n\t ' > /tmp/services-decor.b64
           test "$(wc -c < /tmp/services-decor.b64)" = "35384"
           base64 -d /tmp/services-decor.b64 > assets/services-decor.avif
@@ -25,29 +27,23 @@ jobs:
           echo "72bc1c2fd1bc216f76c2f505745f14a8b5bc58ea3f7fd682032bd097a05b4587  assets/services-decor.avif" | sha256sum -c -
           python3 - <<'PY'
           from pathlib import Path
-
           p = Path('index.html')
           s = p.read_text()
           old = 'src="assets/services-decor.webp"'
           new = 'src="assets/services-decor.avif"'
-          if s.count(old) != 1:
-              raise SystemExit(f'Expected one services image src, found {s.count(old)}')
+          if s.count(old) != 1: raise SystemExit(f'Expected one services image src, found {s.count(old)}')
           p.write_text(s.replace(old, new))
-
           p = Path('tools/run_services_qa.js')
           s = p.read_text()
           old = "data.decorSrc === 'assets/services-decor.webp'"
           new = "data.decorSrc === 'assets/services-decor.avif'"
-          if s.count(old) != 1:
-              raise SystemExit(f'Expected one QA asset path, found {s.count(old)}')
+          if s.count(old) != 1: raise SystemExit(f'Expected one QA asset path, found {s.count(old)}')
           p.write_text(s.replace(old, new))
-
           p = Path('.github/workflows/services-qa.yml')
           s = p.read_text()
           marker = "      - 'assets/services-decor.webp'\n"
           if "      - 'assets/services-decor.avif'\n" not in s:
-              if marker not in s:
-                  raise SystemExit('QA workflow asset path marker missing')
+              if marker not in s: raise SystemExit('QA workflow asset path marker missing')
               s = s.replace(marker, marker + "      - 'assets/services-decor.avif'\n")
           p.write_text(s)
           PY
