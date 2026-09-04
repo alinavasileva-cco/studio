@@ -1,4 +1,4 @@
-name: Install crisp static services artwork
+name: Install verified crisp services artwork
 
 on:
   push:
@@ -14,47 +14,48 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Assemble verified AVIF and switch services block
+      - name: Assemble verified AVIF
         shell: bash
         run: |
           set -euo pipefail
-          echo 'Chunk checksums:'
-          sha256sum assets/services-avif-b64/part-*.txt
           cat assets/services-avif-b64/part-01.txt assets/services-avif-b64/part-02.txt assets/services-avif-b64/part-03.txt assets/services-avif-b64/part-04.txt | tr -d '\r\n\t ' > /tmp/services-decor.b64
           test "$(wc -c < /tmp/services-decor.b64)" = "35384"
           base64 -d /tmp/services-decor.b64 > assets/services-decor.avif
           test "$(stat -c%s assets/services-decor.avif)" = "26538"
           echo "72bc1c2fd1bc216f76c2f505745f14a8b5bc58ea3f7fd682032bd097a05b4587  assets/services-decor.avif" | sha256sum -c -
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('index.html')
-          s = p.read_text()
-          old = 'src="assets/services-decor.webp"'
-          new = 'src="assets/services-decor.avif"'
-          if s.count(old) != 1: raise SystemExit(f'Expected one services image src, found {s.count(old)}')
-          p.write_text(s.replace(old, new))
-          p = Path('tools/run_services_qa.js')
-          s = p.read_text()
-          old = "data.decorSrc === 'assets/services-decor.webp'"
-          new = "data.decorSrc === 'assets/services-decor.avif'"
-          if s.count(old) != 1: raise SystemExit(f'Expected one QA asset path, found {s.count(old)}')
-          p.write_text(s.replace(old, new))
-          p = Path('.github/workflows/services-qa.yml')
-          s = p.read_text()
-          marker = "      - 'assets/services-decor.webp'\n"
-          if "      - 'assets/services-decor.avif'\n" not in s:
-              if marker not in s: raise SystemExit('QA workflow asset path marker missing')
-              s = s.replace(marker, marker + "      - 'assets/services-decor.avif'\n")
-          p.write_text(s)
-          PY
-      - name: Commit final static artwork
+      - name: Switch Services to verified artwork
         shell: bash
         run: |
-          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='src="assets/services-decor-vivid.webp"'
+          new='src="assets/services-decor.avif"'
+          if s.count(old) != 1:
+              raise SystemExit(f'Expected one current Services image, found {s.count(old)}')
+          p.write_text(s.replace(old,new),encoding='utf-8')
+
+          p=Path('tools/run_services_qa.js')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace("data.decorSrc === 'assets/services-decor-vivid.webp'", "data.decorSrc === 'assets/services-decor.avif'")
+          p.write_text(s,encoding='utf-8')
+
+          p=Path('.github/workflows/services-qa.yml')
+          s=p.read_text(encoding='utf-8')
+          marker="      - 'assets/services-decor-vivid.webp'\n"
+          if "      - 'assets/services-decor.avif'\n" not in s:
+              s=s.replace(marker, marker + "      - 'assets/services-decor.avif'\n")
+          p.write_text(s,encoding='utf-8')
+          PY
+          rm -f assets/services-decor-desktop.svg assets/services-decor-mobile.svg
+          rm -rf assets/services-avif-b64
+          rm -f .github/workflows/install-services-avif.yml
+      - name: Commit production artwork
+        shell: bash
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/services-decor.avif index.html tools/run_services_qa.js .github/workflows/services-qa.yml
-          git rm -r assets/services-avif-b64
-          git rm .github/workflows/install-services-avif.yml
-          git commit -m "Use crisp static services artwork"
+          git add -A
+          git commit -m "Use verified crisp static Services artwork"
           git push
