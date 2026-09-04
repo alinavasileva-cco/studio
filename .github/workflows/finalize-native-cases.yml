@@ -1,0 +1,30 @@
+name: Finalize native presentation cases
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/finalize-native-cases.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Bump case script cache and remove obsolete workflow
+        run: |
+          sed -i 's/thecase.js?v=20260904-1/thecase.js?v=20260904-2/g' index.html
+          rm -f .github/workflows/rebuild-cases-native.yml
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/rebuild-cases-native.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "Finalize native presentation cases"
+          git push origin HEAD:main
