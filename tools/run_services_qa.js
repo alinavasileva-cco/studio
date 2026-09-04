@@ -42,6 +42,8 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
         panelWidth: Math.round(panelRect.width * 10) / 10,
         decorLoaded: !!decor && decor.complete && decor.naturalWidth > 0,
         decorNaturalWidth: decor ? decor.naturalWidth : 0,
+        decorNaturalHeight: decor ? decor.naturalHeight : 0,
+        decorSrc: decor ? decor.getAttribute('src') : null,
         decorAnimation: decor ? getComputedStyle(decor).animationName : null,
         basePresent: !!base,
         windPresent: !!wind,
@@ -51,7 +53,8 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
     });
 
     const copyOk = data.desc[0] === 'Одностраничники / лендинги' && data.desc[1] === 'Брендбуки, фирменный стиль';
-    const pass = data.documentScrollWidth <= width + 1 && data.panelLeft >= -1 && data.panelRight <= width + 1 && data.decorLoaded && data.overflowingText.length === 0 && data.decorAnimation === 'none' && !data.basePresent && !data.windPresent && copyOk;
+    const assetOk = data.decorSrc === 'assets/services-hair-hand.webp' && data.decorNaturalWidth === 240 && data.decorNaturalHeight === 744;
+    const pass = data.documentScrollWidth <= width + 1 && data.panelLeft >= -1 && data.panelRight <= width + 1 && data.decorLoaded && data.overflowingText.length === 0 && data.decorAnimation === 'none' && !data.basePresent && !data.windPresent && copyOk && assetOk;
     results.push({ width, pass, ...data });
 
     if (width === 390 || width === 1440) await page.locator('#services').screenshot({ path: `qa-output/services-${width}.png` });
