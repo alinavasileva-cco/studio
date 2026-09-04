@@ -1,0 +1,41 @@
+name: Finalize services block
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/finalize-services-block.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply final services markup
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('services-final.css?v=20260903-cta-final','services-final.css?v=20260904-services-final')
+          s=s.replace('Одностраничники / лендинги с контактами','Одностраничники / лендинги')
+          s=s.replace('Презентации, брендбуки, фирменный стиль','Брендбуки, фирменный стиль')
+          s=s.replace('<img class="services-decor services-decor-base" src="assets/services-decor.webp" alt="" aria-hidden="true">','')
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit final services markup
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Finalize services copy and static decor"
+          git push
