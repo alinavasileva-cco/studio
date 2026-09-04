@@ -1,0 +1,39 @@
+name: Switch services to crisp decor asset
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/switch-crisp-services-asset.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Switch services image
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('src="assets/services-decor.webp"','src="assets/services-hair-hand.webp"')
+          s=s.replace('services-final.css?v=20260904-services-final','services-final.css?v=20260904-crisp-final')
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit switch
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Use crisp services hair and hand asset"
+          git push
