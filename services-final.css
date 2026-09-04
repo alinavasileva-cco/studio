@@ -1,4 +1,4 @@
-/* Final services-only overrides plus the approved mobile hero CTA adjustment. */
+/* Final services-only overrides plus approved mobile hero CTA. */
 .section-index{display:none!important}
 .services-showcase{background:var(--ice)!important}
 .services-showcase .section-head{justify-content:flex-start!important}
@@ -11,36 +11,49 @@
 .services-panel:after{display:none!important}
 .service-icon{background:rgba(251,253,255,.96)!important;box-shadow:0 7px 18px rgba(32,44,52,.08),inset 0 1px 0 rgba(255,255,255,.96)!important}
 .service-offer h3{font-weight:300!important;letter-spacing:-.045em!important}
-.service-desc{color:#495760!important}
 .service-pill{background:rgba(216,92,43,.07)!important;border:1px solid rgba(216,92,43,.16)!important}
-/* Static and crisp: no duplicated animated hair layer. */
-.services-decor-wind{display:none!important;animation:none!important;opacity:0!important}
-.services-decor-base{
-  animation:none!important;
-  transform:none!important;
-  opacity:1!important;
-  filter:none!important;
-  z-index:1!important
-}
+
+/* Approved short copy: remove “с контактами” and the duplicated “Презентации”. */
+.service-offer .service-desc{font-size:0!important;line-height:1.45!important;color:#495760!important}
+.service-offer:first-child .service-desc::after{content:"Одностраничники / лендинги";font-size:18px}
+.service-offer:nth-child(2) .service-desc::after{content:"Брендбуки, фирменный стиль";font-size:18px}
+
+/* One crisp static decorative layer only. No animation, no duplicated image, no polygon hand cutout. */
+.services-decor-wind,.services-decor-base{display:none!important;animation:none!important;opacity:0!important}
 .services-decor-hand{
+  display:block!important;
   animation:none!important;
   transform:none!important;
   opacity:1!important;
   filter:none!important;
-  z-index:4!important
+  clip-path:none!important;
+  z-index:4!important;
+  width:min(500px,40vw)!important;
+  left:-210px!important;
+  bottom:-48px!important;
+  top:auto!important;
+  max-width:none!important;
+  image-rendering:auto!important;
 }
+
 @media(max-width:640px){
   .services-panel{background:linear-gradient(160deg,rgba(251,253,255,.99),rgba(238,243,246,.98))!important}
-  .services-decor{width:292px!important;left:-118px!important;top:122px!important;bottom:auto!important}
-  /* Keep the single hero CTA entirely inside the left text column and away from the face. */
+  .service-offer:first-child .service-desc::after,.service-offer:nth-child(2) .service-desc::after{font-size:15px}
+  .services-decor-hand{
+    width:310px!important;
+    left:-154px!important;
+    top:116px!important;
+    bottom:auto!important;
+  }
   .hero .actions{display:block!important;width:46vw!important;max-width:220px!important;margin-top:18px!important}
   .hero .actions .button.primary{width:100%!important;min-width:0!important;padding-left:10px!important;padding-right:10px!important}
 }
 @media(max-width:390px){
+  .services-decor-hand{width:298px!important;left:-150px!important;top:114px!important}
   .hero .actions{width:45vw!important;max-width:176px!important;margin-top:15px!important}
 }
 @media(max-width:360px){
-  .services-decor{width:274px!important;left:-112px!important;top:118px!important}
+  .services-decor-hand{width:282px!important;left:-143px!important;top:110px!important}
   .hero .actions{width:44vw!important;max-width:158px!important}
   .hero .actions .button.primary{font-size:8.5px!important;padding-left:7px!important;padding-right:7px!important}
 }
