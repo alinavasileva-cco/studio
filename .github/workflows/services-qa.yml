@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/services-qa.yml'
       - 'assets/services-decor.webp'
+      - 'assets/services-decor-vivid.webp'
       - 'services-final.css'
       - 'index.html'
       - 'tools/run_services_qa.js'
