@@ -49,7 +49,6 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
         decorAnimation: decor ? getComputedStyle(decor).animationName : null,
         windAnimation: windStyle ? windStyle.animationName : null,
         windBackground: windStyle ? windStyle.backgroundImage : null,
-        windOpacity: windStyle ? Number.parseFloat(windStyle.opacity) : null,
         basePresent: !!base,
         windElementPresent: !!wind,
         desc,
@@ -58,9 +57,9 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
     });
 
     const copyOk = data.desc[0] === 'Одностраничники / лендинги' && data.desc[1] === 'Брендбуки, фирменный стиль';
-    const assetOk = data.decorSrc === 'assets/services-decor.webp' && data.decorNaturalWidth > 0 && data.decorNaturalHeight > 0;
-    const windOk = data.windAnimation === 'servicesHairBreeze' && /services-decor\.webp/.test(data.windBackground || '') && data.windOpacity > 0 && data.windOpacity < 1;
-    const pass = data.documentScrollWidth <= width + 1 && data.panelLeft >= -1 && data.panelRight <= width + 1 && data.decorLoaded && data.overflowingText.length === 0 && data.decorAnimation === 'none' && !data.basePresent && !data.windElementPresent && copyOk && assetOk && windOk;
+    const assetOk = data.decorSrc === 'assets/services-decor.webp' && data.decorNaturalWidth >= 300 && data.decorNaturalHeight >= 900;
+    const staticOk = data.decorAnimation === 'none' && data.windAnimation === 'none' && data.windBackground === 'none' && !data.basePresent && !data.windElementPresent;
+    const pass = data.documentScrollWidth <= width + 1 && data.panelLeft >= -1 && data.panelRight <= width + 1 && data.decorLoaded && data.overflowingText.length === 0 && copyOk && assetOk && staticOk;
     results.push({ width, pass, ...data });
 
     if (width === 390 || width === 1440) await page.locator('#services').screenshot({ path: `qa-output/services-${width}.png` });
