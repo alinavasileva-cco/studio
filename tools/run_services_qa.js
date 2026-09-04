@@ -69,7 +69,7 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
     });
 
     const copyOk = data.desc[0] === 'Одностраничники / лендинги' && data.desc[1] === 'Брендбуки, фирменный стиль';
-    const assetOk = data.decorSrc === 'assets/services-decor-vivid.webp' && data.decorNaturalWidth >= 260 && data.decorNaturalHeight >= 830;
+    const assetOk = data.decorSrc === 'assets/services-decor-sharp.webp' && data.decorNaturalWidth >= 260 && data.decorNaturalHeight >= 830;
     const staticOk = data.decorAnimation === 'none' && data.windAnimation === 'none' && data.windBackground === 'none' && !data.basePresent && !data.windElementPresent;
     const pass = data.documentScrollWidth <= width + 1 && data.panelLeft >= -1 && data.panelRight <= width + 1 && data.decorLoaded && data.overflowingText.length === 0 && copyOk && assetOk && staticOk;
     results.push({ width, pass, ...data });
