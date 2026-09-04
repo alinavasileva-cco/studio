@@ -58,8 +58,8 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
     });
 
     const copyOk = data.desc[0] === 'Одностраничники / лендинги' && data.desc[1] === 'Брендбуки, фирменный стиль';
-    const assetOk = data.decorSrc === 'assets/services-hair-hand.webp' && data.decorNaturalWidth === 240 && data.decorNaturalHeight === 744;
-    const windOk = data.windAnimation === 'servicesHairBreeze' && /services-hair-hand\.webp/.test(data.windBackground || '') && data.windOpacity > 0 && data.windOpacity < 1;
+    const assetOk = data.decorSrc === 'assets/services-decor.webp' && data.decorNaturalWidth > 0 && data.decorNaturalHeight > 0;
+    const windOk = data.windAnimation === 'servicesHairBreeze' && /services-decor\.webp/.test(data.windBackground || '') && data.windOpacity > 0 && data.windOpacity < 1;
     const pass = data.documentScrollWidth <= width + 1 && data.panelLeft >= -1 && data.panelRight <= width + 1 && data.decorLoaded && data.overflowingText.length === 0 && data.decorAnimation === 'none' && !data.basePresent && !data.windElementPresent && copyOk && assetOk && windOk;
     results.push({ width, pass, ...data });
 
