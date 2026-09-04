@@ -1,0 +1,39 @@
+name: Current site targeted QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/current-site-qa.yml'
+      - 'tools/qa_current_site.js'
+      - 'index.html'
+      - 'thecase-v3.css'
+      - 'thecase.js'
+      - 'assets/cases/**'
+      - 'assets/hero-character-hd.png'
+      - 'assets/services-decor-sharp.webp'
+      - 'assets/services-decor-vivid.webp'
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser driver
+        run: npm install --no-save playwright-core@1.55.0
+      - name: Start local site
+        run: |
+          python3 -m http.server 8000 >/tmp/current-site-http.log 2>&1 &
+          sleep 2
+      - name: Run targeted checks
+        run: node tools/qa_current_site.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-site-qa
+          path: qa-current/
+          retention-days: 5
