@@ -25,9 +25,11 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
 
     const data = await page.evaluate(() => {
       const panel = document.querySelector('.services-panel');
+      const stage = document.querySelector('.services-stage');
       const decor = document.querySelector('.services-decor-hand');
       const base = document.querySelector('.services-decor-base');
       const wind = document.querySelector('.services-decor-wind');
+      const windStyle = stage ? getComputedStyle(stage, '::after') : null;
       const panelRect = panel.getBoundingClientRect();
       const overflowingText = [...document.querySelectorAll('#services h2,#services h3,#services p,#services span,#services b,#services small')]
         .filter(el => el.clientWidth > 0 && el.scrollWidth > el.clientWidth + 2)
@@ -45,8 +47,11 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
         decorNaturalHeight: decor ? decor.naturalHeight : 0,
         decorSrc: decor ? decor.getAttribute('src') : null,
         decorAnimation: decor ? getComputedStyle(decor).animationName : null,
+        windAnimation: windStyle ? windStyle.animationName : null,
+        windBackground: windStyle ? windStyle.backgroundImage : null,
+        windOpacity: windStyle ? Number.parseFloat(windStyle.opacity) : null,
         basePresent: !!base,
-        windPresent: !!wind,
+        windElementPresent: !!wind,
         desc,
         overflowingText
       };
@@ -54,7 +59,8 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
 
     const copyOk = data.desc[0] === 'Одностраничники / лендинги' && data.desc[1] === 'Брендбуки, фирменный стиль';
     const assetOk = data.decorSrc === 'assets/services-hair-hand.webp' && data.decorNaturalWidth === 240 && data.decorNaturalHeight === 744;
-    const pass = data.documentScrollWidth <= width + 1 && data.panelLeft >= -1 && data.panelRight <= width + 1 && data.decorLoaded && data.overflowingText.length === 0 && data.decorAnimation === 'none' && !data.basePresent && !data.windPresent && copyOk && assetOk;
+    const windOk = data.windAnimation === 'servicesHairBreeze' && /services-hair-hand\.webp/.test(data.windBackground || '') && data.windOpacity > 0 && data.windOpacity < 1;
+    const pass = data.documentScrollWidth <= width + 1 && data.panelLeft >= -1 && data.panelRight <= width + 1 && data.decorLoaded && data.overflowingText.length === 0 && data.decorAnimation === 'none' && !data.basePresent && !data.windElementPresent && copyOk && assetOk && windOk;
     results.push({ width, pass, ...data });
 
     if (width === 390 || width === 1440) await page.locator('#services').screenshot({ path: `qa-output/services-${width}.png` });
