@@ -14,8 +14,8 @@
 .service-desc{color:#495760!important}
 .service-pill{background:rgba(216,92,43,.07)!important;border:1px solid rgba(216,92,43,.16)!important}
 
-/* Static approved layer: one left hand + the main hair mass. */
-.services-decor-base,.services-decor-wind{display:none!important}
+/* Fully static approved layer: one left hand + hair. No animation. */
+.services-decor-base,.services-decor-wind{display:none!important;animation:none!important;transform:none!important}
 .services-decor-hand{
   display:block!important;
   width:230px!important;
@@ -30,55 +30,30 @@
   filter:none!important;
   animation:none!important;
   transform:none!important;
+  will-change:auto!important;
 }
-
-/* Wind layer: the same transparent source is clipped to the hair-only edge.
-   The hand and card remain static; only the outer hair strip moves. */
 .services-stage:after{
-  content:"";
-  position:absolute;
-  pointer-events:none;
-  user-select:none;
-  width:230px;
-  aspect-ratio:240/744;
-  left:26px;
-  bottom:-60px;
-  z-index:5;
-  background:url('assets/services-decor.webp') 0 0/100% 100% no-repeat;
-  clip-path:polygon(0 0,39% 0,37% 20%,34% 43%,32% 69%,36% 100%,0 100%);
-  opacity:.48;
-  transform-origin:15% 72%;
-  will-change:transform;
-  animation:servicesHairBreeze 8.6s cubic-bezier(.45,0,.55,1) infinite;
-}
-@keyframes servicesHairBreeze{
-  0%,100%{transform:translate3d(-1px,1px,0) rotate(-.16deg) scale(1.006)}
-  50%{transform:translate3d(7px,-2px,0) rotate(.22deg) scale(1.014)}
+  content:none!important;
+  display:none!important;
+  animation:none!important;
+  transform:none!important;
 }
 
 @media(min-width:641px) and (max-width:980px){
   .services-decor-hand{width:210px!important;left:-86px!important;bottom:-42px!important}
-  .services-stage:after{width:210px;left:-86px;bottom:-42px;animation-duration:8.1s}
 }
 @media(max-width:640px){
   .services-panel{background:linear-gradient(160deg,rgba(251,253,255,.99),rgba(238,243,246,.98))!important}
   .services-decor-hand{width:210px!important;left:-180px!important;top:112px!important;bottom:auto!important}
-  /* On phones only a narrow hair-only edge enters the viewport. */
-  .services-stage:after{width:320px;left:-100px;top:112px;bottom:auto;clip-path:polygon(0 0,37% 0,35% 24%,31% 48%,27% 74%,32% 100%,0 100%);opacity:.34;animation-duration:7.4s}
   .hero .actions{display:block!important;width:46vw!important;max-width:220px!important;margin-top:18px!important}
   .hero .actions .button.primary{width:100%!important;min-width:0!important;padding-left:10px!important;padding-right:10px!important}
 }
 @media(max-width:390px){
   .services-decor-hand{width:205px!important;left:-176px!important;top:108px!important}
-  .services-stage:after{width:300px;left:-96px;top:108px}
   .hero .actions{width:45vw!important;max-width:176px!important;margin-top:15px!important}
 }
 @media(max-width:360px){
   .services-decor-hand{width:195px!important;left:-168px!important;top:106px!important}
-  .services-stage:after{width:286px;left:-92px;top:106px}
   .hero .actions{width:44vw!important;max-width:158px!important}
   .hero .actions .button.primary{font-size:8.5px!important;padding-left:7px!important;padding-right:7px!important}
-}
-@media(prefers-reduced-motion:reduce){
-  .services-stage:after{animation:none!important;transform:none!important}
 }
