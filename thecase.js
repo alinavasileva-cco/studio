@@ -28,6 +28,29 @@
   } catch (_) {}
   setLang(initial);
 
+  // Requested services pass: presentations first, compact spacing, local character art.
+  const servicesPanel = document.querySelector('.services-panel');
+  if (servicesPanel) {
+    const offers = [...servicesPanel.querySelectorAll('.service-offer')];
+    const presentations = offers.find(offer => offer.querySelector('[data-ru="Презентации"]'));
+    if (presentations) servicesPanel.prepend(presentations);
+  }
+
+  const serviceArtSources = [
+    'assets/services-decor-sharp.webp?v=20260904-3',
+    'assets/services-decor-vivid.webp?v=20260904-3',
+    'assets/hero-character-hd.png?v=20260904-3'
+  ];
+  document.querySelectorAll('.services-art').forEach(img => {
+    let sourceIndex = 0;
+    const loadSource = () => { img.src = serviceArtSources[sourceIndex]; };
+    img.onerror = () => {
+      sourceIndex += 1;
+      if (sourceIndex < serviceArtSources.length) loadSource();
+    };
+    loadSource();
+  });
+
   const cases = [
     { title: 'FABERGÉ', ids: ['1IGgu1qRFx-1TeHR2fuVQ9Cf_kSzLcCsk','15zOarlo3gqSp4Bl1sQFt2gG45qdrLV9A','1DW5TNnWwACtL7Y2jvpzJV1ylbU1abphr'] },
     { title: 'RED FOX', ids: ['19aSZt58h59aTRnrhRn6Vm31QSfMR88Xs','1TN1lRXM1LuvVjaDD0BiMTqWNC9eeZLcu'] },
@@ -39,15 +62,48 @@
 
   const style = document.createElement('style');
   style.textContent = `
+    .services{padding-top:72px!important;padding-bottom:72px!important}
+    .services .section-head{margin-bottom:28px!important}
+    .services-stage{min-height:560px!important;padding:0 0 18px!important}
+    .services-panel{min-height:470px!important}
+    .services-panel:before,.services-panel:after{content:none!important;display:none!important}
+    .service-icon{border-radius:14px!important;box-shadow:0 6px 16px rgba(32,44,52,.06)!important}
+    .service-offer h3{margin-top:26px!important}
+    @media(max-width:640px){
+      .services{padding-top:44px!important;padding-bottom:48px!important}
+      .services .section-head{margin-bottom:20px!important}
+      .services .section-note{margin-top:10px!important;line-height:1.4!important}
+      .services-stage{min-height:0!important;padding:0!important}
+      .services-panel{min-height:0!important;border-radius:25px!important}
+      .service-offer,.service-offer:first-of-type,.service-offer+.service-offer{min-height:0!important;padding:27px 22px 26px 24px!important}
+      .service-offer+.service-offer{border-left:0!important;border-top:1px solid var(--line)!important}
+      .service-icon{width:46px!important;height:46px!important;border-radius:12px!important}
+      .service-icon svg{width:24px!important;height:24px!important}
+      .service-offer h3{font-size:25px!important;margin:20px 0 8px!important}
+      .service-desc{font-size:14px!important}
+      .service-pills{margin-top:18px!important;gap:7px!important}
+      .service-pill{min-height:34px!important;font-size:9.5px!important;padding:0 10px!important}
+      .service-result{margin-top:21px!important;padding-top:16px!important}
+      .service-result b{font-size:14px!important}
+      .service-pills-bottom{margin-top:17px!important}
+      .services-art{width:292px!important;max-width:none!important;left:-126px!important;bottom:18px!important}
+      .services-art-hand{clip-path:polygon(66% 0,100% 0,100% 100%,55% 100%,55% 45%,61% 33%)!important}
+    }
+    @media(max-width:390px){
+      .services{padding-top:40px!important;padding-bottom:44px!important}
+      .services-art{width:276px!important;left:-119px!important;bottom:20px!important}
+      .service-offer,.service-offer:first-of-type,.service-offer+.service-offer{padding:24px 19px 23px 21px!important}
+    }
+
     .work{background:linear-gradient(180deg,#f4f7f9 0%,#eef3f6 100%)}
     .work-head{align-items:flex-end!important;margin-bottom:40px!important}
     .cases-grid{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;gap:52px 28px!important;align-items:start!important;overflow:visible!important}
     .case-card{min-width:0!important;max-width:100%!important;background:transparent!important;border:0!important;border-radius:0!important;overflow:visible!important;box-shadow:none!important}
     .case-card.case-large{grid-column:span 7!important}.case-card.case-medium{grid-column:span 5!important}
     .case-card:nth-child(5){grid-column:span 7!important}.case-card:nth-child(6){grid-column:span 5!important}
-    .case-viewport.case-native{position:relative!important;width:100%!important;max-width:100%!important;aspect-ratio:16/9!important;height:auto!important;overflow:hidden!important;border-radius:24px!important;background:#0c1114!important;border:1px solid rgba(18,23,27,.10)!important;box-shadow:0 22px 48px rgba(24,34,40,.10)!important;touch-action:pan-y!important;overscroll-behavior-x:contain!important;isolation:isolate!important}
+    .case-viewport.case-native{position:relative!important;width:100%!important;max-width:100%!important;aspect-ratio:16/9!important;height:auto!important;overflow:hidden!important;border-radius:24px!important;background:#e7ecef!important;border:1px solid rgba(18,23,27,.10)!important;box-shadow:0 22px 48px rgba(24,34,40,.10)!important;touch-action:pan-y!important;overscroll-behavior-x:contain!important;isolation:isolate!important}
     .case-native .case-slides{position:absolute;inset:0;width:100%;height:100%}
-    .case-native .case-slide{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;object-fit:cover!important;display:none!important}
+    .case-native .case-slide{position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none!important;object-fit:cover!important;display:none!important;background:#e7ecef!important}
     .case-native .case-slide.is-active{display:block!important}
     .case-native .case-controls{position:absolute;z-index:3;left:14px;right:14px;bottom:14px;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
     .case-native .case-arrows{display:flex;gap:7px;pointer-events:auto}
@@ -88,6 +144,18 @@
   `;
   document.head.appendChild(style);
 
+  const driveSources = id => [
+    `https://drive.google.com/thumbnail?id=${id}&sz=w1600`,
+    `https://lh3.googleusercontent.com/d/${id}=w1600`,
+    `https://drive.google.com/uc?export=view&id=${id}`
+  ];
+
+  const imageMarkup = (id, title, slideIndex, cardIndex) => {
+    const sources = driveSources(id);
+    const eager = cardIndex === 0 && slideIndex === 0;
+    return `<img class="case-slide${slideIndex === 0 ? ' is-active' : ''}" src="${sources[0]}" data-sources="${sources.map(encodeURIComponent).join('|')}" data-source-index="0" alt="${title} — slide ${slideIndex + 1}" loading="${eager ? 'eager' : 'lazy'}" decoding="async" referrerpolicy="no-referrer">`;
+  };
+
   document.querySelectorAll('.case-card').forEach((card, cardIndex) => {
     const data = cases[cardIndex];
     const viewport = card.querySelector('.case-viewport');
@@ -96,7 +164,7 @@
     viewport.classList.add('case-native');
     viewport.innerHTML = `
       <div class="case-slides">
-        ${data.ids.map((id, i) => `<img class="case-slide${i === 0 ? ' is-active' : ''}" src="https://drive.google.com/uc?export=view&id=${id}" alt="${data.title} — slide ${i + 1}" loading="${cardIndex === 0 && i === 0 ? 'eager' : 'lazy'}" decoding="async">`).join('')}
+        ${data.ids.map((id, i) => imageMarkup(id, data.title, i, cardIndex)).join('')}
       </div>
       <div class="case-controls">
         <div class="case-arrows">
@@ -107,6 +175,17 @@
       </div>`;
 
     const slides = [...viewport.querySelectorAll('.case-slide')];
+    slides.forEach(img => {
+      img.addEventListener('error', () => {
+        const sources = (img.dataset.sources || '').split('|').filter(Boolean).map(decodeURIComponent);
+        const nextIndex = Number(img.dataset.sourceIndex || 0) + 1;
+        if (nextIndex < sources.length) {
+          img.dataset.sourceIndex = String(nextIndex);
+          img.src = sources[nextIndex];
+        }
+      });
+    });
+
     const current = viewport.querySelector('.case-counter b');
     let index = 0;
     const show = value => {
