@@ -1,0 +1,53 @@
+name: Remove website proof block
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/remove-website-proof.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  remove:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Remove website block and close contact layout
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          html = Path('index.html')
+          s = html.read_text(encoding='utf-8')
+          old = '''<aside class="web-proof" aria-label="Website example">
+          <div class="laptop">
+          <div class="laptop-screen">
+          <iframe loading="lazy" src="https://alinavasileva-cco.github.io/alina-business-tracker/" title="Alina Business Tracker"></iframe>
+          </div>
+          <div class="laptop-base" aria-hidden="true"></div>
+          </div>
+          </aside>
+          '''
+          if old not in s:
+              raise SystemExit('Website proof block not found; aborting')
+          html.write_text(s.replace(old, '', 1), encoding='utf-8')
+
+          css = Path('thecase-v3.css')
+          c = css.read_text(encoding='utf-8')
+          marker = '/* Website proof removed: contacts are full-width */'
+          if marker not in c:
+              c += '\n\n' + marker + '\n.contact-shell{display:block!important}\n.contact-main{width:100%;max-width:100%}\n.web-proof,.laptop,.laptop-screen,.laptop-base{display:none!important}\n'
+              css.write_text(c, encoding='utf-8')
+          PY
+      - name: Commit removal
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html thecase-v3.css
+          git diff --cached --quiet && exit 0
+          git commit -m "Remove website proof block"
+          git push origin HEAD:main
