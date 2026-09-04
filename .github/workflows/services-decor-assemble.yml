@@ -15,22 +15,20 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
-      - name: Reconstruct Services source
+      - name: Reconstruct verified Services source
         shell: bash
         run: |
           set -euo pipefail
-          head -c 20000 assets/services-decor-b64/part-01.txt | tr -d '\r\n\t ' > /tmp/p01
-          { printf 'g'; cat assets/services-decor-b64/part-02.txt; } | tr -d '\r\n\t ' > /tmp/p02
-          { printf 'o'; cat assets/services-decor-b64/part-03.txt; } | tr -d '\r\n\t ' > /tmp/p03
-          cat assets/services-decor-b64/part-04.txt | tr -d '\r\n\t ' > /tmp/p04
-          { printf 'Q'; cat assets/services-decor-b64/part-05.txt; } | tr -d '\r\n\t ' > /tmp/p05
-          { printf 'b'; cat assets/services-decor-b64/part-06.txt; } | tr -d '\r\n\t ' > /tmp/p06
-          { printf 'T'; cat assets/services-decor-b64/part-07.txt; } | tr -d '\r\n\t ' > /tmp/p07
-          cat assets/services-decor-b64/part-08.txt | tr -d '\r\n\t ' > /tmp/p08
+          for n in 01 02 03 04 05 06 07 08; do
+            tr -d '\r\n\t ' < "assets/services-decor-b64/part-${n}.txt" > "/tmp/p${n}"
+          done
           cat /tmp/p0{1,2,3,4,5,6,7,8} > /tmp/services-decor.b64
           echo "base64 chars: $(wc -c < /tmp/services-decor.b64)"
+          test "$(wc -c < /tmp/services-decor.b64)" = "141368"
           base64 -d /tmp/services-decor.b64 > /tmp/services-decor-source.webp
           echo "source bytes: $(stat -c%s /tmp/services-decor-source.webp)"
+          test "$(stat -c%s /tmp/services-decor-source.webp)" = "106026"
+          echo "2a5c9d07fbdb6254276e5573250602986c53eb933bce4049e2344bd67dcaacd3  /tmp/services-decor-source.webp" | sha256sum -c -
           file /tmp/services-decor-source.webp
       - name: Create high-density sharp production asset
         shell: bash
