@@ -14,46 +14,45 @@
 .service-desc{color:#495760!important}
 .service-pill{background:rgba(216,92,43,.07)!important;border:1px solid rgba(216,92,43,.16)!important}
 
-/* Fully static approved layer: one left hand + hair. No animation. */
-.services-decor-base,.services-decor-wind{display:none!important;animation:none!important;transform:none!important}
+/* Static services artwork: vivid copper hair + one left hand. No animation. */
+.services-decor-base,.services-decor-wind{display:none!important}
 .services-decor-hand{
   display:block!important;
-  width:230px!important;
+  width:270px!important;
   height:auto!important;
   max-width:none!important;
-  left:26px!important;
+  left:0!important;
   top:auto!important;
-  bottom:-60px!important;
+  bottom:-155px!important;
   z-index:4!important;
   clip-path:none!important;
   opacity:1!important;
   filter:none!important;
   animation:none!important;
   transform:none!important;
-  will-change:auto!important;
+  object-fit:contain!important;
+  image-rendering:auto!important;
 }
-.services-stage:after{
-  content:none!important;
-  display:none!important;
-  animation:none!important;
-  transform:none!important;
-}
+.services-stage:after{content:none!important;display:none!important;animation:none!important}
 
 @media(min-width:641px) and (max-width:980px){
-  .services-decor-hand{width:210px!important;left:-86px!important;bottom:-42px!important}
+  .services-decor-hand{width:250px!important;left:-48px!important;bottom:-130px!important}
 }
 @media(max-width:640px){
   .services-panel{background:linear-gradient(160deg,rgba(251,253,255,.99),rgba(238,243,246,.98))!important}
-  .services-decor-hand{width:210px!important;left:-180px!important;top:112px!important;bottom:auto!important}
+  .services-decor-hand{width:248px!important;left:-122px!important;top:94px!important;bottom:auto!important}
   .hero .actions{display:block!important;width:46vw!important;max-width:220px!important;margin-top:18px!important}
   .hero .actions .button.primary{width:100%!important;min-width:0!important;padding-left:10px!important;padding-right:10px!important}
 }
 @media(max-width:390px){
-  .services-decor-hand{width:205px!important;left:-176px!important;top:108px!important}
+  .services-decor-hand{width:238px!important;left:-118px!important;top:92px!important}
   .hero .actions{width:45vw!important;max-width:176px!important;margin-top:15px!important}
 }
 @media(max-width:360px){
-  .services-decor-hand{width:195px!important;left:-168px!important;top:106px!important}
+  .services-decor-hand{width:226px!important;left:-112px!important;top:90px!important}
   .hero .actions{width:44vw!important;max-width:158px!important}
   .hero .actions .button.primary{font-size:8.5px!important;padding-left:7px!important;padding-right:7px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .services-decor-hand{animation:none!important;transform:none!important}
 }
