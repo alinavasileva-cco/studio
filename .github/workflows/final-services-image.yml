@@ -1,0 +1,112 @@
+name: Final services image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/final-services-image.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply final services block
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC='assets/ChatGPT Image 4 сент. 2026 г., 22_05_34.png'
+          DST='assets/services-hand-hair.png'
+          if [ -f "$SRC" ]; then
+            mv "$SRC" "$DST"
+          fi
+          test -f "$DST"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          index = Path('index.html')
+          html = index.read_text(encoding='utf-8')
+          old = '<p class="section-note" data-en="Two formats. One approach: meaning first, visual system second." data-ru="Два формата. Один подход: сначала смысл, затем визуальная система.">Два формата. Один подход: сначала смысл, затем визуальная система.</p>'
+          new = '<p class="section-note" data-en="Two formats. One approach: meaning first, visual concept second." data-ru="Два формата. Один подход: сначала смысл, затем визуальная концепция.">Два формата. Один подход: сначала смысл, затем визуальная концепция.</p>'
+          if old not in html:
+              raise SystemExit('Services note source text not found')
+          html = html.replace(old, new, 1)
+          index.write_text(html, encoding='utf-8')
+
+          js_path = Path('thecase.js')
+          js = js_path.read_text(encoding='utf-8')
+
+          src_block = re.compile(r"  const baseArt = document\.querySelector\('\.services-art-base'\);\n  const handArt = document\.querySelector\('\.services-art-hand'\);\n  if \(baseArt\) \{.*?\n  \}\n  if \(handArt\) \{.*?\n  \}\n", re.S)
+          replacement = """  const baseArt = document.querySelector('.services-art-base');
+  const handArt = document.querySelector('.services-art-hand');
+  const finalServicesArt = 'assets/services-hand-hair.png?v=20260904-final';
+  if (baseArt) baseArt.src = finalServicesArt;
+  if (handArt) handArt.src = finalServicesArt;
+"""
+          js, n = src_block.subn(replacement, js, count=1)
+          if n != 1:
+              raise SystemExit(f'Could not replace services art source block: {n}')
+
+          def sub_rule(selector, body):
+              global js
+              pattern = re.compile(re.escape(selector) + r"\{[^\n]*\}")
+              js, n = pattern.subn(selector + '{' + body + '}', js, count=1)
+              if n != 1:
+                  raise SystemExit(f'Could not replace rule {selector}: {n}')
+
+          sub_rule('.services-art-base', 'width:650px!important;max-width:none!important;left:-160px!important;top:-22px!important;bottom:auto!important;z-index:2!important;clip-path:none!important;filter:drop-shadow(0 16px 24px rgba(32,44,52,.08))!important')
+          sub_rule('.services-art-hand', 'width:650px!important;max-width:none!important;left:-160px!important;top:-22px!important;bottom:auto!important;z-index:6!important;clip-path:polygon(18% 23%,40% 23%,40% 53%,18% 53%)!important;filter:drop-shadow(0 8px 12px rgba(32,44,52,.05))!important')
+
+          # Replace the mobile overrides inside the first mobile media query.
+          js = js.replace(
+              '.services-art-base{width:252px!important;left:-101px!important;top:-14px!important;bottom:auto!important;z-index:4!important;clip-path:polygon(0 0,68% 0,68% 100%,0 100%)!important}',
+              '.services-art-base{width:460px!important;left:-95px!important;top:-16px!important;bottom:auto!important;z-index:2!important;clip-path:none!important}',
+              1
+          )
+          js = js.replace(
+              '.services-art-hand{width:286px!important;left:-121px!important;top:206px!important;bottom:auto!important;z-index:6!important;clip-path:polygon(64% 0,100% 0,100% 100%,52% 100%,52% 45%,59% 32%)!important}',
+              '.services-art-hand{width:460px!important;left:-95px!important;top:-16px!important;bottom:auto!important;z-index:6!important;clip-path:polygon(18% 23%,40% 23%,40% 53%,18% 53%)!important}',
+              1
+          )
+          js = js.replace(
+              '.services-art-base{width:240px!important;left:-97px!important;top:-10px!important}',
+              '.services-art-base{width:440px!important;left:-92px!important;top:-14px!important}',
+              1
+          )
+          js = js.replace(
+              '.services-art-hand{width:276px!important;left:-118px!important;top:200px!important}',
+              '.services-art-hand{width:440px!important;left:-92px!important;top:-14px!important}',
+              1
+          )
+
+          # Make the panel sit above the hair/base image while the clipped hand remains above the panel.
+          js = js.replace('.services-panel{min-height:450px!important}', '.services-panel{min-height:450px!important;z-index:3!important}', 1)
+          js = js.replace('.services-panel{min-height:0!important;border-radius:24px!important;overflow:visible!important}', '.services-panel{min-height:0!important;border-radius:24px!important;overflow:visible!important;z-index:3!important}', 1)
+
+          if 'assets/services-hand-hair.png?v=20260904-final' not in js:
+              raise SystemExit('Final services image was not wired into JS')
+          js_path.write_text(js, encoding='utf-8')
+          PY
+
+      - name: Verify final files
+        run: |
+          test -f assets/services-hand-hair.png
+          grep -F 'сначала смысл, затем визуальная концепция.' index.html
+          grep -F 'assets/services-hand-hair.png?v=20260904-final' thecase.js
+          grep -F '.services-art-base{width:460px!important;left:-95px!important;top:-16px!important' thecase.js
+
+      - name: Commit final correction
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'
+          else
+            git commit -m 'Finalize services block artwork'
+            git push
+          fi
