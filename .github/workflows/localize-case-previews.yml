@@ -1,0 +1,77 @@
+name: Localize presentation preview images
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/localize-case-previews.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  localize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download public Google Drive previews
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/cases
+          while IFS='|' read -r name id; do
+            [ -n "$name" ] || continue
+            out="assets/cases/${name}.webp"
+            url="https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t"
+            echo "Downloading ${name}"
+            curl -L --fail --retry 3 --retry-delay 2 --connect-timeout 20 --max-time 120 \
+              -A 'Mozilla/5.0' "$url" -o "$out"
+            test "$(wc -c < "$out")" -gt 10000
+            file "$out" | grep -Eqi 'Web/P|RIFF|image'
+          done <<'EOF'
+          faberge-01|1IGgu1qRFx-1TeHR2fuVQ9Cf_kSzLcCsk
+          faberge-02|15zOarlo3gqSp4Bl1sQFt2gG45qdrLV9A
+          faberge-03|1DW5TNnWwACtL7Y2jvpzJV1ylbU1abphr
+          redfox-01|19aSZt58h59aTRnrhRn6Vm31QSfMR88Xs
+          redfox-02|1TN1lRXM1LuvVjaDD0BiMTqWNC9eeZLcu
+          elena-01|14NBiuR8zeW_rBP7IoOOgGpocYwqFOaHg
+          elena-02|1agKSGk0q9L6pL3j3ZJPyd09JRWVmy6wN
+          elena-03|1bzY34Gs-FZcON-BflE2S0g2YMOpUUFmi
+          elena-04|1Q6mJvDWTf53mEriXhlnUrsYArziBCikz
+          elena-05|1gsQQPS80pxylWN9VAap4CiZVvgGbvcnu
+          japanese-01|1B8r2lBHFj6zuk8UKVbgHX_Hk8bnXJfl5
+          japanese-02|126y4HZl3n0I_x7kj5o8VvtOb_ed9p4gw
+          japanese-03|1qjl-AOdwkp05cu-zFh6uN33uldYZPzza
+          yandex-01|1ChbJ8aVs7Cq-teQ7ipsdiMHRpq5kyAf_
+          yandex-02|1YmEHUd39cddtY8T_mxNUMviS5ZeSDqyq
+          yandex-03|1H44MBDgFywp32nkBMHekDjt8Maws6ekx
+          yandex-04|1pK7wnMM0iREze4BsNNb5xPGZWsNWbM-e
+          cat-01|1kzfjYZEVkpZefDxLWVDvM_5h3ZfqI7ud
+          cat-02|1KN4eR6e_Dd3Y6nkBv_SwKtyl7FiRXbsW
+          EOF
+
+      - name: Verify preview count
+        shell: bash
+        run: |
+          set -euo pipefail
+          count=$(find assets/cases -maxdepth 1 -type f -name '*.webp' | wc -l)
+          echo "Localized previews: $count"
+          test "$count" -eq 19
+
+      - name: Commit localized previews
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/cases/*.webp
+          if git diff --cached --quiet; then
+            echo 'No preview changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Add local presentation preview images'
+          git push
