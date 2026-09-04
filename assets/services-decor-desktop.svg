@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="304" height="941" viewBox="0 0 304 941">
+  <defs>
+    <filter id="studioSharp" x="-8%" y="-4%" width="116%" height="108%" color-interpolation-filters="sRGB">
+      <feColorMatrix type="saturate" values="1.16" result="sat"/>
+      <feComponentTransfer in="sat" result="contrast">
+        <feFuncR type="linear" slope="1.055" intercept="-0.0275"/>
+        <feFuncG type="linear" slope="1.055" intercept="-0.0275"/>
+        <feFuncB type="linear" slope="1.055" intercept="-0.0275"/>
+        <feFuncA type="identity"/>
+      </feComponentTransfer>
+      <feConvolveMatrix in="contrast" order="3" kernelMatrix="0 -0.18 0 -0.18 1.72 -0.18 0 -0.18 0" divisor="1" bias="0" preserveAlpha="true"/>
+    </filter>
+  </defs>
+  <image href="services-decor-vivid.webp" x="0" y="0" width="304" height="941" preserveAspectRatio="xMidYMid meet" filter="url(#studioSharp)"/>
+</svg>
