@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="304" height="745" viewBox="0 70 304 745">
+  <defs>
+    <filter id="studioSharpMobile" x="-8%" y="-4%" width="116%" height="108%" color-interpolation-filters="sRGB">
+      <feColorMatrix type="saturate" values="1.18" result="sat"/>
+      <feComponentTransfer in="sat" result="contrast">
+        <feFuncR type="linear" slope="1.065" intercept="-0.0325"/>
+        <feFuncG type="linear" slope="1.065" intercept="-0.0325"/>
+        <feFuncB type="linear" slope="1.065" intercept="-0.0325"/>
+        <feFuncA type="identity"/>
+      </feComponentTransfer>
+      <feConvolveMatrix in="contrast" order="3" kernelMatrix="0 -0.21 0 -0.21 1.84 -0.21 0 -0.21 0" divisor="1" bias="0" preserveAlpha="true"/>
+    </filter>
+    <linearGradient id="fadeBottom" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="white"/>
+      <stop offset="0.86" stop-color="white"/>
+      <stop offset="1" stop-color="black"/>
+    </linearGradient>
+    <mask id="softEnd">
+      <rect x="0" y="70" width="304" height="745" fill="url(#fadeBottom)"/>
+    </mask>
+  </defs>
+  <g mask="url(#softEnd)">
+    <image href="services-decor-vivid.webp" x="0" y="0" width="304" height="941" preserveAspectRatio="xMidYMid meet" filter="url(#studioSharpMobile)"/>
+  </g>
+</svg>
