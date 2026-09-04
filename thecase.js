@@ -28,7 +28,14 @@
   } catch (_) {}
   setLang(initial);
 
-  // Services: presentations first; character peeks from behind the panel.
+  const servicesNote = document.querySelector('.services .section-note');
+  if (servicesNote) {
+    servicesNote.dataset.ru = 'Два формата. Один подход: сначала смысл, затем визуальная концепция.';
+    servicesNote.dataset.en = 'Two formats. One approach: meaning first, visual concept second.';
+    servicesNote.textContent = servicesNote.dataset[initial];
+  }
+
+  // Services: presentations first; one hand and hair peek from behind the panel.
   const servicesPanel = document.querySelector('.services-panel');
   if (servicesPanel) {
     const offers = [...servicesPanel.querySelectorAll('.service-offer')];
@@ -38,22 +45,9 @@
 
   const baseArt = document.querySelector('.services-art-base');
   const handArt = document.querySelector('.services-art-hand');
-  if (baseArt) {
-    baseArt.src = 'assets/hero-character-hd.png?v=20260904-4';
-    baseArt.onerror = () => { baseArt.src = 'assets/services-decor-sharp.webp?v=20260904-4'; };
-  }
-  if (handArt) {
-    const handSources = [
-      'assets/services-decor-sharp.webp?v=20260904-4',
-      'assets/services-decor-vivid.webp?v=20260904-4'
-    ];
-    let handSourceIndex = 0;
-    handArt.src = handSources[0];
-    handArt.onerror = () => {
-      handSourceIndex += 1;
-      if (handSourceIndex < handSources.length) handArt.src = handSources[handSourceIndex];
-    };
-  }
+  const finalServicesArt = 'assets/ChatGPT%20Image%204%20%D1%81%D0%B5%D0%BD%D1%82.%202026%20%D0%B3.,%2022_05_34.png?v=20260904-final';
+  if (baseArt) baseArt.src = finalServicesArt;
+  if (handArt) handArt.src = finalServicesArt;
 
   const cases = [
     {
@@ -99,18 +93,18 @@
     .services{padding-top:68px!important;padding-bottom:62px!important}
     .services .section-head{margin-bottom:24px!important}
     .services-stage{min-height:500px!important;padding:0 0 12px!important;position:relative!important}
-    .services-panel{min-height:450px!important}
+    .services-panel{min-height:450px!important;z-index:3!important}
     .services-panel:before,.services-panel:after{content:none!important;display:none!important}
     .service-icon{border-radius:13px!important;box-shadow:0 5px 15px rgba(32,44,52,.055)!important}
     .service-offer h3{margin-top:24px!important}
-    .services-art-base{width:430px!important;max-width:none!important;left:-106px!important;top:-32px!important;bottom:auto!important;z-index:4!important;clip-path:polygon(0 0,67% 0,67% 100%,0 100%)!important;filter:drop-shadow(0 16px 24px rgba(32,44,52,.08))!important}
-    .services-art-hand{width:345px!important;max-width:none!important;left:-118px!important;top:96px!important;bottom:auto!important;z-index:6!important;clip-path:polygon(62% 0,100% 0,100% 100%,52% 100%,52% 46%,59% 31%)!important}
+    .services-art-base{width:650px!important;max-width:none!important;left:-160px!important;top:-22px!important;bottom:auto!important;z-index:2!important;clip-path:none!important;filter:drop-shadow(0 16px 24px rgba(32,44,52,.08))!important}
+    .services-art-hand{width:650px!important;max-width:none!important;left:-160px!important;top:-22px!important;bottom:auto!important;z-index:6!important;clip-path:polygon(18% 23%,40% 23%,40% 53%,18% 53%)!important}
     @media(max-width:640px){
       .services{padding-top:40px!important;padding-bottom:42px!important}
       .services .section-head{margin-bottom:16px!important}
       .services .section-note{margin-top:8px!important;line-height:1.35!important}
       .services-stage{min-height:0!important;padding:0!important}
-      .services-panel{min-height:0!important;border-radius:24px!important;overflow:visible!important}
+      .services-panel{min-height:0!important;border-radius:24px!important;overflow:visible!important;z-index:3!important}
       .service-offer,.service-offer+.service-offer{min-height:0!important;padding:23px 20px 22px 22px!important}
       .service-offer:first-of-type{min-height:0!important;padding:23px 20px 22px 82px!important}
       .service-offer+.service-offer{border-left:0!important;border-top:1px solid var(--line)!important}
@@ -123,15 +117,15 @@
       .service-result{margin-top:18px!important;padding-top:14px!important}
       .service-result b{font-size:13.5px!important}
       .service-pills-bottom{margin-top:14px!important}
-      .services-art-base{width:252px!important;left:-101px!important;top:-14px!important;bottom:auto!important;z-index:4!important;clip-path:polygon(0 0,68% 0,68% 100%,0 100%)!important}
-      .services-art-hand{width:286px!important;left:-121px!important;top:206px!important;bottom:auto!important;z-index:6!important;clip-path:polygon(64% 0,100% 0,100% 100%,52% 100%,52% 45%,59% 32%)!important}
+      .services-art-base{width:460px!important;left:-95px!important;top:-16px!important;bottom:auto!important;z-index:2!important;clip-path:none!important}
+      .services-art-hand{width:460px!important;left:-95px!important;top:-16px!important;bottom:auto!important;z-index:6!important;clip-path:polygon(18% 23%,40% 23%,40% 53%,18% 53%)!important}
     }
     @media(max-width:390px){
       .services{padding-top:38px!important;padding-bottom:40px!important}
       .service-offer,.service-offer+.service-offer{padding:21px 18px 20px 20px!important}
       .service-offer:first-of-type{padding:21px 18px 20px 78px!important}
-      .services-art-base{width:240px!important;left:-97px!important;top:-10px!important}
-      .services-art-hand{width:276px!important;left:-118px!important;top:200px!important}
+      .services-art-base{width:440px!important;left:-92px!important;top:-14px!important}
+      .services-art-hand{width:440px!important;left:-92px!important;top:-14px!important}
     }
 
     .work{background:linear-gradient(180deg,#f4f7f9 0%,#eef3f6 100%)}
