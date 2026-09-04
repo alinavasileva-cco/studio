@@ -1,0 +1,48 @@
+name: Update THE CASE hero copy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-hero-copy.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Replace hero copy only
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '''<p class="eyebrow" data-en="BUSINESS PRESENTATIONS THAT SELL" data-ru="ПРЕЗЕНТАЦИИ ДЛЯ БИЗНЕСА, КОТОРЫЕ ПРОДАЮТ">ПРЕЗЕНТАЦИИ ДЛЯ БИЗНЕСА, КОТОРЫЕ ПРОДАЮТ</p>
+          <h1>
+          <span class="hero-title" data-en="THE CASE" data-ru="КЕЙС">КЕЙС</span>
+          <span class="hero-subtitle" data-en="Business presentations." data-ru="Презентации для бизнеса">Презентации для бизнеса</span>
+          <span class="hero-accent" data-en="Not just slides." data-ru="Business presentations. Not just slides.">Business presentations. Not just slides.</span>
+          </h1>
+          <p class="hero-lead" data-en="Structure, copy and visual logic — built as one commercial tool." data-ru="Структура, текст и визуальная логика — в одном коммерческом инструменте.">Структура, текст и визуальная логика — в одном коммерческом инструменте.</p>'''
+          new = '''<h1>
+          <span class="hero-title" data-en="THE CASE" data-ru="THE CASE">THE CASE</span>
+          <span class="hero-subtitle" data-en="Business presentations." data-ru="Презентации для бизнеса">Презентации для бизнеса</span>
+          <span class="hero-accent" data-en="a tool that sells" data-ru="инструмент, который продаёт">инструмент, который продаёт</span>
+          </h1>'''
+          if old not in s:
+              raise SystemExit('Expected hero block not found; aborting without touching other content')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
+      - name: Commit hero copy
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Simplify THE CASE hero copy"
+          git push origin HEAD:main
