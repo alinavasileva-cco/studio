@@ -27,7 +27,7 @@ public final class ScannerService extends Service {
         super.onCreate();
         store = new LeadStore(this);
         createNotificationChannel();
-        startForeground(NOTIFICATION_ID, notification("Подготовка полного поиска по истории…", true));
+        startForeground(NOTIFICATION_ID, notification("Подготовка Telegram-поиска…", true));
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
@@ -41,7 +41,7 @@ public final class ScannerService extends Service {
         }
         if (workerStarted.compareAndSet(false, true)) {
             keepRunning = true;
-            Thread t = new Thread(this::runOneManualPass, "lead-radar-v13");
+            Thread t = new Thread(this::runOneManualPass, "lead-radar-v14");
             t.setDaemon(true);
             t.start();
         }
@@ -49,7 +49,7 @@ public final class ScannerService extends Service {
     }
 
     private void runOneManualPass() {
-        LeadScannerV13 scanner = new LeadScannerV13();
+        LeadScannerV14 scanner = new LeadScannerV14();
         List<String> channels = parseChannels(store.channels());
         store.beginRun(channels.size());
         int checked = 0;
@@ -68,11 +68,7 @@ public final class ScannerService extends Service {
                         Lead lead = leads.get(i);
                         if (lead.category != Lead.Category.SITE && lead.category != Lead.Category.PRESENTATION) continue;
                         if (store.wasPreviewed(lead.dedupKey)) continue;
-                        String message = MessageComposer.compose(
-                                lead,
-                                store.profileUrl(),
-                                store.presentationPortfolioUrl()
-                        );
+                        String message = MessageComposer.compose(lead, store.profileUrl(), store.presentationPortfolioUrl());
                         if (message == null || message.trim().isEmpty()) continue;
                         store.addPreview(lead, message);
                     }
@@ -90,7 +86,7 @@ public final class ScannerService extends Service {
                     + "Проверено " + checked + " из " + channels.size()
                     + ", постов " + store.diagnosticPosts()
                     + ", найдено " + found
-                    + ", ошибок чтения " + store.diagnosticErrors();
+                    + ", ошибок " + store.diagnosticErrors();
             updateNotification(text, false);
             stopForeground(true);
             stopSelf();
@@ -102,7 +98,7 @@ public final class ScannerService extends Service {
         if (raw == null || raw.trim().isEmpty()) return r;
         Set<String> seen = new HashSet<>();
         for (String p : raw.split("[\\n,; ]+")) {
-            String c = LeadScannerV13.normalizeChannel(p);
+            String c = LeadScannerV14.normalizeChannel(p);
             if (!c.isEmpty() && seen.add(c.toLowerCase(java.util.Locale.ROOT))) r.add(c);
         }
         return r;
@@ -110,26 +106,17 @@ public final class ScannerService extends Service {
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= 26) {
-            NotificationChannel c = new NotificationChannel(
-                    CHANNEL_ID,
-                    "Lead Radar — ручной поиск",
-                    NotificationManager.IMPORTANCE_LOW
-            );
+            NotificationChannel c = new NotificationChannel(CHANNEL_ID, "Lead Radar — ручной поиск", NotificationManager.IMPORTANCE_LOW);
             c.setDescription("Ручной поиск Telegram-заказов");
             getSystemService(NotificationManager.class).createNotificationChannel(c);
         }
     }
 
     private Notification notification(String text, boolean ongoing) {
-        Intent open = new Intent(this, MainActivityV12.class);
-        PendingIntent pi = PendingIntent.getActivity(
-                this, 0, open,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-        );
-        Notification.Builder b = Build.VERSION.SDK_INT >= 26
-                ? new Notification.Builder(this, CHANNEL_ID)
-                : new Notification.Builder(this);
-        return b.setContentTitle("Lead Radar v13")
+        Intent open = new Intent(this, MainActivityV14.class);
+        PendingIntent pi = PendingIntent.getActivity(this, 0, open, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        Notification.Builder b = Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this);
+        return b.setContentTitle("Lead Radar v14")
                 .setContentText(text)
                 .setSmallIcon(android.R.drawable.stat_notify_sync)
                 .setContentIntent(pi)
@@ -139,8 +126,7 @@ public final class ScannerService extends Service {
     }
 
     private void updateNotification(String text, boolean ongoing) {
-        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE))
-                .notify(NOTIFICATION_ID, notification(text, ongoing));
+        ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notification(text, ongoing));
     }
 
     @Override public IBinder onBind(Intent intent) { return null; }
