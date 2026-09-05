@@ -2,29 +2,33 @@
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#f8fbfd"/>
-      <stop offset="0.46" stop-color="#eef3f6"/>
+      <stop offset="0.45" stop-color="#e8eef2"/>
       <stop offset="1" stop-color="#dde6eb"/>
     </linearGradient>
-    <radialGradient id="glow" cx="68%" cy="28%" r="58%">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.66"/>
+    <linearGradient id="veil" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#eef3f6" stop-opacity="0.92"/>
+      <stop offset="0.41" stop-color="#eef3f6" stop-opacity="0.50"/>
+      <stop offset="0.72" stop-color="#eef3f6" stop-opacity="0.03"/>
+      <stop offset="1" stop-color="#eef3f6" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="72%" cy="30%" r="46%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.56"/>
       <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="soft" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#eef3f6" stop-opacity="0.20"/>
-      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.34"/>
-      <stop offset="1" stop-color="#eef3f6" stop-opacity="0.10"/>
-    </linearGradient>
   </defs>
   <rect width="1920" height="1500" fill="url(#bg)"/>
+  <rect width="1920" height="1500" fill="url(#veil)"/>
   <rect width="1920" height="1500" fill="url(#glow)"/>
-  <path d="M-160 225 C 160 10, 420 360, 785 92 S 1330 155, 2080 -40" fill="none" stroke="#d85c2b" stroke-width="2.1" stroke-opacity="0.68"/>
-  <path d="M-170 246 C 150 32, 430 382, 792 114 S 1340 177, 2090 -18" fill="none" stroke="#d85c2b" stroke-width="1.15" stroke-opacity="0.24"/>
-  <path d="M-165 268 C 158 53, 438 403, 800 136 S 1350 198, 2100 5" fill="none" stroke="#d85c2b" stroke-width="1" stroke-opacity="0.16"/>
-  <path d="M-220 1110 C 140 905, 480 1302, 885 1008 S 1425 940, 2110 730" fill="none" stroke="#d85c2b" stroke-width="2.1" stroke-opacity="0.64"/>
-  <path d="M-215 1134 C 150 930, 490 1327, 895 1033 S 1435 966, 2118 755" fill="none" stroke="#d85c2b" stroke-width="1.15" stroke-opacity="0.23"/>
-  <path d="M-210 1158 C 160 955, 500 1352, 905 1058 S 1445 992, 2126 780" fill="none" stroke="#d85c2b" stroke-width="1" stroke-opacity="0.15"/>
-  <path d="M1495 -110 C 1645 170, 1560 395, 1760 585 S 1965 930, 1840 1235" fill="none" stroke="#d85c2b" stroke-width="1.6" stroke-opacity="0.32"/>
-  <path d="M1540 -125 C 1690 155, 1605 385, 1800 575 S 2005 920, 1885 1240" fill="none" stroke="#d85c2b" stroke-width="0.9" stroke-opacity="0.14"/>
-  <path d="M-200 525 C 300 370, 520 635, 860 545 S 1400 430, 2110 565" fill="none" stroke="#ffffff" stroke-width="84" stroke-opacity="0.18"/>
-  <path d="M-160 905 C 310 760, 595 970, 955 850 S 1490 735, 2100 865" fill="none" stroke="url(#soft)" stroke-width="110" opacity="0.56"/>
+
+  <!-- restrained THE CASE pattern: only fine terracotta contours -->
+  <path d="M-180 220 C 170 10, 450 335, 805 86 S 1370 140, 2080 -60" fill="none" stroke="#d85c2b" stroke-width="2" stroke-opacity="0.58"/>
+  <path d="M-170 247 C 180 37, 460 362, 815 113 S 1380 167, 2090 -33" fill="none" stroke="#d85c2b" stroke-width="1" stroke-opacity="0.20"/>
+  <path d="M-160 274 C 190 64, 470 389, 825 140 S 1390 194, 2100 -6" fill="none" stroke="#d85c2b" stroke-width="1" stroke-opacity="0.12"/>
+
+  <path d="M-230 1180 C 150 965, 500 1335, 900 1050 S 1450 965, 2120 755" fill="none" stroke="#d85c2b" stroke-width="2" stroke-opacity="0.54"/>
+  <path d="M-220 1208 C 160 993, 510 1363, 910 1078 S 1460 993, 2130 783" fill="none" stroke="#d85c2b" stroke-width="1" stroke-opacity="0.18"/>
+  <path d="M-210 1236 C 170 1021, 520 1391, 920 1106 S 1470 1021, 2140 811" fill="none" stroke="#d85c2b" stroke-width="1" stroke-opacity="0.10"/>
+
+  <path d="M1540 -90 C 1695 170, 1610 395, 1805 595 S 2015 930, 1880 1260" fill="none" stroke="#d85c2b" stroke-width="1.4" stroke-opacity="0.24"/>
+  <path d="M1580 -110 C 1735 150, 1650 375, 1845 575 S 2055 910, 1920 1240" fill="none" stroke="#d85c2b" stroke-width="0.9" stroke-opacity="0.10"/>
 </svg>
