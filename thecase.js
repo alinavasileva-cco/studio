@@ -22,6 +22,11 @@
       heroAccent.dataset.en = 'Your product should look compelling.';
     }
 
+    // Product slogan is a small overline above the main hero title.
+    if (heroAccent && heroTitle && heroTitle.parentNode === heroAccent.parentNode) {
+      heroTitle.parentNode.insertBefore(heroAccent, heroTitle);
+    }
+
     const applyHeroLanguage = lang => {
       document.documentElement.lang = lang;
       if (heroTitle) heroTitle.textContent = heroTitle.dataset[lang];
@@ -65,6 +70,17 @@
       }
       .services-art-base,.services-art-hand{display:none!important}
 
+      .hero h1 .hero-accent{
+        order:-1;
+        margin:0 0 14px 2px;
+        font-family:var(--m);
+        font-size:12px;
+        line-height:1.35;
+        font-weight:500;
+        letter-spacing:.02em;
+        max-width:560px;
+      }
+
       html[lang="ru"] .hero-copy{width:min(800px,60vw)}
       html[lang="ru"] .hero-title{
         font-size:clamp(44px,5.7vw,82px);
@@ -76,13 +92,17 @@
         font-size:clamp(21px,2.4vw,34px);
         max-width:680px;
       }
-      html[lang="ru"] .hero-accent{font-size:17px;max-width:620px}
 
       @media(max-width:640px){
+        .hero h1 .hero-accent{
+          font-size:9px;
+          line-height:1.3;
+          max-width:62vw;
+          margin:0 0 10px 1px;
+        }
         html[lang="ru"] .hero-copy{width:72vw;padding-top:104px}
         html[lang="ru"] .hero-title{font-size:clamp(29px,8.7vw,37px);line-height:1.01;max-width:72vw}
         html[lang="ru"] .hero-subtitle{font-size:clamp(16px,4.8vw,20px);line-height:1.12;max-width:67vw;margin-top:15px}
-        html[lang="ru"] .hero-accent{font-size:10px;line-height:1.35;max-width:61vw;margin-top:8px}
       }
     `;
     document.head.appendChild(style);
