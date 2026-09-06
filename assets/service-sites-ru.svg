@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs><filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="26" stdDeviation="30" flood-color="#35414a" flood-opacity=".22"/></filter><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fafcfd"/><stop offset="1" stop-color="#e7edf1"/></linearGradient></defs>
+<rect width="1600" height="900" fill="none"/>
+<g filter="url(#s)">
+<rect x="210" y="115" width="1180" height="620" rx="26" fill="#171b1e"/>
+<rect x="238" y="143" width="1124" height="564" rx="12" fill="url(#g)"/>
+<circle cx="800" cy="130" r="4" fill="#4e5960"/>
+<text x="290" y="198" font-family="Arial,sans-serif" font-size="20" fill="#15191c">THE <tspan fill="#ca5a32">CASE</tspan></text>
+<text x="960" y="198" font-family="Arial,sans-serif" font-size="16" fill="#15191c">О НАС</text><text x="1045" y="198" font-family="Arial,sans-serif" font-size="16" fill="#15191c">УСЛУГИ</text><text x="1135" y="198" font-family="Arial,sans-serif" font-size="16" fill="#15191c">КЕЙСЫ</text><text x="1220" y="198" font-family="Arial,sans-serif" font-size="16" fill="#15191c">КОНТАКТЫ</text>
+<text x="292" y="322" font-family="Georgia,serif" font-size="62" fill="#15191c">Сайт для роста</text><text x="292" y="388" font-family="Georgia,serif" font-size="62" fill="#15191c">вашего бизнеса</text>
+<text x="294" y="440" font-family="Arial,sans-serif" font-size="23" fill="#5c6870">Одностраничники и лендинги</text>
+<rect x="292" y="495" width="190" height="54" rx="27" fill="#15191c"/><text x="328" y="529" font-family="Arial,sans-serif" font-size="18" fill="#fff">Подробнее →</text>
+<rect x="886" y="258" width="355" height="290" rx="14" fill="#dce5ea"/><path d="M908 500 L908 350 L1022 294 L1022 500Z" fill="#6e7981"/><path d="M1022 500 L1022 294 L1218 380 L1218 500Z" fill="#b8c2c8"/><rect x="944" y="375" width="35" height="84" fill="#15191c" opacity=".65"/><rect x="1075" y="376" width="46" height="83" fill="#ca5a32" opacity=".8"/><text x="886" y="586" font-family="Arial,sans-serif" font-size="20" fill="#657079">Структура • дизайн • запуск</text>
+<rect x="154" y="735" width="1292" height="34" rx="17" fill="#b6bec4"/><rect x="535" y="735" width="530" height="14" rx="7" fill="#d9dfe3"/>
+</g></svg>
