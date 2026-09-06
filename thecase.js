@@ -32,42 +32,91 @@
     let presentationOffer = null;
     let websiteOffer = null;
 
-    if (servicesPanel) {
-      const offers = [...servicesPanel.querySelectorAll('.service-offer')];
-      presentationOffer = offers.find(offer => offer.querySelector('[data-ru="Презентации"]')) || null;
-      websiteOffer = offers.find(offer => offer.querySelector('[data-ru="Сайты"]')) || null;
-      if (presentationOffer) servicesPanel.prepend(presentationOffer);
+    const createSpec = (labelRu, labelEn, contentNode) => {
+      const spec = document.createElement('div');
+      spec.className = 'service-spec';
+      const label = document.createElement('small');
+      label.className = 'service-spec-label';
+      label.dataset.ru = labelRu;
+      label.dataset.en = labelEn;
+      label.textContent = labelRu;
+      spec.appendChild(label);
+      if (contentNode) spec.appendChild(contentNode);
+      return spec;
+    };
 
-      const addVisual = (offer, type) => {
-        if (!offer || offer.querySelector('.service-visual')) return;
+    const prepareOffer = (offer, type) => {
+      if (!offer) return;
+
+      if (!offer.querySelector('.service-visual')) {
         const visual = document.createElement('figure');
         visual.className = `service-visual service-visual-${type}`;
         const img = document.createElement('img');
         img.alt = '';
         img.loading = 'lazy';
         img.decoding = 'async';
-        img.dataset.ruSrc = type === 'presentation' ? 'assets/service-presentations-ru.svg' : 'assets/service-sites-ru.svg';
-        img.dataset.enSrc = type === 'presentation' ? 'assets/service-presentations-en.svg' : 'assets/service-sites-en.svg';
+        img.dataset.ruSrc = type === 'presentation'
+          ? 'assets/service-presentations-approved-ru.svg?v=20260906-services-final'
+          : 'assets/service-sites-approved-ru.svg?v=20260906-services-final';
+        img.dataset.enSrc = type === 'presentation'
+          ? 'assets/service-presentations-approved-en.svg?v=20260906-services-final'
+          : 'assets/service-sites-approved-en.svg?v=20260906-services-final';
         visual.appendChild(img);
-        const desc = offer.querySelector('.service-desc');
-        if (desc) desc.insertAdjacentElement('afterend', visual);
+        const heading = offer.querySelector('h3');
+        if (heading) heading.insertAdjacentElement('afterend', visual);
         else offer.prepend(visual);
-      };
+      }
 
-      addVisual(presentationOffer, 'presentation');
-      addVisual(websiteOffer, 'website');
+      const desc = offer.querySelector('.service-desc');
+      const result = offer.querySelector('.service-result');
+      const pills = [...offer.querySelectorAll('.service-pill')];
+      const oldPills = offer.querySelector('.service-pills');
 
-      [presentationOffer, websiteOffer].forEach(offer => {
-        if (!offer || offer.querySelector('.service-brief-cta')) return;
+      if (!offer.querySelector('.service-specs')) {
+        const specs = document.createElement('div');
+        specs.className = 'service-specs';
+
+        if (result) {
+          const oldLabel = result.querySelector('small');
+          if (oldLabel) oldLabel.remove();
+          result.classList.add('service-spec-value');
+          specs.appendChild(createSpec('РЕЗУЛЬТАТ', 'OUTPUT', result));
+        }
+
+        if (pills[0]) {
+          pills[0].classList.add('service-spec-value');
+          specs.appendChild(createSpec('СРОК', 'TIMING', pills[0]));
+        }
+        if (pills[1]) {
+          pills[1].classList.add('service-spec-value');
+          specs.appendChild(createSpec('СТОИМОСТЬ', 'PRICE', pills[1]));
+        }
+
+        if (oldPills) oldPills.remove();
+        if (desc) desc.insertAdjacentElement('afterend', specs);
+        else offer.appendChild(specs);
+      }
+
+      if (!offer.querySelector('.service-brief-cta')) {
         const cta = document.createElement('a');
         cta.className = 'service-brief-cta';
         cta.href = 'https://t.me/AlinaVasileva';
         cta.target = '_blank';
         cta.rel = 'noopener';
-        cta.dataset.ru = 'ОТПРАВИТЬ ТЗ ↗';
-        cta.dataset.en = 'SEND BRIEF ↗';
+        cta.dataset.ru = 'Отправить ТЗ  →';
+        cta.dataset.en = 'Send brief  →';
+        cta.textContent = cta.dataset.ru;
         offer.appendChild(cta);
-      });
+      }
+    };
+
+    if (servicesPanel) {
+      const offers = [...servicesPanel.querySelectorAll('.service-offer')];
+      presentationOffer = offers.find(offer => offer.querySelector('[data-ru="Презентации"]')) || null;
+      websiteOffer = offers.find(offer => offer.querySelector('[data-ru="Сайты"]')) || null;
+      if (presentationOffer) servicesPanel.prepend(presentationOffer);
+      prepareOffer(presentationOffer, 'presentation');
+      prepareOffer(websiteOffer, 'website');
     }
 
     const setText = (el, lang, ru, en) => {
@@ -106,20 +155,23 @@
         const resultParts = presentationOffer.querySelectorAll('.service-result b span');
         if (resultParts[0]) setText(resultParts[0], lang, '', '');
         if (resultParts[1]) setText(resultParts[1], lang, ' + ', ' + ');
-        const pills = presentationOffer.querySelectorAll('.service-pill');
-        if (pills[0]) setText(pills[0], lang, '◷ от 1 дня', '◷ from 1 day');
-        if (pills[1]) setText(pills[1], lang, '₽ от 5 000 рублей', '₽ from 5,000');
+        const pills = presentationOffer.querySelectorAll('.service-spec > .service-pill');
+        if (pills[0]) setText(pills[0], lang, 'от 1 дня', 'from 1 day');
+        if (pills[1]) setText(pills[1], lang, 'от 5 000 рублей', 'from 5,000 ₽');
       }
 
       if (websiteOffer) {
         setText(websiteOffer.querySelector('.service-desc'), lang,
           'Одностраничники / лендинги',
           'One-page websites / landing pages');
-        const pills = websiteOffer.querySelectorAll('.service-pill');
-        if (pills[0]) setText(pills[0], lang, '◷ от 3 дней', '◷ from 3 days');
-        if (pills[1]) setText(pills[1], lang, '₽ от 10 000 рублей', '₽ from 10,000');
+        const pills = websiteOffer.querySelectorAll('.service-spec > .service-pill');
+        if (pills[0]) setText(pills[0], lang, 'от 3 дней', 'from 3 days');
+        if (pills[1]) setText(pills[1], lang, 'от 10 000 рублей', 'from 10,000 ₽');
       }
 
+      document.querySelectorAll('.service-spec-label').forEach(label => {
+        label.textContent = label.dataset[lang] || label.textContent;
+      });
       document.querySelectorAll('.service-visual img').forEach(img => {
         img.src = lang === 'en' ? img.dataset.enSrc : img.dataset.ruSrc;
       });
@@ -168,66 +220,145 @@
     const style = document.createElement('style');
     style.textContent = `
       .services{
-        background:#eef3f6!important;
-        background-image:linear-gradient(180deg,#eef3f6 0%,#f8fbfd 52%,#eef3f6 100%)!important;
+        background:#eef4f7!important;
+        background-image:radial-gradient(circle at 50% 42%,rgba(255,255,255,.68),rgba(255,255,255,0) 58%)!important;
         border-bottom:0!important;
-        padding-top:72px!important;
-        padding-bottom:88px!important;
+        padding:58px 0 72px!important;
       }
+      .services>.shell{width:min(1480px,calc(100% - 64px))!important}
       .services .section-head{display:none!important}
       .services-art-base,.services-art-hand{display:none!important}
-      .services-stage{min-height:0!important;display:block!important;padding:38px 0 30px!important}
+      .services-stage{min-height:0!important;display:block!important;padding:0!important}
       .services-panel{
         width:100%!important;min-height:0!important;display:grid!important;
         grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
-        gap:clamp(54px,6vw,98px)!important;align-items:start!important;
+        gap:0!important;align-items:stretch!important;
         background:transparent!important;border:0!important;border-radius:0!important;
         box-shadow:none!important;overflow:visible!important;
       }
       .services-panel:before,.services-panel:after{content:none!important;display:none!important}
       .service-offer,.service-offer:first-of-type{
-        padding:0!important;margin:0!important;min-height:0!important;background:transparent!important;
-        transform:none!important;align-self:start!important;
+        padding:0 46px 0 38px!important;margin:0!important;min-height:0!important;
+        background:transparent!important;transform:none!important;align-self:stretch!important;
       }
-      .service-offer+.service-offer{border-left:0!important;border-top:0!important}
+      .service-offer+.service-offer{
+        border-left:1px solid rgba(18,23,27,.14)!important;
+        border-top:0!important;padding-left:52px!important;padding-right:22px!important;
+      }
       .service-icon{display:none!important}
       .service-offer h3{
-        margin:0 0 10px!important;font-size:clamp(38px,4.2vw,62px)!important;
-        line-height:1!important;letter-spacing:-.055em!important;
+        margin:0 0 18px!important;
+        font-family:Georgia,'Times New Roman',serif!important;
+        font-size:clamp(72px,7.2vw,112px)!important;
+        line-height:.9!important;font-weight:400!important;letter-spacing:-.055em!important;
+        color:#0b0f12!important;
       }
-      .service-desc{margin:0!important;font-size:clamp(16px,1.45vw,20px)!important;color:#4c5961!important;line-height:1.35!important}
-      .service-visual{margin:28px 0 26px!important;width:100%!important;aspect-ratio:16/9!important;overflow:visible!important}
-      .service-visual img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important}
-      .service-result{margin-top:20px!important;padding-top:0!important;border-top:0!important}
-      .service-result small{margin-bottom:8px!important;color:#6b777f!important;font-size:10px!important;letter-spacing:.18em!important}
-      .service-result b{max-width:430px!important;font-size:clamp(18px,1.55vw,22px)!important;font-weight:400!important}
-      .service-pills,.service-pills-bottom{gap:14px 26px!important;margin-top:22px!important}
-      .service-pill{min-height:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#c9562c!important;font-size:14px!important}
+      .service-visual{
+        margin:8px 0 24px!important;width:100%!important;
+        aspect-ratio:16/10!important;overflow:visible!important;
+        display:flex!important;align-items:center!important;justify-content:center!important;
+      }
+      .service-visual img{
+        display:block!important;width:100%!important;height:100%!important;object-fit:contain!important;
+        filter:drop-shadow(0 18px 24px rgba(34,46,54,.10))!important;
+      }
+      .service-desc{
+        margin:0 0 30px!important;font-size:clamp(23px,2vw,31px)!important;
+        color:#5d6870!important;line-height:1.16!important;letter-spacing:-.025em!important;
+        max-width:620px!important;
+      }
+      .service-specs{
+        display:grid!important;grid-template-columns:1fr 1fr 1fr!important;
+        gap:0!important;margin:0 0 24px!important;width:100%!important;
+      }
+      .service-spec{
+        min-width:0!important;padding:0 24px 2px 0!important;
+      }
+      .service-spec+.service-spec{
+        border-left:1px solid rgba(18,23,27,.12)!important;
+        padding-left:36px!important;
+      }
+      .service-spec-label{
+        display:block!important;margin:0 0 12px!important;
+        font-family:var(--m)!important;font-size:11px!important;font-weight:500!important;
+        letter-spacing:.20em!important;color:#66727a!important;text-transform:uppercase!important;
+      }
+      .service-result{
+        margin:0!important;padding:0!important;border:0!important;display:block!important;
+      }
+      .service-result b{
+        display:block!important;max-width:none!important;font-size:clamp(19px,1.65vw,26px)!important;
+        font-weight:400!important;line-height:1.12!important;color:#11171c!important;letter-spacing:-.025em!important;
+      }
+      .service-result em{font-style:normal!important;color:#d85c2b!important}
+      .service-pill{
+        display:block!important;min-height:0!important;padding:0!important;border:0!important;border-radius:0!important;
+        background:transparent!important;color:#11171c!important;font-size:clamp(18px,1.5vw,24px)!important;
+        line-height:1.18!important;white-space:normal!important;
+      }
+      .service-pills,.service-pills-bottom{display:contents!important}
       .service-brief-cta{
         display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;
-        margin-top:28px!important;min-height:54px!important;padding:0 22px!important;
-        border:0!important;border-radius:16px!important;background:#d85c2b!important;color:#fff!important;
-        font-family:var(--m)!important;font-size:14px!important;font-weight:600!important;
-        letter-spacing:.035em!important;text-decoration:none!important;box-shadow:0 12px 28px rgba(216,92,43,.14)!important;
+        margin-top:22px!important;min-height:72px!important;padding:0 22px!important;
+        border:0!important;border-radius:12px!important;background:#db5524!important;color:#fff!important;
+        font-family:var(--m)!important;font-size:clamp(18px,1.65vw,25px)!important;font-weight:400!important;
+        letter-spacing:-.015em!important;text-decoration:none!important;
+        box-shadow:none!important;transition:transform .18s ease,background .18s ease!important;
       }
-      .service-brief-cta:hover{transform:translateY(-1px)!important;background:#c95126!important}
+      .service-brief-cta:hover{transform:translateY(-2px)!important;background:#c94b1d!important}
+
       .hero h1 .hero-accent{order:-1;margin:0 0 14px 2px;font-family:var(--m);font-size:12px;line-height:1.35;font-weight:500;letter-spacing:.02em;max-width:560px}
       html[lang="ru"] .hero-copy{width:min(800px,60vw)}
       html[lang="ru"] .hero-title{font-size:clamp(44px,5.7vw,82px);line-height:.98;letter-spacing:-.055em;max-width:800px}
       html[lang="ru"] .hero-subtitle{font-size:clamp(21px,2.4vw,34px);max-width:680px}
 
+      @media(max-width:900px){
+        .services{padding:36px 0 56px!important}
+        .services>.shell{width:auto!important;margin-left:0!important;margin-right:0!important}
+        .services-stage{padding:0!important}
+        .services-panel{grid-template-columns:1fr!important}
+        .service-offer,.service-offer:first-of-type{
+          width:100%!important;padding:42px 30px 52px!important;margin:0!important;transform:none!important;
+        }
+        .service-offer:first-of-type{padding-top:34px!important}
+        .service-offer+.service-offer{
+          border-left:0!important;border-top:1px solid rgba(18,23,27,.08)!important;
+          padding:54px 30px 44px!important;
+        }
+        .service-offer h3{
+          font-size:clamp(60px,16vw,86px)!important;line-height:.92!important;margin-bottom:18px!important;
+        }
+        .service-visual{
+          aspect-ratio:16/10!important;margin:2px -6px 26px!important;width:calc(100% + 12px)!important;
+        }
+        .service-desc{
+          font-size:clamp(21px,6vw,28px)!important;line-height:1.16!important;margin-bottom:30px!important;
+          max-width:90%!important;
+        }
+        .service-specs{grid-template-columns:1fr!important;margin-bottom:8px!important}
+        .service-spec{
+          padding:18px 0 22px!important;border-top:1px solid rgba(18,23,27,.10)!important;
+        }
+        .service-spec+.service-spec{
+          border-left:0!important;padding-left:0!important;
+        }
+        .service-spec-label{font-size:10px!important;margin-bottom:9px!important}
+        .service-result b,.service-pill{font-size:20px!important;line-height:1.22!important}
+        .service-brief-cta{
+          min-height:64px!important;margin-top:22px!important;border-radius:12px!important;
+          font-size:18px!important;
+        }
+      }
+
       @media(max-width:640px){
-        .services{padding-top:38px!important;padding-bottom:62px!important}
-        .services-stage{padding:18px 0 10px!important}
-        .services-panel{grid-template-columns:1fr!important;gap:58px!important}
-        .service-offer,.service-offer:first-of-type{width:100%!important;padding:0!important;margin:0!important;transform:none!important}
-        .service-offer h3{font-size:clamp(38px,11vw,48px)!important;line-height:.98!important}
-        .service-desc{font-size:17px!important;line-height:1.35!important}
-        .service-visual{margin:22px -4px 20px!important;width:calc(100% + 8px)!important}
-        .service-result{margin-top:18px!important}.service-result b{font-size:18px!important;line-height:1.35!important}
-        .service-pills,.service-pills-bottom{display:grid!important;gap:11px!important;margin-top:18px!important}
-        .service-pill{font-size:13px!important}
-        .service-brief-cta{margin-top:22px!important;min-height:50px!important;border-radius:14px!important;font-size:13px!important}
+        .services{padding-top:18px!important;padding-bottom:38px!important}
+        .service-offer,.service-offer:first-of-type{padding-left:24px!important;padding-right:24px!important}
+        .service-offer h3{font-size:clamp(58px,17vw,78px)!important}
+        .service-visual{margin-left:-8px!important;width:calc(100% + 16px)!important}
+        .service-desc{max-width:100%!important;font-size:22px!important}
+        .service-result b,.service-pill{font-size:19px!important}
+        .service-brief-cta{font-size:17px!important;min-height:60px!important}
+
         .hero h1 .hero-accent{font-size:9px;line-height:1.3;max-width:62vw;margin:0 0 10px 1px}
         html[lang="ru"] .hero-copy{width:72vw;padding-top:104px}
         html[lang="ru"] .hero-title{font-size:clamp(29px,8.7vw,37px);line-height:1.01;max-width:72vw}
