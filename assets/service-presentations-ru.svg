@@ -1,8 +1,66 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
-<defs><filter id="s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#5a6570" flood-opacity=".18"/></filter></defs>
-<rect width="1600" height="900" fill="none"/>
-<g filter="url(#s)">
-<g transform="translate(110 120) rotate(-4 540 300)"><rect width="1080" height="608" rx="18" fill="#f6f0e8"/><text x="62" y="76" font-family="Arial,sans-serif" font-size="22" fill="#ca5a32">THE CASE</text><text x="62" y="138" font-family="Arial,sans-serif" font-size="46" fill="#15191c">АРГУМЕНТАЦИЯ</text><text x="62" y="182" font-family="Arial,sans-serif" font-size="23" fill="#66717a">Логика, которая ведёт к решению</text><rect x="62" y="250" width="430" height="210" rx="10" fill="#eef3f6"/><path d="M95 420 L180 360 L265 390 L355 295 L455 330" fill="none" stroke="#ca5a32" stroke-width="8"/><text x="95" y="494" font-family="Arial,sans-serif" font-size="20" fill="#66717a">План</text><text x="210" y="494" font-family="Arial,sans-serif" font-size="20" fill="#66717a">Факт</text><text x="350" y="494" font-family="Arial,sans-serif" font-size="20" fill="#66717a">Рост</text></g>
-<g transform="translate(260 86) rotate(2 540 300)"><rect width="1080" height="608" rx="18" fill="#eef3f6"/><text x="62" y="76" font-family="Arial,sans-serif" font-size="22" fill="#ca5a32">THE CASE</text><text x="62" y="138" font-family="Arial,sans-serif" font-size="46" fill="#15191c">ВИЗУАЛЬНЫЙ КОД</text><text x="62" y="182" font-family="Arial,sans-serif" font-size="23" fill="#66717a">Акценты, иерархия, ритм</text><rect x="655" y="112" width="338" height="320" rx="12" fill="#dde6eb"/><rect x="708" y="169" width="54" height="190" fill="#ca5a32" opacity=".75"/><rect x="785" y="218" width="54" height="141" fill="#15191c" opacity=".8"/><rect x="862" y="137" width="54" height="222" fill="#8f9ba3"/><text x="655" y="475" font-family="Arial,sans-serif" font-size="20" fill="#66717a">Выручка</text><text x="790" y="475" font-family="Arial,sans-serif" font-size="20" fill="#66717a">Динамика</text></g>
-<g transform="translate(390 150)"><rect width="1080" height="608" rx="18" fill="#fbfdff"/><text x="62" y="76" font-family="Arial,sans-serif" font-size="22" fill="#ca5a32">THE CASE</text><text x="62" y="170" font-family="Arial,sans-serif" font-size="66" fill="#15191c">Презентации</text><text x="62" y="240" font-family="Arial,sans-serif" font-size="66" fill="#15191c">для бизнеса</text><text x="62" y="308" font-family="Arial,sans-serif" font-size="28" fill="#59656e">Для конференций, выступлений, учёбы</text><line x1="62" y1="360" x2="1018" y2="360" stroke="#d7dfe4"/><text x="62" y="416" font-family="Arial,sans-serif" font-size="20" letter-spacing="4" fill="#7a858d">РЕЗУЛЬТАТ</text><text x="62" y="470" font-family="Arial,sans-serif" font-size="40" fill="#15191c">PPTX + PDF</text><circle cx="872" cy="210" r="118" fill="#e8eef2"/><path d="M804 256c44-90 96-116 136-78-24 36-51 66-90 89-18 11-37 9-46-11z" fill="#ca5a32" opacity=".85"/></g>
-</g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" role="img" aria-label="Бизнес-презентации THE CASE">
+<defs>
+  <filter id="sh" x="-20%" y="-20%" width="140%" height="160%"><feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#26333b" flood-opacity=".20"/></filter>
+  <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#f1f4f6"/></linearGradient>
+  <linearGradient id="soft" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6f0eb"/><stop offset="1" stop-color="#ffffff"/></linearGradient>
+</defs>
+<g filter="url(#sh)">
+  <g transform="translate(98 95) rotate(-5 330 220)">
+    <rect width="760" height="428" rx="18" fill="url(#paper)" stroke="#d8dde0"/>
+    <text x="42" y="46" font-family="Arial,sans-serif" font-size="15" font-weight="700" fill="#d85c2b">THE CASE</text>
+    <text x="42" y="100" font-family="Georgia,serif" font-size="38" fill="#11171c">Сегменты рынка</text>
+    <text x="42" y="126" font-family="Arial,sans-serif" font-size="12" letter-spacing="3" fill="#727c82">СТРАТЕГИЯ / РЫНОК / РОСТ</text>
+    <g transform="translate(42 166)">
+      <rect width="268" height="206" rx="8" fill="#f6f7f8"/>
+      <g font-family="Arial,sans-serif" font-size="12" fill="#11171c">
+        <text x="18" y="34" font-weight="700">01  Enterprise</text><text x="18" y="58" fill="#6c757b">Крупные компании</text>
+        <line x1="18" y1="76" x2="250" y2="76" stroke="#d9dde0"/>
+        <text x="18" y="108" font-weight="700">02  Mid-Market</text><text x="18" y="132" fill="#6c757b">Компании в фазе роста</text>
+        <line x1="18" y1="150" x2="250" y2="150" stroke="#d9dde0"/>
+        <text x="18" y="182" font-weight="700">03  SMB</text>
+      </g>
+    </g>
+    <g transform="translate(338 162)">
+      <text x="0" y="18" font-family="Arial,sans-serif" font-size="11" fill="#7a848a">ПОТЕНЦИАЛ РЫНКА</text>
+      <text x="0" y="58" font-family="Georgia,serif" font-size="34" fill="#11171c">₽ 125 млрд</text>
+      <rect x="0" y="92" width="338" height="160" rx="10" fill="#eef1f3"/>
+      <path d="M22 181 L74 148 L118 161 L164 124 L205 138 L253 98 L306 112" fill="none" stroke="#d85c2b" stroke-width="5"/>
+      <g fill="#aeb6bb"><rect x="22" y="196" width="26" height="34"/><rect x="74" y="184" width="26" height="46"/><rect x="126" y="170" width="26" height="60"/><rect x="178" y="152" width="26" height="78"/><rect x="230" y="128" width="26" height="102"/></g>
+    </g>
+  </g>
+  <g transform="translate(428 92) rotate(5 370 214)">
+    <rect width="760" height="428" rx="18" fill="url(#soft)" stroke="#d8dde0"/>
+    <text x="42" y="46" font-family="Arial,sans-serif" font-size="15" font-weight="700" fill="#d85c2b">THE CASE</text>
+    <text x="42" y="104" font-family="Georgia,serif" font-size="40" fill="#11171c">Стратегия роста</text>
+    <text x="42" y="132" font-family="Arial,sans-serif" font-size="12" letter-spacing="3" fill="#727c82">ЛЮДИ / ПРОДУКТ / РЫНОК / МАСШТАБ</text>
+    <g transform="translate(42 174)" font-family="Arial,sans-serif">
+      <g><path d="M0 0h158l32 54-32 54H0z" fill="#eceff1"/><text x="18" y="28" font-size="22" fill="#11171c">01</text><text x="18" y="54" font-size="12" font-weight="700">Основа</text><text x="18" y="74" font-size="11" fill="#6d777d">2026</text></g>
+      <g transform="translate(166)"><path d="M0 0h158l32 54-32 54H0l32-54z" fill="#e3e7e9"/><text x="40" y="28" font-size="22">02</text><text x="40" y="54" font-size="12" font-weight="700">Ускорение</text><text x="40" y="74" font-size="11" fill="#6d777d">2027</text></g>
+      <g transform="translate(332)"><path d="M0 0h158l32 54-32 54H0l32-54z" fill="#d85c2b"/><text x="40" y="28" font-size="22" fill="#fff">03</text><text x="40" y="54" font-size="12" font-weight="700" fill="#fff">Масштаб</text><text x="40" y="74" font-size="11" fill="#fff">2028</text></g>
+      <g transform="translate(498)"><path d="M0 0h150v108H0l32-54z" fill="#eceff1"/><text x="40" y="28" font-size="22">04</text><text x="40" y="54" font-size="12" font-weight="700">Лидерство</text><text x="40" y="74" font-size="11" fill="#6d777d">2029+</text></g>
+    </g>
+    <g transform="translate(42 316)" font-family="Arial,sans-serif"><text font-size="11" fill="#788187">ОЖИДАЕМЫЙ РЕЗУЛЬТАТ</text><text y="34" font-size="22" fill="#11171c">Рост выручки · рост маржи · системное масштабирование</text></g>
+  </g>
+  <g transform="translate(206 350)">
+    <rect width="1018" height="510" rx="20" fill="#fff" stroke="#d5dadd"/>
+    <text x="46" y="48" font-family="Arial,sans-serif" font-size="15" font-weight="700" fill="#d85c2b">THE CASE</text>
+    <text x="46" y="110" font-family="Georgia,serif" font-size="52" fill="#11171c">Performance Dashboard</text>
+    <text x="46" y="140" font-family="Arial,sans-serif" font-size="12" letter-spacing="3" fill="#788187">КЛЮЧЕВЫЕ МЕТРИКИ / ЭФФЕКТИВНОСТЬ / ВОЗМОЖНОСТИ</text>
+    <g transform="translate(46 178)" font-family="Arial,sans-serif">
+      <g><rect width="210" height="86" rx="8" fill="#f4f6f7"/><text x="18" y="34" font-family="Georgia,serif" font-size="30">₽48,2M</text><text x="18" y="62" font-size="10" fill="#6f797f">ВЫРУЧКА</text><text x="138" y="34" font-size="14" fill="#d85c2b">↑ 24%</text></g>
+      <g transform="translate(224)"><rect width="190" height="86" rx="8" fill="#f4f6f7"/><text x="18" y="34" font-family="Georgia,serif" font-size="30">18,6%</text><text x="18" y="62" font-size="10" fill="#6f797f">EBITDA MARGIN</text><text x="116" y="34" font-size="14" fill="#d85c2b">↑ 3,2 п.п.</text></g>
+      <g transform="translate(428)"><rect width="190" height="86" rx="8" fill="#f4f6f7"/><text x="18" y="34" font-family="Georgia,serif" font-size="30">102K</text><text x="18" y="62" font-size="10" fill="#6f797f">КЛИЕНТЫ</text><text x="116" y="34" font-size="14" fill="#d85c2b">↑ 28%</text></g>
+      <g transform="translate(632)"><rect width="190" height="86" rx="8" fill="#f4f6f7"/><text x="18" y="34" font-family="Georgia,serif" font-size="30">₽471</text><text x="18" y="62" font-size="10" fill="#6f797f">ARPU</text><text x="118" y="34" font-size="14" fill="#d85c2b">↑ 12%</text></g>
+    </g>
+    <g transform="translate(46 292)" font-family="Arial,sans-serif">
+      <rect width="398" height="164" rx="10" fill="#fafbfb" stroke="#e1e5e7"/>
+      <text x="16" y="24" font-size="13" font-weight="700">Динамика выручки</text>
+      <line x1="44" y1="136" x2="366" y2="136" stroke="#ccd2d5"/><line x1="44" y1="56" x2="44" y2="136" stroke="#ccd2d5"/>
+      <g fill="#c6cdd1"><rect x="70" y="108" width="32" height="28"/><rect x="128" y="98" width="32" height="38"/><rect x="186" y="84" width="32" height="52"/><rect x="244" y="68" width="32" height="68"/></g><rect x="302" y="48" width="32" height="88" fill="#d85c2b"/>
+      <text x="66" y="153" font-size="9" fill="#7b858b">2022</text><text x="124" y="153" font-size="9" fill="#7b858b">2023</text><text x="182" y="153" font-size="9" fill="#7b858b">2024</text><text x="240" y="153" font-size="9" fill="#7b858b">2025</text><text x="298" y="153" font-size="9" fill="#7b858b">2026</text>
+      <g transform="translate(420)"><rect width="300" height="164" rx="10" fill="#fafbfb" stroke="#e1e5e7"/><text x="16" y="24" font-size="13" font-weight="700">Unit economics</text><text x="16" y="58" font-size="11" fill="#687279">CAC</text><text x="200" y="58" font-size="15">₽8 400</text><line x1="16" y1="72" x2="282" y2="72" stroke="#e1e5e7"/><text x="16" y="98" font-size="11" fill="#687279">LTV</text><text x="200" y="98" font-size="15">₽46 100</text><line x1="16" y1="112" x2="282" y2="112" stroke="#e1e5e7"/><text x="16" y="138" font-size="11" fill="#687279">LTV / CAC</text><text x="200" y="138" font-size="15" fill="#d85c2b">5,5×</text></g>
+      <g transform="translate(740)"><rect width="220" height="164" rx="10" fill="#fafbfb" stroke="#e1e5e7"/><text x="16" y="24" font-size="13" font-weight="700">Приоритеты</text><g font-size="11"><text x="16" y="58" fill="#d85c2b">01</text><text x="48" y="58">Рост core-продукта</text><text x="16" y="92" fill="#7a848a">02</text><text x="48" y="92">Операционная эффективность</text><text x="16" y="126" fill="#7a848a">03</text><text x="48" y="126">Новые сегменты</text></g></g>
+    </g>
+  </g>
+</g>
+</svg>
