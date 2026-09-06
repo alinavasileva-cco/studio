@@ -3,18 +3,17 @@
   original.src = 'thecase-original.js?v=20260905-hero-copy';
 
   original.onload = () => {
-    // Final hero copy. Russian version leads with the service proposition;
-    // English version keeps THE CASE as the brand headline.
+    // Approved copy only. Layout, imagery and visual styling stay unchanged.
     const heroTitle = document.querySelector('.hero-title');
     const heroSubtitle = document.querySelector('.hero-subtitle');
     const heroAccent = document.querySelector('.hero-accent');
 
     if (heroTitle) {
-      heroTitle.dataset.ru = 'Презентации для бизнеса';
+      heroTitle.dataset.ru = 'Презентации и сайты для бизнеса';
       heroTitle.dataset.en = 'THE CASE';
     }
     if (heroSubtitle) {
-      heroSubtitle.dataset.ru = 'инструмент, который продаёт';
+      heroSubtitle.dataset.ru = 'Концепция. Аргументация. Визуальный код.';
       heroSubtitle.dataset.en = 'Business. Not just slides.';
     }
     if (heroAccent) {
@@ -38,9 +37,67 @@
         document.title = 'THE CASE — Business. Not just slides.';
         if (metaDescription) metaDescription.content = 'THE CASE creates business presentations that make products look compelling and sell the idea clearly.';
       } else {
-        document.title = 'Презентации для бизнеса — THE CASE';
-        if (metaDescription) metaDescription.content = 'Презентации для бизнеса: инструмент, который продаёт. Ваш продукт должен выглядеть убедительно.';
+        document.title = 'Презентации и сайты для бизнеса — THE CASE';
+        if (metaDescription) metaDescription.content = 'THE CASE — презентации и сайты для бизнеса. Концепция. Аргументация. Визуальный код.';
       }
+    };
+
+    const applyApprovedCopy = lang => {
+      if (lang !== 'ru') return;
+
+      const setRu = (el, text) => {
+        if (!el) return;
+        el.dataset.ru = text;
+        el.textContent = text;
+      };
+
+      setRu(document.querySelector('.head-cta'), 'ЗАКАЗАТЬ ↗');
+      setRu(document.querySelector('.hero-actions .button.primary'), 'ЗАКАЗАТЬ ПРЕЗЕНТАЦИЮ ↗');
+
+      // Old explanatory hero labels are removed textually only.
+      document.querySelectorAll('.hero-facts strong, .hero-facts small').forEach(el => {
+        el.dataset.ru = '';
+        el.textContent = '';
+      });
+
+      setRu(document.querySelector('.services .section-note'), '');
+
+      const presentationOffer = [...document.querySelectorAll('.service-offer')].find(offer =>
+        offer.querySelector('[data-ru="Презентации"]')
+      );
+      if (presentationOffer) {
+        setRu(presentationOffer.querySelector('.service-desc'), 'Для бизнеса, конференций, выступлений, учёбы');
+        const resultParts = presentationOffer.querySelectorAll('.service-result b span');
+        if (resultParts[0]) {
+          resultParts[0].dataset.ru = '';
+          resultParts[0].textContent = '';
+        }
+        if (resultParts[1]) {
+          resultParts[1].dataset.ru = ' + ';
+          resultParts[1].textContent = ' + ';
+        }
+      }
+
+      setRu(document.querySelector('.work h2'), 'ПОРТФОЛИО');
+
+      const categories = {
+        'FABERGÉ': 'Культура',
+        'RED FOX': 'Продукт',
+        'ЕЛЕНА ЦВЕТОЧНАЯ': 'Бренд',
+        'JAPANESE MINIMALISM': 'Editorial',
+        'YANDEX TAXI': 'Recruitment',
+        'CAT GROOMER': 'Сервис'
+      };
+      document.querySelectorAll('.case-card').forEach(card => {
+        const title = card.querySelector('h3')?.textContent?.trim();
+        const category = card.querySelector('.case-meta p');
+        if (title && category && categories[title]) setRu(category, categories[title]);
+      });
+
+      const contactTitleParts = document.querySelectorAll('.contact-main h2 span');
+      if (contactTitleParts[0]) setRu(contactTitleParts[0], 'КОНТАКТЫ');
+      if (contactTitleParts[1]) setRu(contactTitleParts[1], '');
+      setRu(document.querySelector('.contact-copy'), '');
     };
 
     let currentLang = document.documentElement.lang === 'en' ? 'en' : 'ru';
@@ -49,9 +106,14 @@
       if (saved === 'ru' || saved === 'en') currentLang = saved;
     } catch (_) {}
     applyHeroLanguage(currentLang);
+    applyApprovedCopy(currentLang);
 
     document.querySelectorAll('.lang-btn').forEach(btn => {
-      btn.addEventListener('click', () => applyHeroLanguage(btn.dataset.lang));
+      btn.addEventListener('click', () => {
+        const lang = btn.dataset.lang;
+        applyHeroLanguage(lang);
+        applyApprovedCopy(lang);
+      });
     });
 
     // Services only: approved pattern, no character artwork, no card container.
