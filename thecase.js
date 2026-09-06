@@ -3,7 +3,7 @@
   original.src = 'thecase-original.js?v=20260905-hero-copy';
 
   original.onload = () => {
-    // Approved copy only. Layout, imagery and visual styling stay unchanged.
+    // Approved copy only. Hero imagery and composition stay unchanged.
     const heroTitle = document.querySelector('.hero-title');
     const heroSubtitle = document.querySelector('.hero-subtitle');
     const heroAccent = document.querySelector('.hero-accent');
@@ -21,7 +21,6 @@
       heroAccent.dataset.en = 'Your product should look compelling.';
     }
 
-    // Product slogan is a small overline above the main hero title.
     if (heroAccent && heroTitle && heroTitle.parentNode === heroAccent.parentNode) {
       heroTitle.parentNode.insertBefore(heroAccent, heroTitle);
     }
@@ -54,7 +53,6 @@
       setRu(document.querySelector('.head-cta'), 'ЗАКАЗАТЬ ↗');
       setRu(document.querySelector('.hero-actions .button.primary'), 'ЗАКАЗАТЬ ПРЕЗЕНТАЦИЮ ↗');
 
-      // Old explanatory hero labels are removed textually only.
       document.querySelectorAll('.hero-facts strong, .hero-facts small').forEach(el => {
         el.dataset.ru = '';
         el.textContent = '';
@@ -108,15 +106,6 @@
     applyHeroLanguage(currentLang);
     applyApprovedCopy(currentLang);
 
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const lang = btn.dataset.lang;
-        applyHeroLanguage(lang);
-        applyApprovedCopy(lang);
-      });
-    });
-
-    // Services only: approved pattern, no character artwork, no card container.
     document.querySelectorAll('.services-art-base, .services-art-hand').forEach(el => {
       el.style.display = 'none';
       el.setAttribute('aria-hidden', 'true');
@@ -127,15 +116,44 @@
       const offers = [...servicesPanel.querySelectorAll('.service-offer')];
       const presentations = offers.find(offer => offer.querySelector('[data-ru="Презентации"]'));
       if (presentations) servicesPanel.prepend(presentations);
+
+      [...servicesPanel.querySelectorAll('.service-offer')].forEach(offer => {
+        if (!offer.querySelector('.service-brief-cta')) {
+          const cta = document.createElement('a');
+          cta.className = 'service-brief-cta';
+          cta.href = 'https://t.me/AlinaVasileva';
+          cta.target = '_blank';
+          cta.rel = 'noopener';
+          cta.dataset.ru = 'ОТПРАВИТЬ ТЗ ↗';
+          cta.dataset.en = 'SEND BRIEF ↗';
+          cta.textContent = currentLang === 'en' ? cta.dataset.en : cta.dataset.ru;
+          offer.appendChild(cta);
+        }
+      });
     }
+
+    const applyServiceLanguage = lang => {
+      document.querySelectorAll('.service-brief-cta').forEach(cta => {
+        cta.textContent = cta.dataset[lang] || cta.textContent;
+      });
+    };
+    applyServiceLanguage(currentLang);
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lang = btn.dataset.lang;
+        currentLang = lang;
+        applyHeroLanguage(lang);
+        applyApprovedCopy(lang);
+        applyServiceLanguage(lang);
+      });
+    });
 
     const style = document.createElement('style');
     style.textContent = `
       .services{
-        background-image:url('assets/services-pattern-final.svg?v=20260905-final')!important;
-        background-size:cover!important;
-        background-position:center!important;
-        background-repeat:no-repeat!important;
+        background:#eef3f6!important;
+        background-image:linear-gradient(180deg,#eef3f6 0%,#f7fafc 50%,#eef3f6 100%)!important;
         border-bottom:0!important;
         padding-top:76px!important;
         padding-bottom:90px!important;
@@ -153,6 +171,7 @@
         display:grid!important;
         grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
         gap:clamp(56px,8vw,128px)!important;
+        align-items:start!important;
         background:transparent!important;
         border:0!important;
         border-radius:0!important;
@@ -163,13 +182,17 @@
       .service-offer,
       .service-offer:first-of-type{
         padding:0!important;
+        margin:0!important;
         min-height:0!important;
         background:transparent!important;
+        transform:none!important;
+        align-self:start!important;
       }
       .service-offer+.service-offer{border-left:0!important;border-top:0!important}
       .service-icon{
         width:54px!important;
         height:54px!important;
+        margin:0!important;
         border-radius:0!important;
         background:transparent!important;
         border:0!important;
@@ -218,6 +241,24 @@
         color:#c9562c!important;
         font-size:14px!important;
       }
+      .service-brief-cta{
+        display:inline-flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        margin-top:34px!important;
+        min-height:48px!important;
+        padding:0 22px!important;
+        border:1px solid rgba(18,23,27,.22)!important;
+        border-radius:999px!important;
+        background:rgba(255,255,255,.36)!important;
+        color:#12171b!important;
+        font-family:var(--m)!important;
+        font-size:12px!important;
+        font-weight:600!important;
+        letter-spacing:.08em!important;
+        text-decoration:none!important;
+      }
+      .service-brief-cta:hover{background:#fff!important;border-color:rgba(18,23,27,.36)!important}
 
       .hero h1 .hero-accent{
         order:-1;
@@ -244,27 +285,35 @@
 
       @media(max-width:640px){
         .services{
-          padding-top:54px!important;
-          padding-bottom:74px!important;
-          background-position:center top!important;
+          padding-top:42px!important;
+          padding-bottom:64px!important;
+          background-image:linear-gradient(180deg,#eef3f6 0%,#f8fbfd 50%,#eef3f6 100%)!important;
         }
-        .services-stage{padding:26px 8px 20px!important}
+        .services-stage{padding:22px 0 14px!important}
         .services-panel{
           grid-template-columns:1fr!important;
-          gap:84px!important;
+          gap:46px!important;
         }
-        .service-icon{width:46px!important;height:46px!important}
+        .service-offer,
+        .service-offer:first-of-type{
+          width:100%!important;
+          padding:0!important;
+          margin:0!important;
+          transform:none!important;
+        }
+        .service-icon{width:46px!important;height:46px!important;margin:0!important}
         .service-icon svg{width:36px!important;height:36px!important}
         .service-offer h3{
-          margin-top:14px!important;
+          margin:14px 0 10px!important;
           font-size:clamp(36px,11vw,46px)!important;
           line-height:.98!important;
         }
-        .service-desc{font-size:17px!important;line-height:1.35!important}
-        .service-result{margin-top:28px!important}
+        .service-desc{margin:0!important;font-size:17px!important;line-height:1.35!important}
+        .service-result{margin-top:24px!important}
         .service-result b{font-size:18px!important;line-height:1.35!important}
-        .service-pills,.service-pills-bottom{display:grid!important;gap:14px!important;margin-top:25px!important}
+        .service-pills,.service-pills-bottom{display:grid!important;gap:12px!important;margin-top:22px!important}
         .service-pill{font-size:13px!important}
+        .service-brief-cta{margin-top:26px!important;min-height:46px!important;padding:0 19px!important;font-size:11px!important}
 
         .hero h1 .hero-accent{
           font-size:9px;
