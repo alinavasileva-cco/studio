@@ -1,5 +1,5 @@
-# studio
+# THE CASE
 
-VASILEVA STUDIO — отдельный сайт-портфолио услуг по созданию сайтов и бизнес-презентаций.
+Portfolio site for THE CASE.
 
-Проект рассчитан на публикацию через GitHub Pages без сборщика: `index.html`, `styles.css`, `script.js` и папка `assets`.
+Live: https://alinavasileva-cco.github.io/studio/
