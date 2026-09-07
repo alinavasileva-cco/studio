@@ -48,7 +48,7 @@
             <h3 class="services-master-subhead" data-ru="Презентации и сайты" data-en="Presentations and websites">Презентации и сайты</h3>
             <p class="services-master-copy" data-ru="Для бизнеса, конференций, выступлений и учёбы." data-en="For business, conferences, talks and study.">Для бизнеса, конференций, выступлений и учёбы.</p>
             <figure class="services-master-visual">
-              <img src="assets/service-combo-premium-final.webp?v=20260907-1358" alt="THE CASE — презентации и сайты" loading="eager" decoding="async" />
+              <img src="assets/service-combo-premium-final.png?v=20260907-final-png" alt="THE CASE — презентации и сайты" loading="eager" decoding="async" />
             </figure>
             <a class="services-master-cta" href="https://t.me/AlinaVasileva" target="_blank" rel="noopener" data-ru="Отправить ТЗ →" data-en="Send brief →">Отправить ТЗ →</a>
           </div>
@@ -141,8 +141,8 @@
       .services-master-title{margin:0 0 48px!important;font-family:var(--u)!important;font-size:clamp(44px,5vw,70px)!important;font-weight:300!important;line-height:1!important;letter-spacing:-.05em!important;text-transform:uppercase!important;color:#12171b!important}
       .services-master-subhead{margin:0!important;max-width:1120px!important;font-family:var(--u)!important;font-size:clamp(38px,4.6vw,66px)!important;font-weight:300!important;line-height:1.04!important;letter-spacing:-.055em!important;color:#12171b!important}
       .services-master-copy{margin:24px 0 0!important;max-width:920px!important;font-family:var(--m)!important;font-size:clamp(17px,1.55vw,22px)!important;line-height:1.48!important;color:#59656d!important}
-      .services-master-visual{margin:44px 0 0!important;width:100%!important;min-height:0!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important}
-      .services-master-visual img{display:block!important;width:min(1240px,100%)!important;height:auto!important;max-height:none!important;margin:0 auto!important;object-fit:contain!important;object-position:center!important;background:transparent!important}
+      .services-master-visual{display:block!important;width:100%!important;height:auto!important;min-height:0!important;margin:36px 0 0!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important}
+      .services-master-visual img{display:block!important;visibility:visible!important;opacity:1!important;width:min(1200px,100%)!important;max-width:100%!important;height:auto!important;max-height:none!important;margin:0 auto!important;padding:0!important;object-fit:contain!important;object-position:center center!important;background:transparent!important;border:0!important;box-shadow:none!important;transform:none!important}
       .services-master-cta{display:flex!important;align-items:center!important;justify-content:center!important;width:min(760px,100%)!important;min-height:68px!important;margin:34px auto 0!important;padding:0 28px!important;border:0!important;border-radius:14px!important;background:#d85c2b!important;color:#fff!important;font-family:var(--m)!important;font-size:18px!important;font-weight:500!important;letter-spacing:-.01em!important;text-decoration:none!important;box-shadow:none!important;transition:transform .18s ease,background .18s ease!important}
       .services-master-cta:hover{transform:translateY(-2px)!important;background:#c94b1d!important}
       @media(max-width:900px){.services{padding:68px 0 78px!important}.services>.shell{width:auto!important;margin-left:30px!important;margin-right:30px!important}.services-master-title{margin-bottom:36px!important}.services-master-visual{margin-top:38px!important;padding:0!important;background:transparent!important}}
@@ -157,8 +157,8 @@
         .services-master-title{margin-bottom:30px!important;font-size:clamp(39px,11.5vw,52px)!important;line-height:1!important;letter-spacing:-.055em!important}
         .services-master-subhead{max-width:100%!important;font-size:clamp(29px,8.8vw,39px)!important;line-height:1.06!important;letter-spacing:-.05em!important}
         .services-master-copy{margin-top:20px!important;font-size:16px!important;line-height:1.48!important;max-width:100%!important}
-        .services-master-visual{margin:30px -10px 0!important;width:calc(100% + 20px)!important;padding:0!important;background:transparent!important}
-        .services-master-visual img{width:100%!important;max-height:none!important;margin:0!important}
+        .services-master-visual{width:calc(100% + 16px)!important;margin:28px -8px 0!important;padding:0!important;min-height:0!important;background:transparent!important}
+        .services-master-visual img{display:block!important;visibility:visible!important;opacity:1!important;width:100%!important;max-width:none!important;height:auto!important;max-height:none!important;margin:0!important;object-fit:contain!important}
         .services-master-cta{width:100%!important;min-height:60px!important;margin-top:26px!important;border-radius:12px!important;font-size:17px!important}
       }
     `;
