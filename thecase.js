@@ -48,7 +48,7 @@
             <h3 class="services-master-subhead" data-ru="Презентации и сайты" data-en="Presentations and websites">Презентации и сайты</h3>
             <p class="services-master-copy" data-ru="Для бизнеса, конференций, выступлений и учёбы." data-en="For business, conferences, talks and study.">Для бизнеса, конференций, выступлений и учёбы.</p>
             <figure class="services-master-visual">
-              <img src="assets/service-combo-premium-final.svg?v=20260907-1007-final" alt="THE CASE — презентации и сайты" loading="eager" decoding="async" />
+              <img src="assets/service-combo-premium-final.webp?v=20260907-1312" alt="THE CASE — презентации и сайты" loading="eager" decoding="async" />
             </figure>
             <a class="services-master-cta" href="https://t.me/AlinaVasileva" target="_blank" rel="noopener" data-ru="Отправить ТЗ →" data-en="Send brief →">Отправить ТЗ →</a>
           </div>
