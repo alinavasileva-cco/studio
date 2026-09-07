@@ -46,9 +46,9 @@
           <div class="services-master">
             <h2 class="services-master-title" data-ru="УСЛУГИ" data-en="SERVICES">УСЛУГИ</h2>
             <h3 class="services-master-subhead" data-ru="Презентации и сайты для бизнеса" data-en="Presentations and websites for business">Презентации и сайты для бизнеса</h3>
-            <p class="services-master-copy" data-ru="Презентации для бизнеса, конференций, выступлений и учёбы. Сайты — одностраничники и лендинги." data-en="Presentations for business, conferences, talks and study. Websites — one-page sites and landing pages.">Презентации для бизнеса, конференций, выступлений и учёбы. Сайты — одностраничники и лендинги.</p>
+            <p class="services-master-copy" data-ru="Для бизнеса, конференций, выступлений и учёбы. Сайты — одностраничники и лендинги." data-en="For business, conferences, talks and study. Websites — one-page sites and landing pages.">Для бизнеса, конференций, выступлений и учёбы. Сайты — одностраничники и лендинги.</p>
             <figure class="services-master-visual">
-              <img src="assets/service-combo-premium.svg?v=20260907-final" alt="THE CASE — презентации и сайты для бизнеса" loading="lazy" decoding="async" />
+              <img src="assets/service-combo-premium-hd.webp?v=20260907-hd" alt="THE CASE — презентации и сайты для бизнеса" loading="lazy" decoding="async" />
             </figure>
             <a class="services-master-cta" href="https://t.me/AlinaVasileva" target="_blank" rel="noopener" data-ru="Отправить ТЗ →" data-en="Send brief →">Отправить ТЗ →</a>
           </div>
@@ -90,8 +90,8 @@
       setText(
         servicesCopy,
         lang,
-        'Презентации для бизнеса, конференций, выступлений и учёбы. Сайты — одностраничники и лендинги.',
-        'Presentations for business, conferences, talks and study. Websites — one-page sites and landing pages.'
+        'Для бизнеса, конференций, выступлений и учёбы. Сайты — одностраничники и лендинги.',
+        'For business, conferences, talks and study. Websites — one-page sites and landing pages.'
       );
       setText(servicesCta, lang, 'Отправить ТЗ →', 'Send brief →');
 
@@ -153,7 +153,7 @@
         color:#12171b!important;white-space:nowrap!important
       }
 
-      /* SERVICES: one unified product block */
+      /* SERVICES: one unified product block, same typography as hero */
       .services{
         background:#eef3f6!important;background-image:none!important;border-bottom:0!important;
         padding:94px 0 104px!important
@@ -175,16 +175,16 @@
         font-size:clamp(17px,1.55vw,22px)!important;line-height:1.48!important;color:#59656d!important
       }
       .services-master-visual{
-        margin:48px 0 0!important;width:100%!important;min-height:0!important;padding:26px 20px!important;
-        background:#fff!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important
+        margin:46px 0 0!important;width:100%!important;min-height:0!important;padding:0!important;
+        background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important
       }
       .services-master-visual img{
-        display:block!important;width:100%!important;height:auto!important;max-height:720px!important;
-        object-fit:contain!important;object-position:center!important
+        display:block!important;width:100%!important;height:auto!important;max-height:760px!important;
+        object-fit:contain!important;object-position:center!important;background:transparent!important
       }
       .services-master-cta{
         display:flex!important;align-items:center!important;justify-content:center!important;
-        width:min(760px,100%)!important;min-height:68px!important;margin:34px auto 0!important;padding:0 28px!important;
+        width:min(760px,100%)!important;min-height:68px!important;margin:30px auto 0!important;padding:0 28px!important;
         border:0!important;border-radius:14px!important;background:#d85c2b!important;color:#fff!important;
         font-family:var(--m)!important;font-size:18px!important;font-weight:500!important;letter-spacing:-.01em!important;
         text-decoration:none!important;box-shadow:none!important;transition:transform .18s ease,background .18s ease!important
@@ -195,7 +195,7 @@
         .services{padding:68px 0 78px!important}
         .services>.shell{width:auto!important;margin-left:30px!important;margin-right:30px!important}
         .services-master-title{margin-bottom:36px!important}
-        .services-master-visual{margin-top:38px!important;padding:18px 10px!important}
+        .services-master-visual{margin-top:38px!important;padding:0!important}
       }
 
       @media(max-width:640px){
@@ -227,9 +227,9 @@
           margin-top:20px!important;font-size:16px!important;line-height:1.48!important;max-width:100%!important
         }
         .services-master-visual{
-          margin:32px -12px 0!important;width:calc(100% + 24px)!important;padding:10px 0!important;background:#fff!important
+          margin:32px -8px 0!important;width:calc(100% + 16px)!important;padding:0!important;background:transparent!important
         }
-        .services-master-visual img{width:100%!important;max-height:none!important}
+        .services-master-visual img{width:100%!important;max-height:none!important;background:transparent!important}
         .services-master-cta{
           width:100%!important;min-height:60px!important;margin-top:26px!important;border-radius:12px!important;
           font-size:17px!important
