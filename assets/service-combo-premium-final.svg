@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3000" height="1680" viewBox="0 0 3000 1680" fill="none">
+<defs>
+  <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#6C747B"/><stop offset=".45" stop-color="#22282D"/><stop offset="1" stop-color="#8D969D"/></linearGradient>
+  <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFFDF9"/><stop offset="1" stop-color="#F4EEE8"/></linearGradient>
+  <linearGradient id="terra" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#F27A42"/><stop offset="1" stop-color="#B43A18"/></linearGradient>
+  <linearGradient id="mount" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#E5B18E"/><stop offset=".6" stop-color="#B9481D"/><stop offset="1" stop-color="#6D2415"/></linearGradient>
+  <linearGradient id="arch" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#D96B34"/><stop offset=".45" stop-color="#A63B18"/><stop offset="1" stop-color="#4F241B"/></linearGradient>
+  <filter id="shadow" x="-25%" y="-25%" width="150%" height="170%"><feDropShadow dx="0" dy="34" stdDeviation="28" flood-color="#182028" flood-opacity=".18"/></filter>
+  <filter id="soft" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#182028" flood-opacity=".10"/></filter>
+  <clipPath id="screenClip"><rect x="1900" y="280" width="900" height="600" rx="18"/></clipPath>
+</defs>
+
+<!-- presentation stack -->
+<g filter="url(#shadow)">
+  <g transform="translate(110 410) rotate(-6 410 370)">
+    <rect width="820" height="620" rx="10" fill="#FFFDF9"/>
+    <text x="58" y="70" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#15191C">THE <tspan fill="#D85C2B">CASE</tspan></text>
+    <text x="62" y="175" font-family="Georgia, serif" font-size="72" fill="#14181B">Market</text>
+    <text x="62" y="245" font-family="Georgia, serif" font-size="72" fill="#14181B">overview</text>
+    <text x="62" y="300" font-family="Arial, sans-serif" font-size="22" letter-spacing="5" fill="#747E85">KEY TRENDS AND OPPORTUNITIES</text>
+    <g transform="translate(70 360)">
+      <rect x="0" y="118" width="80" height="70" fill="#D9DEE1"/><rect x="116" y="88" width="80" height="100" fill="#CDD3D7"/><rect x="232" y="34" width="80" height="154" fill="#D85C2B"/>
+      <text x="18" y="110" font-family="Arial" font-size="22" fill="#14181B">12.4</text><text x="136" y="80" font-family="Arial" font-size="22" fill="#14181B">18.7</text><text x="252" y="26" font-family="Arial" font-size="22" fill="#14181B">26.1</text>
+      <line x1="0" y1="190" x2="330" y2="190" stroke="#BEC5C9"/>
+    </g>
+    <text x="62" y="560" font-family="Arial, sans-serif" font-size="44" fill="#14181B">+22%</text>
+    <text x="170" y="560" font-family="Arial, sans-serif" font-size="20" fill="#67727A">CAGR 2022–2024</text>
+  </g>
+
+  <g transform="translate(420 245) rotate(2 550 430)">
+    <rect width="1120" height="820" rx="12" fill="#FFFDF9"/>
+    <text x="70" y="82" font-family="Arial, sans-serif" font-size="31" font-weight="700" fill="#15191C">THE <tspan fill="#D85C2B">CASE</tspan></text>
+    <text x="72" y="245" font-family="Georgia, serif" font-size="122" fill="#111518">From</text>
+    <text x="72" y="355" font-family="Georgia, serif" font-size="122" fill="#111518">strategy</text>
+    <text x="72" y="470" font-family="Georgia, serif" font-size="122" fill="#111518">to <tspan font-style="italic" fill="#D85C2B">results</tspan></text>
+    <text x="76" y="545" font-family="Arial, sans-serif" font-size="26" letter-spacing="5" fill="#1B2024">BUSINESS PRESENTATIONS</text>
+    <text x="76" y="585" font-family="Arial, sans-serif" font-size="26" letter-spacing="5" fill="#1B2024">THAT DRIVE GROWTH</text>
+    <path d="M690 0H1120V820H580L690 0Z" fill="#F1ECE6"/>
+    <path d="M735 165L1038 118L1120 245V590L980 520L835 600L660 520Z" fill="url(#arch)"/>
+    <path d="M780 190L1050 152L1120 262V340L850 310Z" fill="#E1834E"/>
+    <rect x="838" y="330" width="135" height="240" fill="#172126" opacity=".9"/>
+    <rect x="990" y="318" width="115" height="244" fill="#E8E2DC" opacity=".85"/>
+    <line x1="75" y1="700" x2="515" y2="700" stroke="#D0D5D8"/>
+    <text x="76" y="760" font-family="Arial, sans-serif" font-size="21" letter-spacing="4" fill="#59656D">STRATEGY</text><text x="265" y="760" font-family="Arial, sans-serif" font-size="21" letter-spacing="4" fill="#59656D">DESIGN</text><text x="430" y="760" font-family="Arial, sans-serif" font-size="21" letter-spacing="4" fill="#59656D">IMPACT</text>
+  </g>
+
+  <g transform="translate(1320 420) rotate(4 360 310)">
+    <rect width="720" height="620" rx="10" fill="#FFFDF9"/>
+    <text x="52" y="64" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#15191C">THE <tspan fill="#D85C2B">CASE</tspan></text>
+    <text x="54" y="170" font-family="Georgia, serif" font-size="72" fill="#111518">Growth</text><text x="54" y="240" font-family="Georgia, serif" font-size="72" fill="#111518">strategy</text>
+    <text x="56" y="286" font-family="Arial" font-size="20" letter-spacing="3" fill="#69747B">ANALYSIS. PLAN. EXECUTION.</text>
+    <g font-family="Georgia, serif" font-size="50" fill="#D85C2B"><text x="60" y="390">01</text><text x="60" y="465">02</text><text x="60" y="540">03</text></g>
+    <g font-family="Arial" font-size="21" fill="#4E5960"><text x="145" y="385">Market analysis and insights</text><text x="145" y="460">Strategic roadmap</text><text x="145" y="535">Implementation and impact</text></g>
+    <path d="M410 432L520 382L650 440L720 520V620H350Z" fill="url(#mount)"/>
+  </g>
+</g>
+
+<!-- laptop -->
+<g filter="url(#shadow)">
+  <rect x="1840" y="210" width="1040" height="740" rx="46" fill="url(#metal)"/>
+  <rect x="1882" y="252" width="956" height="654" rx="24" fill="#0A0D0F"/>
+  <rect x="1900" y="270" width="920" height="618" rx="18" fill="url(#screen)"/>
+  <g clip-path="url(#screenClip)">
+    <rect x="1900" y="270" width="920" height="618" fill="#FCF9F5"/>
+    <text x="1950" y="330" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#171B1E">THE <tspan fill="#D85C2B">CASE</tspan></text>
+    <g font-family="Arial" font-size="15" fill="#242A2E"><text x="2330" y="330">ABOUT</text><text x="2410" y="330">SERVICES</text><text x="2510" y="330">CASES</text><text x="2588" y="330">CONTACTS</text></g>
+    <rect x="2690" y="298" width="102" height="44" rx="22" fill="#161A1D"/><text x="2710" y="326" font-family="Arial" font-size="13" fill="#FFF">GET IN TOUCH</text>
+    <text x="1950" y="460" font-family="Georgia, serif" font-size="80" fill="#111518">Ideas that</text><text x="1950" y="535" font-family="Georgia, serif" font-size="80" fill="#111518">drive <tspan font-style="italic" fill="#D85C2B">growth</tspan></text>
+    <text x="1953" y="585" font-family="Arial" font-size="22" fill="#4F5960">Business presentations, websites and content</text><text x="1953" y="617" font-family="Arial" font-size="22" fill="#4F5960">for ambitious companies.</text>
+    <rect x="1950" y="660" width="200" height="58" rx="29" fill="#D85C2B"/><text x="1990" y="696" font-family="Arial" font-size="18" fill="#FFF">DISCUSS PROJECT →</text>
+    <path d="M2250 520L2440 355L2640 430L2815 340V888H2205Z" fill="#E8DED5"/>
+    <path d="M2320 620L2460 430L2585 530L2710 405L2820 510V888H2295Z" fill="url(#mount)"/>
+    <text x="2640" y="700" font-family="Georgia, serif" font-size="44" fill="#FFF">Strategy</text><text x="2640" y="748" font-family="Georgia, serif" font-size="44" fill="#FFF">design</text><text x="2640" y="796" font-family="Georgia, serif" font-size="44" fill="#FFF">impact</text>
+    <g font-family="Arial" fill="#111518"><text x="1950" y="825" font-size="36">+67%</text><text x="2090" y="825" font-size="36">×2.5</text><text x="2225" y="825" font-size="36">3 weeks</text></g>
+  </g>
+  <path d="M1760 950H2960L2865 1080H1845L1760 950Z" fill="url(#metal)"/>
+  <path d="M1805 970H2910L2852 1038H1870L1805 970Z" fill="#596168"/>
+  <path d="M2150 980H2590L2550 1035H2190L2150 980Z" fill="#A8B0B5" opacity=".75"/>
+  <path d="M1750 1080H2970C2940 1105 2890 1120 2820 1120H1900C1830 1120 1780 1105 1750 1080Z" fill="#20262A"/>
+</g>
+</svg>
