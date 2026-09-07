@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1900 900" role="img" aria-label="THE CASE — презентации и сайты для бизнеса">
+<defs>
+  <filter id="shadow" x="-25%" y="-25%" width="150%" height="170%"><feDropShadow dx="0" dy="26" stdDeviation="24" flood-color="#27323a" flood-opacity=".20"/></filter>
+  <filter id="soft" x="-25%" y="-25%" width="150%" height="170%"><feDropShadow dx="0" dy="14" stdDeviation="15" flood-color="#27323a" flood-opacity=".14"/></filter>
+  <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#f3f5f6"/></linearGradient>
+  <linearGradient id="cream" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffaf6"/><stop offset="1" stop-color="#f2ece7"/></linearGradient>
+  <linearGradient id="copper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f08751"/><stop offset=".55" stop-color="#d85c2b"/><stop offset="1" stop-color="#9d3518"/></linearGradient>
+  <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#707980"/><stop offset=".36" stop-color="#3d454b"/><stop offset="1" stop-color="#151a1d"/></linearGradient>
+  <linearGradient id="mount" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffc9a5"/><stop offset=".55" stop-color="#d85c2b"/><stop offset="1" stop-color="#7f2c18"/></linearGradient>
+</defs>
+
+<!-- presentation stack -->
+<g transform="translate(48 112)" filter="url(#shadow)">
+  <g transform="translate(15 70) rotate(-6 275 190)">
+    <rect width="550" height="380" rx="7" fill="url(#paper)" stroke="#dde2e5"/>
+    <text x="34" y="42" font-family="Arial,sans-serif" font-size="15" font-weight="700" fill="#d85c2b">THE CASE</text>
+    <text x="34" y="91" font-family="Georgia,serif" font-size="34" fill="#11171c">Market opportunity</text>
+    <text x="34" y="119" font-family="Arial,sans-serif" font-size="12" letter-spacing="2" fill="#748087">STRATEGY / MARKET / GROWTH</text>
+    <g transform="translate(34 165)">
+      <line x1="0" y1="142" x2="270" y2="142" stroke="#cfd6da"/>
+      <rect x="20" y="96" width="42" height="46" fill="#c9cfd3"/><rect x="83" y="76" width="42" height="66" fill="#b8c0c5"/><rect x="146" y="51" width="42" height="91" fill="#9da8ae"/><rect x="209" y="16" width="42" height="126" fill="#d85c2b"/>
+      <g font-family="Arial,sans-serif" font-size="10" fill="#69747a"><text x="25" y="164">2022</text><text x="88" y="164">2023</text><text x="151" y="164">2024</text><text x="214" y="164">2025</text></g>
+      <text x="325" y="54" font-family="Georgia,serif" font-size="31" fill="#11171c">+22%</text><text x="325" y="82" font-family="Arial,sans-serif" font-size="11" fill="#6d777d">average growth</text>
+      <text x="325" y="130" font-family="Georgia,serif" font-size="31" fill="#d85c2b">19.1</text><text x="325" y="156" font-family="Arial,sans-serif" font-size="11" fill="#6d777d">market index</text>
+    </g>
+  </g>
+
+  <g transform="translate(420 34) rotate(5 245 170)">
+    <rect width="500" height="350" rx="7" fill="url(#cream)" stroke="#ded9d4"/>
+    <text x="30" y="40" font-family="Arial,sans-serif" font-size="14" font-weight="700" fill="#11171c">THE <tspan fill="#d85c2b">CASE</tspan></text>
+    <text x="30" y="93" font-family="Georgia,serif" font-size="37" fill="#11171c">Growth strategy</text>
+    <text x="30" y="121" font-family="Arial,sans-serif" font-size="12" fill="#6f797f">Focus. Resources. Measurable result.</text>
+    <g transform="translate(30 162)" font-family="Arial,sans-serif"><text y="28" font-family="Georgia,serif" font-size="33" fill="#d85c2b">01</text><text x="60" y="15" font-size="12" fill="#11171c">Market analysis</text><text x="60" y="34" font-size="11" fill="#6e777c">and opportunities</text><line x1="0" y1="54" x2="420" y2="54" stroke="#ded9d4"/><text y="92" font-family="Georgia,serif" font-size="33" fill="#d85c2b">02</text><text x="60" y="79" font-size="12" fill="#11171c">Strategy</text><text x="60" y="98" font-size="11" fill="#6e777c">and action plan</text><line x1="0" y1="118" x2="420" y2="118" stroke="#ded9d4"/><text y="156" font-family="Georgia,serif" font-size="33" fill="#d85c2b">03</text><text x="60" y="143" font-size="12" fill="#11171c">Implementation</text><text x="60" y="162" font-size="11" fill="#6e777c">and measurable results</text></g>
+  </g>
+
+  <g transform="translate(180 38)">
+    <rect width="720" height="500" rx="8" fill="#fff" stroke="#dce1e4"/>
+    <text x="42" y="46" font-family="Arial,sans-serif" font-size="15" font-weight="700" fill="#11171c">THE <tspan fill="#d85c2b">CASE</tspan></text>
+    <text x="42" y="129" font-family="Georgia,serif" font-size="62" fill="#11171c">From</text>
+    <text x="42" y="191" font-family="Georgia,serif" font-size="62" fill="#11171c">strategy</text>
+    <text x="42" y="253" font-family="Georgia,serif" font-size="62" fill="#11171c">to <tspan fill="#d85c2b" font-style="italic">results</tspan></text>
+    <text x="44" y="309" font-family="Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="2.4" fill="#11171c">BUSINESS PRESENTATIONS</text><text x="44" y="331" font-family="Arial,sans-serif" font-size="13" font-weight="700" letter-spacing="2.4" fill="#11171c">THAT DRIVE GROWTH</text>
+    <g transform="translate(405 0)"><rect width="315" height="500" fill="#f0ede9"/><path d="M0 500V246L86 174L150 203L221 112L315 48V500Z" fill="#e7b18f"/><path d="M0 500V318L104 232L174 269L245 191L315 140V500Z" fill="#d85c2b" opacity=".88"/><path d="M0 500V391L118 302L198 347L270 282L315 252V500Z" fill="#81321e" opacity=".74"/><rect x="69" y="167" width="169" height="205" fill="#f4f0ec" opacity=".93"/><rect x="85" y="183" width="137" height="95" fill="#cfd5d8"/><rect x="85" y="292" width="57" height="63" fill="#11171c"/><rect x="152" y="292" width="70" height="63" fill="#e36a38"/></g>
+    <line x1="42" y1="418" x2="365" y2="418" stroke="#dce1e4"/><g font-family="Arial,sans-serif" font-size="11" letter-spacing="2" fill="#647078"><text x="42" y="451">STRATEGY</text><text x="151" y="451">DESIGN</text><text x="245" y="451">IMPACT</text></g><text x="658" y="464" font-family="Arial,sans-serif" font-size="12" fill="#657079">01</text>
+  </g>
+</g>
+
+<!-- laptop -->
+<g transform="translate(1015 135)" filter="url(#shadow)">
+  <rect x="70" y="0" width="760" height="510" rx="34" fill="url(#metal)"/>
+  <rect x="92" y="22" width="716" height="466" rx="19" fill="#090c0e"/>
+  <rect x="108" y="38" width="684" height="434" rx="10" fill="#fffaf7"/>
+  <circle cx="450" cy="13" r="4" fill="#879097"/>
+  <g transform="translate(108 38)">
+    <rect width="684" height="434" rx="10" fill="#fffaf7"/>
+    <text x="26" y="33" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#11171c">THE <tspan fill="#d85c2b">CASE</tspan></text>
+    <g font-family="Arial,sans-serif" font-size="8" fill="#252b2f"><text x="388" y="31">ABOUT</text><text x="438" y="31">SERVICES</text><text x="495" y="31">CASES</text><text x="540" y="31">CONTACTS</text></g>
+    <rect x="593" y="15" width="72" height="25" rx="13" fill="#171b1e"/><text x="608" y="31" font-family="Arial,sans-serif" font-size="7" fill="#fff">GET A QUOTE</text>
+    <text x="27" y="84" font-family="Arial,sans-serif" font-size="9" letter-spacing="2.3" fill="#7a8388">WEBSITES FOR BUSINESS</text>
+    <text x="27" y="139" font-family="Georgia,serif" font-size="45" fill="#11171c">More than</text><text x="27" y="185" font-family="Georgia,serif" font-size="45" fill="#11171c">a <tspan fill="#d85c2b" font-style="italic">website</tspan></text>
+    <text x="28" y="216" font-family="Arial,sans-serif" font-size="12" fill="#58636a">A growth instrument for ambitious business</text>
+    <rect x="27" y="246" width="120" height="34" rx="17" fill="#d85c2b"/><text x="51" y="267" font-family="Arial,sans-serif" font-size="9" fill="#fff">START A PROJECT →</text>
+    <g transform="translate(362 63)"><rect width="294" height="276" rx="8" fill="url(#mount)"/><path d="M0 276V198L70 152L132 176L191 119L245 137L294 96V276Z" fill="#81321e" opacity=".72"/><path d="M0 276V228L88 171L154 196L214 153L294 132V276Z" fill="#b84725" opacity=".76"/><path d="M190 0h104v276H238c18-53 11-107-48-151z" fill="#fff" opacity=".20"/><text x="183" y="241" font-family="Georgia,serif" font-size="22" fill="#fff">Ideas that build</text><text x="183" y="264" font-family="Georgia,serif" font-size="22" fill="#fff">businesses</text></g>
+    <g transform="translate(27 342)" font-family="Arial,sans-serif"><text y="0" font-family="Georgia,serif" font-size="24" fill="#11171c">+67%</text><text y="20" font-size="8" fill="#677279">growth in enquiries</text><line x1="89" y1="-10" x2="89" y2="29" stroke="#d9dddf"/><text x="106" y="0" font-family="Georgia,serif" font-size="24" fill="#11171c">×2.5</text><text x="106" y="20" font-size="8" fill="#677279">conversion rate</text><line x1="184" y1="-10" x2="184" y2="29" stroke="#d9dddf"/><text x="201" y="0" font-family="Georgia,serif" font-size="24" fill="#11171c">3 weeks</text><text x="201" y="20" font-size="8" fill="#677279">average delivery</text></g>
+  </g>
+  <path d="M20 510h860l55 60c8 9 2 22-11 22H-24c-13 0-19-13-11-22z" fill="url(#metal)"/>
+  <path d="M335 510h230l26 22c5 5 2 12-6 12H315c-8 0-11-7-6-12z" fill="#8d959a" opacity=".82"/>
+</g>
+</svg>
