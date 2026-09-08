@@ -1,108 +1,117 @@
 (() => {
-  const presentationId = '1sPhXPXcCsKAWD3QMxlUK-hCWob6zspTFyYv56O0reNQ';
-  const slideIds = ['p1', 'p2', 'p3', 'p4'];
-  const embed = `https://docs.google.com/presentation/d/${presentationId}/embed?start=false&loop=false&delayms=60000`;
-  const slideUrl = pageId => `https://docs.google.com/presentation/d/${presentationId}/export/png?id=${presentationId}&pageid=${pageId}`;
+  const configs = {
+    'AURELIA': {
+      slides: ['p1', 'p2', 'p3', 'p4'].map(pageId => `https://docs.google.com/presentation/d/1sPhXPXcCsKAWD3QMxlUK-hCWob6zspTFyYv56O0reNQ/export/png?id=1sPhXPXcCsKAWD3QMxlUK-hCWob6zspTFyYv56O0reNQ&pageid=${pageId}`),
+      embed: 'https://docs.google.com/presentation/d/1sPhXPXcCsKAWD3QMxlUK-hCWob6zspTFyYv56O0reNQ/embed?start=false&loop=false&delayms=60000'
+    },
+    'FABERGÉ': {
+      slides: ['assets/cases/faberge-01.webp?v=20260904-1','assets/cases/faberge-02.webp?v=20260904-1','assets/cases/faberge-03.webp?v=20260904-1'],
+      embed: 'https://docs.google.com/presentation/d/1U2kSLYvgoq1DzTv52fAxs1wjbvIYNylOVjtapuNP16Y/embed?start=false&loop=false&delayms=60000'
+    },
+    'RED FOX': {
+      slides: ['assets/cases/redfox-01.webp?v=20260904-1','assets/cases/redfox-02.webp?v=20260904-1'],
+      embed: 'https://docs.google.com/presentation/d/1Fzz3W0-_Ir70kt8s0_VbsAvhzs0CCuOJIk1M24HGLCI/embed?start=false&loop=false&delayms=60000'
+    },
+    'ЕЛЕНА ЦВЕТОЧНАЯ': {
+      slides: ['assets/cases/elena-01.webp?v=20260904-1','assets/cases/elena-02.webp?v=20260904-1','assets/cases/elena-03.webp?v=20260904-1','assets/cases/elena-04.webp?v=20260904-1','assets/cases/elena-05.webp?v=20260904-1'],
+      embed: 'https://docs.google.com/presentation/d/1c4yJK7twEgL1nSS_sHkAUkabu2yGLQ7xvQeS2rNyO6k/embed?start=false&loop=false&delayms=60000'
+    },
+    'JAPANESE MINIMALISM': {
+      slides: ['assets/cases/japanese-01.webp?v=20260904-1','assets/cases/japanese-02.webp?v=20260904-1','assets/cases/japanese-03.webp?v=20260904-1'],
+      embed: 'https://docs.google.com/presentation/d/1LxFhOK6EKMKNn4aIy_Y48HlyfuW-tE1ORtpe8n4ozJk/embed?start=false&loop=false&delayms=60000'
+    },
+    'YANDEX TAXI': {
+      slides: ['assets/cases/yandex-01.webp?v=20260904-1','assets/cases/yandex-02.webp?v=20260904-1','assets/cases/yandex-03.webp?v=20260904-1','assets/cases/yandex-04.webp?v=20260904-1'],
+      embed: 'https://docs.google.com/presentation/d/1O0LuxPKg917YbccV5rgVue16HbaZwSwicNI_N67Q5Cc/embed?start=false&loop=false&delayms=60000'
+    },
+    'CAT GROOMER': {
+      slides: ['assets/cases/cat-01.webp?v=20260904-1','assets/cases/cat-02.webp?v=20260904-1'],
+      embed: 'https://docs.google.com/presentation/d/1deDoDf3BO3Hf01T_wUzVa-VcDSmMoZYLjBKlyNK1hFk/embed?start=false&loop=false&delayms=60000'
+    }
+  };
 
-  const mount = () => {
-    const grid = document.querySelector('.cases-grid');
-    if (!grid || grid.querySelector('.case-aurelia')) return false;
-
-    const nativeExisting = grid.querySelectorAll('.case-viewport.case-native');
-    if (nativeExisting.length < 6) return false;
-
-    const card = document.createElement('article');
-    card.className = 'case-card case-large case-aurelia';
-    card.innerHTML = `
-      <div class="case-viewport case-native">
-        <div class="case-slides">
-          ${slideIds.map((id, i) => `<img class="case-slide${i === 0 ? ' is-active' : ''}" src="${slideUrl(id)}" alt="AURELIA — slide ${i + 1}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async">`).join('')}
-        </div>
-        <iframe class="case-fallback" loading="lazy" allowfullscreen src="${embed}" title="AURELIA presentation"></iframe>
-        <div class="case-controls">
-          <div class="case-arrows">
-            <button class="case-arrow case-prev" type="button" aria-label="Previous slide">←</button>
-            <button class="case-arrow case-next" type="button" aria-label="Next slide">→</button>
-          </div>
-          <div class="case-counter"><b>1</b> / 4</div>
-        </div>
-      </div>
-      <div class="case-meta"><div><h3>AURELIA</h3><p data-ru="Beauty" data-en="Beauty">Beauty</p></div></div>
-    `;
-
-    grid.prepend(card);
-
+  const rebuildCard = card => {
+    if (card.dataset.portfolioFixed === '1') return;
+    const title = card.querySelector('.case-meta h3')?.textContent?.trim();
+    const config = configs[title];
     const viewport = card.querySelector('.case-viewport');
-    const slides = [...card.querySelectorAll('.case-slide')];
-    const counter = card.querySelector('.case-counter b');
-    let active = 0;
+    if (!config || !viewport) return;
 
-    const show = next => {
-      active = (next + slides.length) % slides.length;
+    viewport.classList.add('case-native');
+    viewport.classList.remove('is-fallback');
+    viewport.innerHTML = `
+      <div class="case-slides">
+        ${config.slides.map((src, i) => `<img class="case-slide${i === 0 ? ' is-active' : ''}" src="${src}" alt="${title} — slide ${i + 1}" loading="${i === 0 ? 'eager' : 'lazy'}" decoding="async">`).join('')}
+      </div>
+      <iframe class="case-fallback" loading="lazy" allowfullscreen src="${config.embed}" title="${title} presentation"></iframe>
+      <div class="case-controls">
+        <div class="case-arrows">
+          <button class="case-arrow case-prev" type="button" aria-label="Previous slide">←</button>
+          <button class="case-arrow case-next" type="button" aria-label="Next slide">→</button>
+        </div>
+        <span class="case-counter"><b>1</b> / ${config.slides.length}</span>
+      </div>`;
+
+    const slides = [...viewport.querySelectorAll('.case-slide')];
+    const counter = viewport.querySelector('.case-counter b');
+    let active = 0;
+    let failed = 0;
+
+    const show = value => {
+      if (!slides.length || viewport.classList.contains('is-fallback')) return;
+      active = (value + slides.length) % slides.length;
       slides.forEach((slide, i) => slide.classList.toggle('is-active', i === active));
       if (counter) counter.textContent = String(active + 1);
     };
 
-    card.querySelector('.case-prev')?.addEventListener('click', () => show(active - 1));
-    card.querySelector('.case-next')?.addEventListener('click', () => show(active + 1));
-
-    let touchX = null;
-    viewport?.addEventListener('touchstart', event => {
-      touchX = event.touches?.[0]?.clientX ?? null;
-    }, { passive: true });
-    viewport?.addEventListener('touchend', event => {
-      if (touchX == null) return;
-      const endX = event.changedTouches?.[0]?.clientX;
-      if (typeof endX === 'number' && Math.abs(endX - touchX) > 46) {
-        show(active + (endX < touchX ? 1 : -1));
-      }
-      touchX = null;
-    }, { passive: true });
-
     slides.forEach(slide => {
       slide.addEventListener('error', () => {
-        if (slide.classList.contains('is-active')) viewport.classList.add('is-fallback');
+        failed += 1;
+        if (slide.classList.contains('is-active') || failed >= slides.length) viewport.classList.add('is-fallback');
       }, { once: true });
       slide.addEventListener('load', () => {
         if (slide.classList.contains('is-active')) viewport.classList.remove('is-fallback');
       }, { once: true });
     });
 
-    const syncLanguage = () => {
-      const category = card.querySelector('.case-meta p');
-      if (category) category.textContent = document.documentElement.lang === 'en' ? category.dataset.en : category.dataset.ru;
-    };
-    syncLanguage();
-    document.querySelectorAll('.lang-btn').forEach(btn => btn.addEventListener('click', () => window.setTimeout(syncLanguage, 0)));
+    viewport.querySelector('.case-prev')?.addEventListener('click', () => show(active - 1));
+    viewport.querySelector('.case-next')?.addEventListener('click', () => show(active + 1));
 
-    const style = document.createElement('style');
-    style.textContent = `
-      @media(min-width:981px){
-        .cases-grid>.case-card:nth-child(1){grid-column:span 7!important}
-        .cases-grid>.case-card:nth-child(2){grid-column:span 5!important}
-        .cases-grid>.case-card:nth-child(3){grid-column:span 5!important}
-        .cases-grid>.case-card:nth-child(4){grid-column:span 7!important}
-        .cases-grid>.case-card:nth-child(5){grid-column:span 7!important}
-        .cases-grid>.case-card:nth-child(6){grid-column:span 5!important}
-        .cases-grid>.case-card:nth-child(7){grid-column:span 7!important}
-      }
-      @media(max-width:980px) and (min-width:641px){
-        .cases-grid>.case-card{grid-column:span 6!important}
-      }
-      @media(max-width:640px){
-        .cases-grid>.case-card{grid-column:auto!important}
-      }
-    `;
-    document.head.appendChild(style);
+    let startX = null;
+    viewport.addEventListener('touchstart', event => {
+      startX = event.touches?.[0]?.clientX ?? null;
+    }, { passive: true });
+    viewport.addEventListener('touchend', event => {
+      if (startX == null) return;
+      const endX = event.changedTouches?.[0]?.clientX;
+      if (typeof endX === 'number' && Math.abs(endX - startX) > 46) show(active + (endX < startX ? 1 : -1));
+      startX = null;
+    }, { passive: true });
 
-    return true;
+    card.dataset.portfolioFixed = '1';
   };
 
-  if (!mount()) {
+  const repairPortfolio = () => {
+    const grid = document.querySelector('.cases-grid');
+    if (!grid) return false;
+
+    const cards = [...grid.querySelectorAll('.case-card')];
+    if (cards.length < 7) return false;
+
+    // thecase-original.js has finished when at least six existing cards are native.
+    // At that point rebuild every card by its own title, not by DOM index.
+    const nativeCount = cards.filter(card => card.querySelector('.case-viewport.case-native')).length;
+    if (nativeCount < 6) return false;
+
+    cards.forEach(rebuildCard);
+    return cards.every(card => card.dataset.portfolioFixed === '1');
+  };
+
+  if (!repairPortfolio()) {
     let attempts = 0;
     const timer = window.setInterval(() => {
       attempts += 1;
-      if (mount() || attempts > 80) window.clearInterval(timer);
+      if (repairPortfolio() || attempts > 120) window.clearInterval(timer);
     }, 100);
   }
 })();
