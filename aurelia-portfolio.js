@@ -34,9 +34,114 @@
     }
   };
 
+  const mobileOrder = ['OZON', 'RED FOX', 'AURELIA', 'FABERGÉ', 'ЕЛЕНА ЦВЕТОЧНАЯ', 'JAPANESE MINIMALISM', 'YANDEX TAXI', 'CAT GROOMER'];
+  const majorTitles = ['OZON', 'AURELIA', 'YANDEX TAXI'];
+  const minorTitles = ['RED FOX', 'FABERGÉ', 'ЕЛЕНА ЦВЕТОЧНАЯ', 'JAPANESE MINIMALISM', 'CAT GROOMER'];
+
+  const injectPortfolioLayoutStyles = () => {
+    if (document.getElementById('portfolio-editorial-layout')) return;
+    const style = document.createElement('style');
+    style.id = 'portfolio-editorial-layout';
+    style.textContent = `
+      @media (min-width: 981px) {
+        .cases-grid.portfolio-composed {
+          display: grid !important;
+          grid-template-columns: minmax(0, 1.52fr) minmax(330px, 1fr) !important;
+          gap: 28px !important;
+          align-items: stretch !important;
+        }
+        .cases-grid.portfolio-composed .cases-column {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 28px;
+        }
+        .cases-grid.portfolio-composed .case-card {
+          width: 100% !important;
+          min-width: 0 !important;
+          grid-column: auto !important;
+          margin: 0 !important;
+        }
+        .cases-grid.portfolio-composed .case-viewport {
+          width: 100%;
+          aspect-ratio: 16 / 9;
+        }
+        .cases-grid.portfolio-composed .cases-column-major .case-viewport {
+          border-radius: 28px;
+        }
+        .cases-grid.portfolio-composed .cases-column-minor .case-viewport {
+          border-radius: 22px;
+        }
+        .cases-grid.portfolio-composed .cases-column-major .case-meta h3 {
+          font-size: 17px;
+        }
+        .cases-grid.portfolio-composed .cases-column-minor .case-meta h3 {
+          font-size: 14px;
+        }
+        .cases-grid.portfolio-composed .cases-column-minor .case-meta p {
+          font-size: 10px;
+        }
+      }
+
+      @media (min-width: 641px) and (max-width: 980px) {
+        .cases-grid.portfolio-composed {
+          display: grid !important;
+          grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr) !important;
+          gap: 20px !important;
+          align-items: stretch !important;
+        }
+        .cases-grid.portfolio-composed .cases-column {
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          gap: 20px;
+        }
+        .cases-grid.portfolio-composed .case-card {
+          width: 100% !important;
+          grid-column: auto !important;
+          margin: 0 !important;
+        }
+        .cases-grid.portfolio-composed .case-viewport {
+          width: 100%;
+          aspect-ratio: 16 / 9;
+          border-radius: 20px;
+        }
+        .cases-grid.portfolio-composed .cases-column-minor .case-meta h3 {
+          font-size: 12px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .cases-grid.portfolio-composed {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 30px !important;
+        }
+        .cases-grid.portfolio-composed .cases-column {
+          display: contents !important;
+        }
+        .cases-grid.portfolio-composed .case-card {
+          width: 100% !important;
+          grid-column: auto !important;
+          order: var(--mobile-order, 99);
+          margin: 0 !important;
+        }
+        .cases-grid.portfolio-composed .case-viewport {
+          width: 100%;
+          aspect-ratio: 16 / 9;
+          border-radius: 20px;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  };
+
   const ensurePortfolioOrder = () => {
     const grid = document.querySelector('.cases-grid');
     if (!grid) return false;
+    if (grid.dataset.composed === '1') return true;
 
     let ozonCard = [...grid.querySelectorAll('.case-card')].find(card => card.querySelector('.case-meta h3')?.textContent?.trim() === 'OZON');
     if (!ozonCard) {
@@ -120,24 +225,55 @@
     card.dataset.portfolioFixed = '1';
   };
 
+  const composePortfolio = () => {
+    const grid = document.querySelector('.cases-grid');
+    if (!grid || grid.dataset.composed === '1') return true;
+
+    const cards = [...grid.querySelectorAll(':scope > .case-card')];
+    if (cards.length < 8 || !cards.every(card => card.dataset.portfolioFixed === '1')) return false;
+
+    const byTitle = new Map(cards.map(card => [card.querySelector('.case-meta h3')?.textContent?.trim(), card]));
+    if (!mobileOrder.every(title => byTitle.has(title))) return false;
+
+    mobileOrder.forEach((title, index) => {
+      byTitle.get(title)?.style.setProperty('--mobile-order', String(index + 1));
+    });
+
+    const majorColumn = document.createElement('div');
+    majorColumn.className = 'cases-column cases-column-major';
+    const minorColumn = document.createElement('div');
+    minorColumn.className = 'cases-column cases-column-minor';
+
+    majorTitles.forEach(title => majorColumn.appendChild(byTitle.get(title)));
+    minorTitles.forEach(title => minorColumn.appendChild(byTitle.get(title)));
+
+    grid.replaceChildren(majorColumn, minorColumn);
+    grid.classList.add('portfolio-composed');
+    grid.dataset.composed = '1';
+    return true;
+  };
+
   const repairPortfolio = () => {
+    injectPortfolioLayoutStyles();
     ensurePortfolioOrder();
 
     const grid = document.querySelector('.cases-grid');
     if (!grid) return false;
+    if (grid.dataset.composed === '1') return true;
 
     const cards = [...grid.querySelectorAll('.case-card')];
     if (cards.length < 8) return false;
 
-    // thecase-original.js has finished when at least six existing cards are native.
-    // At that point rebuild every card by its own title, not by DOM index.
     const nativeCount = cards.filter(card => card.querySelector('.case-viewport.case-native')).length;
     if (nativeCount < 6) return false;
 
     cards.forEach(rebuildCard);
-    return cards.every(card => card.dataset.portfolioFixed === '1');
+    if (!cards.every(card => card.dataset.portfolioFixed === '1')) return false;
+
+    return composePortfolio();
   };
 
+  injectPortfolioLayoutStyles();
   ensurePortfolioOrder();
 
   if (!repairPortfolio()) {
