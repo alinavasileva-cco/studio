@@ -1,5 +1,9 @@
 (() => {
   const configs = {
+    'OZON': {
+      slides: ['p2', 'p3', 'p4'].map(pageId => `https://docs.google.com/presentation/d/1vCxqqiwonb6E-VVP4qggV6tVw7P4bHWeFDSti5zBu4c/export/png?id=1vCxqqiwonb6E-VVP4qggV6tVw7P4bHWeFDSti5zBu4c&pageid=${pageId}`),
+      embed: 'https://docs.google.com/presentation/d/1vCxqqiwonb6E-VVP4qggV6tVw7P4bHWeFDSti5zBu4c/embed?start=false&loop=false&delayms=60000'
+    },
     'AURELIA': {
       slides: ['p1', 'p2', 'p3', 'p4'].map(pageId => `https://docs.google.com/presentation/d/1sPhXPXcCsKAWD3QMxlUK-hCWob6zspTFyYv56O0reNQ/export/png?id=1sPhXPXcCsKAWD3QMxlUK-hCWob6zspTFyYv56O0reNQ&pageid=${pageId}`),
       embed: 'https://docs.google.com/presentation/d/1sPhXPXcCsKAWD3QMxlUK-hCWob6zspTFyYv56O0reNQ/embed?start=false&loop=false&delayms=60000'
@@ -28,6 +32,31 @@
       slides: ['assets/cases/cat-01.webp?v=20260904-1','assets/cases/cat-02.webp?v=20260904-1'],
       embed: 'https://docs.google.com/presentation/d/1deDoDf3BO3Hf01T_wUzVa-VcDSmMoZYLjBKlyNK1hFk/embed?start=false&loop=false&delayms=60000'
     }
+  };
+
+  const ensurePortfolioOrder = () => {
+    const grid = document.querySelector('.cases-grid');
+    if (!grid) return false;
+
+    let ozonCard = [...grid.querySelectorAll('.case-card')].find(card => card.querySelector('.case-meta h3')?.textContent?.trim() === 'OZON');
+    if (!ozonCard) {
+      ozonCard = document.createElement('article');
+      ozonCard.className = 'case-card case-large case-ozon';
+      ozonCard.innerHTML = `
+        <div class="case-viewport"><iframe allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${configs.OZON.embed}" title="OZON presentation"></iframe></div>
+        <div class="case-meta"><div><h3>OZON</h3><p data-en="Retail media" data-ru="Retail media">Retail media</p></div></div>`;
+    }
+
+    grid.insertBefore(ozonCard, grid.firstElementChild);
+
+    const redFoxCard = [...grid.querySelectorAll('.case-card')].find(card => card.querySelector('.case-meta h3')?.textContent?.trim() === 'RED FOX');
+    if (redFoxCard) {
+      redFoxCard.classList.remove('case-medium');
+      redFoxCard.classList.add('case-large');
+      grid.insertBefore(redFoxCard, ozonCard.nextElementSibling);
+    }
+
+    return true;
   };
 
   const rebuildCard = card => {
@@ -92,11 +121,13 @@
   };
 
   const repairPortfolio = () => {
+    ensurePortfolioOrder();
+
     const grid = document.querySelector('.cases-grid');
     if (!grid) return false;
 
     const cards = [...grid.querySelectorAll('.case-card')];
-    if (cards.length < 7) return false;
+    if (cards.length < 8) return false;
 
     // thecase-original.js has finished when at least six existing cards are native.
     // At that point rebuild every card by its own title, not by DOM index.
@@ -106,6 +137,8 @@
     cards.forEach(rebuildCard);
     return cards.every(card => card.dataset.portfolioFixed === '1');
   };
+
+  ensurePortfolioOrder();
 
   if (!repairPortfolio()) {
     let attempts = 0;
