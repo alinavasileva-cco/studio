@@ -9,7 +9,7 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
   const browser = await chromium.launch({ headless: true, executablePath, args: ['--no-sandbox'] });
   fs.mkdirSync('qa-current', { recursive: true });
   const results = [];
-  const expectedTitles = ['HUAWEI', 'ALFA BANK', 'RED FOX', 'JAPANESE MINIMALISM', 'OZON', 'YANDEX TAXI'];
+  const expectedTitles = ['ALFA BANK', 'HUAWEI', 'RED FOX', 'AURELIA', 'YANDEX TAXI', 'JAPANESE MINIMALISM'];
 
   for (const width of [390, 430, 768, 1024, 1440]) {
     const height = width >= 1000 ? 1000 : width >= 700 ? 1024 : 900;
@@ -19,8 +19,6 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
     page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
     page.on('pageerror', err => pageErrors.push(String(err)));
 
-    // Keep the test deterministic: local assets execute normally. External presentation
-    // thumbnails may be unavailable in CI and are not allowed to block page readiness.
     await page.route('**/*', route => {
       const url = route.request().url();
       if (url.startsWith('http://127.0.0.1:8000/') || url.startsWith('data:') || url.startsWith('blob:')) return route.continue();
