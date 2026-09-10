@@ -38,6 +38,62 @@
   const majorTitles = ['OZON', 'AURELIA', 'YANDEX TAXI'];
   const minorTitles = ['RED FOX', 'FABERGÉ', 'ЕЛЕНА ЦВЕТОЧНАЯ', 'JAPANESE MINIMALISM', 'CAT GROOMER'];
 
+  const injectServicePriceStyles = () => {
+    if (document.getElementById('services-price-style')) return;
+    const style = document.createElement('style');
+    style.id = 'services-price-style';
+    style.textContent = `
+      .services-master-price{
+        margin:12px 0 0!important;
+        color:#d85c2b!important;
+        font-family:var(--m)!important;
+        font-size:13px!important;
+        line-height:1.4!important;
+        font-weight:500!important;
+        letter-spacing:.01em!important;
+      }
+      @media(max-width:640px){
+        .services-master-price{
+          margin-top:10px!important;
+          font-size:12px!important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  };
+
+  const ensureServicePrice = () => {
+    const copy = document.querySelector('.services-master-copy');
+    if (!copy) return false;
+
+    let price = document.querySelector('.services-master-price');
+    if (!price) {
+      price = document.createElement('p');
+      price.className = 'services-master-price';
+      copy.insertAdjacentElement('afterend', price);
+    }
+
+    const lang = document.documentElement.lang === 'en' ? 'en' : 'ru';
+    price.textContent = lang === 'en'
+      ? 'from €100 (up to 15 slides)'
+      : '10 000 рублей (до 15 слайдов)';
+    return true;
+  };
+
+  injectServicePriceStyles();
+  ensureServicePrice();
+
+  const serviceObserver = new MutationObserver(() => {
+    ensureServicePrice();
+  });
+  serviceObserver.observe(document.body, { childList: true, subtree: true });
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      window.setTimeout(ensureServicePrice, 0);
+    });
+  });
+
   const injectPortfolioLayoutStyles = () => {
     if (document.getElementById('portfolio-editorial-layout')) return;
     const style = document.createElement('style');
