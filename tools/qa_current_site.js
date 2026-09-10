@@ -9,73 +9,92 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
   const browser = await chromium.launch({ headless: true, executablePath, args: ['--no-sandbox'] });
   fs.mkdirSync('qa-current', { recursive: true });
   const results = [];
+  const expectedTitles = ['HUAWEI', 'ALFA BANK', 'RED FOX', 'JAPANESE MINIMALISM', 'OZON', 'YANDEX TAXI'];
 
-  for (const width of [390, 430, 1440]) {
-    const page = await browser.newPage({ viewport: { width, height: width >= 1000 ? 1000 : 900 }, deviceScaleFactor: 1 });
+  for (const width of [390, 430, 768, 1024, 1440]) {
+    const height = width >= 1000 ? 1000 : width >= 700 ? 1024 : 900;
+    const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
     const consoleErrors = [];
+    const pageErrors = [];
     page.on('console', msg => { if (msg.type() === 'error') consoleErrors.push(msg.text()); });
-    page.on('pageerror', err => consoleErrors.push(String(err)));
+    page.on('pageerror', err => pageErrors.push(String(err)));
 
+    // Keep the test deterministic: local assets execute normally. External presentation
+    // thumbnails may be unavailable in CI and are not allowed to block page readiness.
     await page.route('**/*', route => {
       const url = route.request().url();
       if (url.startsWith('http://127.0.0.1:8000/') || url.startsWith('data:') || url.startsWith('blob:')) return route.continue();
       return route.abort();
     });
+
+    const started = Date.now();
     await page.goto('http://127.0.0.1:8000/', { waitUntil: 'domcontentloaded', timeout: 15000 });
-    await page.waitForTimeout(500);
+    const domContentLoadedMs = Date.now() - started;
 
-    const services = page.locator('#services');
-    await services.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(350);
-    await services.screenshot({ path: `qa-current/services-${width}.png` });
+    await page.locator('.hero').waitFor({ state: 'visible', timeout: 5000 });
+    await page.locator('#services .services-master').waitFor({ state: 'visible', timeout: 5000 });
+    await page.locator('.brief-modal').waitFor({ state: 'attached', timeout: 5000 });
+    await page.waitForFunction(() => document.querySelectorAll('.cases-grid .case-card').length === 6, null, { timeout: 6000 });
 
-    const firstService = await page.locator('.services-panel .service-offer h3').first().textContent();
-    const servicesData = await page.evaluate(() => {
-      const stage = document.querySelector('.services-stage');
-      const panel = document.querySelector('.services-panel');
-      const base = document.querySelector('.services-art-base');
-      const hand = document.querySelector('.services-art-hand');
-      const rect = el => el ? ({ x: Math.round(el.getBoundingClientRect().x), y: Math.round(el.getBoundingClientRect().y), width: Math.round(el.getBoundingClientRect().width), height: Math.round(el.getBoundingClientRect().height) }) : null;
+    const data = await page.evaluate(expectedTitles => {
+      const rect = el => el ? ({
+        x: Math.round(el.getBoundingClientRect().x),
+        y: Math.round(el.getBoundingClientRect().y),
+        width: Math.round(el.getBoundingClientRect().width),
+        height: Math.round(el.getBoundingClientRect().height)
+      }) : null;
+      const serviceImage = document.querySelector('.services-master-visual img');
+      const cards = [...document.querySelectorAll('.cases-grid .case-card')];
+      const titles = cards.map(card => card.querySelector('.case-meta h3')?.textContent?.trim() || '');
+      const iframes = document.querySelectorAll('.cases-grid iframe').length;
+      const serviceImageLoaded = !!serviceImage && serviceImage.complete && serviceImage.naturalWidth > 0;
+      const hero = document.querySelector('.hero');
+      const services = document.querySelector('#services');
+      const work = document.querySelector('#work');
       return {
-        stage: rect(stage),
-        panel: rect(panel),
-        base: base ? { loaded: base.complete && base.naturalWidth > 0, naturalWidth: base.naturalWidth, naturalHeight: base.naturalHeight, rect: rect(base), src: base.getAttribute('src') } : null,
-        hand: hand ? { loaded: hand.complete && hand.naturalWidth > 0, naturalWidth: hand.naturalWidth, naturalHeight: hand.naturalHeight, rect: rect(hand), src: hand.getAttribute('src') } : null,
-        beforeContent: panel ? getComputedStyle(panel, '::before').content : null,
-        afterContent: panel ? getComputedStyle(panel, '::after').content : null,
-        overflowX: document.documentElement.scrollWidth - innerWidth
+        title: document.title,
+        readyState: document.readyState,
+        hero: rect(hero),
+        services: rect(services),
+        work: rect(work),
+        serviceImageLoaded,
+        serviceImageNaturalWidth: serviceImage?.naturalWidth || 0,
+        serviceImageSrc: serviceImage?.getAttribute('src') || '',
+        cardCount: cards.length,
+        titles,
+        titleOrderCorrect: JSON.stringify(titles) === JSON.stringify(expectedTitles),
+        portfolioIframeCount: iframes,
+        overflowX: document.documentElement.scrollWidth - innerWidth,
+        bodyHeight: document.body.scrollHeight,
+        serviceText: document.querySelector('.services-master-subhead')?.textContent?.trim() || '',
+        priceText: document.querySelector('.services-master-price')?.textContent?.trim() || ''
       };
-    });
+    }, expectedTitles);
 
-    const work = page.locator('#work');
-    await work.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(350);
+    const heartbeatStart = Date.now();
+    await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 100)));
+    const heartbeatMs = Date.now() - heartbeatStart;
 
-    const cards = page.locator('.case-card');
-    const cardCount = await cards.count();
-    const caseImages = [];
-    for (let i = 0; i < cardCount; i++) {
-      const card = cards.nth(i);
-      await card.scrollIntoViewIfNeeded();
-      await page.waitForTimeout(180);
-      caseImages.push(await card.evaluate(el => {
-        const img = el.querySelector('.case-slide.is-active');
-        const vp = el.querySelector('.case-viewport');
-        return {
-          title: el.querySelector('.case-meta h3')?.textContent.trim() || '',
-          complete: !!img?.complete,
-          naturalWidth: img?.naturalWidth || 0,
-          naturalHeight: img?.naturalHeight || 0,
-          src: img?.getAttribute('src') || '',
-          currentSrc: img?.currentSrc || '',
-          fallback: !!vp?.classList.contains('is-fallback')
-        };
-      }));
-    }
+    await page.locator('.hero').screenshot({ path: `qa-current/hero-${width}.png` });
+    await page.locator('#services').screenshot({ path: `qa-current/services-${width}.png` });
     await page.locator('#work').screenshot({ path: `qa-current/work-${width}.png` });
 
-    const pass = firstService.trim() === 'Презентации' && servicesData.base?.loaded && servicesData.hand?.loaded && servicesData.beforeContent === 'none' && servicesData.afterContent === 'none' && servicesData.overflowX <= 1 && caseImages.length === 6 && caseImages.every(x => x.complete && x.naturalWidth > 0 && !x.fallback && x.src.startsWith('assets/cases/'));
-    results.push({ width, pass, firstService: firstService.trim(), servicesData, caseImages, consoleErrors });
+    const pass =
+      domContentLoadedMs < 5000 &&
+      heartbeatMs < 1500 &&
+      data.hero?.width > 0 &&
+      data.services?.width > 0 &&
+      data.work?.width > 0 &&
+      data.serviceImageLoaded &&
+      data.cardCount === 6 &&
+      data.titleOrderCorrect &&
+      data.portfolioIframeCount === 0 &&
+      data.overflowX <= 1 &&
+      data.serviceText === 'Презентации и сайты' &&
+      data.priceText === '10 000 рублей (до 15 слайдов)' &&
+      pageErrors.length === 0;
+
+    results.push({ width, pass, domContentLoadedMs, heartbeatMs, data, consoleErrors, pageErrors });
     await page.close();
   }
 
