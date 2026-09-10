@@ -1,0 +1,2 @@
+HUAWEI + ALFA BANK portfolio refresh
+version: 20260910-huawei-alfa-final
