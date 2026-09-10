@@ -1,0 +1,39 @@
+name: Refresh portfolio cache once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/refresh-portfolio-cache-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Refresh portfolio script cache key
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = 'aurelia-portfolio.js?v=20260910-services-price'
+          new = 'aurelia-portfolio.js?v=20260910-huawei-alfa-final'
+          if old not in s and new not in s:
+              raise SystemExit('portfolio script tag not found')
+          s = s.replace(old, new)
+          p.write_text(s, encoding='utf-8')
+          PY
+          rm -f .github/workflows/refresh-portfolio-cache-once.yml
+      - name: Commit cache refresh
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html .github/workflows/refresh-portfolio-cache-once.yml
+          git commit -m 'Refresh Huawei Alfa portfolio cache key'
+          git push
