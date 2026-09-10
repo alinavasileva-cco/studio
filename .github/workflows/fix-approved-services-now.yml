@@ -1,0 +1,100 @@
+name: Fix approved services now
+
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-approved-services-now.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore approved services block
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          index_path = Path('index.html')
+          index = index_path.read_text(encoding='utf-8')
+
+          approved_services = '''<section class="section services" id="services">
+          <div class="shell">
+          <div class="services-master">
+          <h2 class="services-master-title" data-en="SERVICES" data-ru="УСЛУГИ">УСЛУГИ</h2>
+          <h3 class="services-master-subhead" data-en="Presentations and websites" data-ru="Презентации и сайты">Презентации и сайты</h3>
+          <p class="services-master-copy" data-en="For business, conferences, talks and study." data-ru="Для бизнеса, конференций, выступлений и учёбы.">Для бизнеса, конференций, выступлений и учёбы.</p>
+          <p class="services-master-price" data-en="from €100 (up to 15 slides)" data-ru="10 000 рублей (до 15 слайдов)">10 000 рублей (до 15 слайдов)</p>
+          <figure class="services-master-visual">
+          <img src="assets/service-combo-premium-final.png?v=20260910-services-approved" alt="THE CASE — презентации и сайты" loading="eager" decoding="async"/>
+          </figure>
+          <a class="services-master-cta" href="#brief-form" role="button" aria-haspopup="dialog" data-en="Send brief →" data-ru="Отправить ТЗ →">Отправить ТЗ →</a>
+          </div>
+          </div>
+          </section>
+          <section class="section work"'''
+
+          pattern = r'<section class="section services" id="services">.*?</section>\s*<section class="section work"'
+          index2, count = re.subn(pattern, approved_services, index, count=1, flags=re.S)
+          if count != 1:
+              raise SystemExit(f'Could not replace services section, matches={count}')
+          index2 = re.sub(r'thecase\.js\?v=[^"\']+', 'thecase.js?v=20260910-services-approved-static', index2, count=1)
+          index_path.write_text(index2, encoding='utf-8')
+
+          js_path = Path('thecase.js')
+          js = js_path.read_text(encoding='utf-8')
+          js = js.replace("    let servicesCopy = null;\n    let servicesCta = null;", "    let servicesCopy = null;\n    let servicesPrice = null;\n    let servicesCta = null;")
+          js = js.replace(
+              '            <p class="services-master-copy" data-ru="Для бизнеса, конференций, выступлений и учёбы." data-en="For business, conferences, talks and study.">Для бизнеса, конференций, выступлений и учёбы.</p>\n            <figure class="services-master-visual">',
+              '            <p class="services-master-copy" data-ru="Для бизнеса, конференций, выступлений и учёбы." data-en="For business, conferences, talks and study.">Для бизнеса, конференций, выступлений и учёбы.</p>\n            <p class="services-master-price" data-ru="10 000 рублей (до 15 слайдов)" data-en="from €100 (up to 15 slides)">10 000 рублей (до 15 слайдов)</p>\n            <figure class="services-master-visual">'
+          )
+          js = js.replace('assets/service-combo-premium-final.png?v=20260907-final-png', 'assets/service-combo-premium-final.png?v=20260910-services-approved')
+          js = js.replace("        servicesCopy = shell.querySelector('.services-master-copy');\n        servicesCta = shell.querySelector('.services-master-cta');", "        servicesCopy = shell.querySelector('.services-master-copy');\n        servicesPrice = shell.querySelector('.services-master-price');\n        servicesCta = shell.querySelector('.services-master-cta');")
+          js = js.replace("      setText(servicesCopy, lang, 'Для бизнеса, конференций, выступлений и учёбы.', 'For business, conferences, talks and study.');\n      setText(servicesCta, lang, 'Отправить ТЗ →', 'Send brief →');", "      setText(servicesCopy, lang, 'Для бизнеса, конференций, выступлений и учёбы.', 'For business, conferences, talks and study.');\n      setText(servicesPrice, lang, '10 000 рублей (до 15 слайдов)', 'from €100 (up to 15 slides)');\n      setText(servicesCta, lang, 'Отправить ТЗ →', 'Send brief →');")
+          js = js.replace('font-size:clamp(34px,3.8vw,50px)!important', 'font-size:clamp(26px,2.4vw,34px)!important')
+          js = js.replace('font-size:clamp(30px,8.5vw,38px)!important', 'font-size:clamp(24px,7vw,30px)!important')
+          js = js.replace(
+              '      .services-master-copy{margin:24px 0 0!important;max-width:920px!important;font-family:var(--m)!important;font-size:clamp(17px,1.55vw,22px)!important;line-height:1.48!important;color:#59656d!important}\n',
+              '      .services-master-copy{margin:24px 0 0!important;max-width:920px!important;font-family:var(--m)!important;font-size:clamp(17px,1.55vw,22px)!important;line-height:1.48!important;color:#59656d!important}\n      .services-master-price{margin:10px 0 0!important;font-family:var(--m)!important;font-size:clamp(12px,1vw,14px)!important;line-height:1.4!important;font-weight:500!important;color:#d85c2b!important}\n'
+          )
+          js_path.write_text(js, encoding='utf-8')
+
+          css_path = Path('thecase-v3.css')
+          css = css_path.read_text(encoding='utf-8')
+          marker = '/* APPROVED SERVICES STATIC FALLBACK 2026-09-10 */'
+          if marker not in css:
+              css += '''\n\n/* APPROVED SERVICES STATIC FALLBACK 2026-09-10 */
+          #services.services{background:#eef3f6!important;background-image:none!important;border:0!important;padding:94px 0 104px!important}
+          #services>.shell{width:min(1380px,calc(100% - 72px))!important}
+          #services .services-master{width:100%!important;margin:0!important;padding:0!important}
+          #services .services-master-title{margin:0 0 48px!important;font-family:var(--u)!important;font-size:clamp(26px,2.4vw,34px)!important;font-weight:300!important;line-height:1!important;letter-spacing:-.05em!important;text-transform:uppercase!important;color:#12171b!important}
+          #services .services-master-subhead{margin:0!important;max-width:1120px!important;font-family:var(--u)!important;font-size:clamp(38px,4.6vw,66px)!important;font-weight:300!important;line-height:1.04!important;letter-spacing:-.055em!important;color:#12171b!important}
+          #services .services-master-copy{margin:24px 0 0!important;max-width:920px!important;font-family:var(--m)!important;font-size:clamp(17px,1.55vw,22px)!important;line-height:1.48!important;color:#59656d!important}
+          #services .services-master-price{margin:10px 0 0!important;font-family:var(--m)!important;font-size:clamp(12px,1vw,14px)!important;line-height:1.4!important;font-weight:500!important;color:#d85c2b!important}
+          #services .services-master-visual{display:block!important;width:100%!important;height:auto!important;min-height:0!important;margin:36px 0 0!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important}
+          #services .services-master-visual img{display:block!important;visibility:visible!important;opacity:1!important;width:min(1200px,100%)!important;max-width:100%!important;height:auto!important;max-height:none!important;margin:0 auto!important;padding:0!important;object-fit:contain!important;object-position:center center!important;background:transparent!important;border:0!important;box-shadow:none!important;transform:none!important}
+          #services .services-master-cta{display:flex!important;align-items:center!important;justify-content:center!important;width:min(760px,100%)!important;min-height:68px!important;margin:34px auto 0!important;padding:0 28px!important;border:0!important;border-radius:14px!important;background:#d85c2b!important;color:#fff!important;font-family:var(--m)!important;font-size:18px!important;font-weight:500!important;text-decoration:none!important;box-shadow:none!important}
+          @media(max-width:640px){#services.services{padding:56px 0 66px!important}#services>.shell{width:auto!important;margin-left:24px!important;margin-right:24px!important}#services .services-master-title{margin-bottom:30px!important;font-size:clamp(24px,7vw,30px)!important}#services .services-master-subhead{font-size:clamp(29px,8.8vw,39px)!important;line-height:1.06!important}#services .services-master-copy{margin-top:20px!important;font-size:16px!important}#services .services-master-visual{width:calc(100% + 16px)!important;margin:28px -8px 0!important}#services .services-master-visual img{width:100%!important;max-width:none!important;height:auto!important;object-fit:contain!important}#services .services-master-cta{width:100%!important;min-height:60px!important;margin-top:26px!important;border-radius:12px!important;font-size:17px!important}}
+          '''
+              css_path.write_text(css, encoding='utf-8')
+
+          print('Approved services restored in index.html, thecase.js and fallback CSS.')
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html thecase.js thecase-v3.css
+          if git diff --cached --quiet; then
+            echo "No changes needed"
+          else
+            git commit -m "Restore approved services block"
+            git push origin main
+          fi
