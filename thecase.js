@@ -37,6 +37,7 @@
     let servicesTitle = null;
     let servicesSubhead = null;
     let servicesCopy = null;
+    let servicesPrice = null;
     let servicesCta = null;
     const portfolioLinkLabel = document.querySelector('.portfolio-link span');
 
@@ -48,8 +49,9 @@
             <h2 class="services-master-title" data-ru="УСЛУГИ" data-en="SERVICES">УСЛУГИ</h2>
             <h3 class="services-master-subhead" data-ru="Презентации и сайты" data-en="Presentations and websites">Презентации и сайты</h3>
             <p class="services-master-copy" data-ru="Для бизнеса, конференций, выступлений и учёбы." data-en="For business, conferences, talks and study.">Для бизнеса, конференций, выступлений и учёбы.</p>
+            <p class="services-master-price" data-ru="10 000 рублей (до 15 слайдов)" data-en="from €100 (up to 15 slides)">10 000 рублей (до 15 слайдов)</p>
             <figure class="services-master-visual">
-              <img src="assets/service-combo-premium-final.png?v=20260907-final-png" alt="THE CASE — презентации и сайты" loading="eager" decoding="async" />
+              <img src="assets/service-combo-premium-final.png?v=20260910-services-approved" alt="THE CASE — презентации и сайты" loading="eager" decoding="async" />
             </figure>
             <a class="services-master-cta" href="#brief-form" role="button" aria-haspopup="dialog" data-ru="Отправить ТЗ →" data-en="Send brief →">Отправить ТЗ →</a>
           </div>
@@ -57,6 +59,7 @@
         servicesTitle = shell.querySelector('.services-master-title');
         servicesSubhead = shell.querySelector('.services-master-subhead');
         servicesCopy = shell.querySelector('.services-master-copy');
+        servicesPrice = shell.querySelector('.services-master-price');
         servicesCta = shell.querySelector('.services-master-cta');
       }
     }
@@ -230,6 +233,7 @@
       setText(servicesTitle, lang, 'УСЛУГИ', 'SERVICES');
       setText(servicesSubhead, lang, 'Презентации и сайты', 'Presentations and websites');
       setText(servicesCopy, lang, 'Для бизнеса, конференций, выступлений и учёбы.', 'For business, conferences, talks and study.');
+      setText(servicesPrice, lang, '10 000 рублей (до 15 слайдов)', 'from €100 (up to 15 slides)');
       setText(servicesCta, lang, 'Отправить ТЗ →', 'Send brief →');
       setText(portfolioLinkLabel, lang, 'БОЛЬШЕ РАБОТ', 'MORE WORK');
 
@@ -292,9 +296,10 @@
       .services{background:#eef3f6!important;background-image:none!important;border-bottom:0!important;padding:94px 0 104px!important}
       .services>.shell{width:min(1380px,calc(100% - 72px))!important}
       .services-master{width:100%!important;margin:0!important;padding:0!important}
-      .services-master-title{margin:0 0 48px!important;font-family:var(--u)!important;font-size:clamp(34px,3.8vw,50px)!important;font-weight:300!important;line-height:1!important;letter-spacing:-.05em!important;text-transform:uppercase!important;color:#12171b!important}
+      .services-master-title{margin:0 0 48px!important;font-family:var(--u)!important;font-size:clamp(26px,2.4vw,34px)!important;font-weight:300!important;line-height:1!important;letter-spacing:-.05em!important;text-transform:uppercase!important;color:#12171b!important}
       .services-master-subhead{margin:0!important;max-width:1120px!important;font-family:var(--u)!important;font-size:clamp(38px,4.6vw,66px)!important;font-weight:300!important;line-height:1.04!important;letter-spacing:-.055em!important;color:#12171b!important}
       .services-master-copy{margin:24px 0 0!important;max-width:920px!important;font-family:var(--m)!important;font-size:clamp(17px,1.55vw,22px)!important;line-height:1.48!important;color:#59656d!important}
+      .services-master-price{margin:10px 0 0!important;font-family:var(--m)!important;font-size:clamp(12px,1vw,14px)!important;line-height:1.4!important;font-weight:500!important;color:#d85c2b!important}
       .services-master-visual{display:block!important;width:100%!important;height:auto!important;min-height:0!important;margin:36px 0 0!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important}
       .services-master-visual img{display:block!important;visibility:visible!important;opacity:1!important;width:min(1200px,100%)!important;max-width:100%!important;height:auto!important;max-height:none!important;margin:0 auto!important;padding:0!important;object-fit:contain!important;object-position:center center!important;background:transparent!important;border:0!important;box-shadow:none!important;transform:none!important}
       .services-master-cta{display:flex!important;align-items:center!important;justify-content:center!important;width:min(760px,100%)!important;min-height:68px!important;margin:34px auto 0!important;padding:0 28px!important;border:0!important;border-radius:14px!important;background:#d85c2b!important;color:#fff!important;font-family:var(--m)!important;font-size:18px!important;font-weight:500!important;letter-spacing:-.01em!important;text-decoration:none!important;box-shadow:none!important;transition:transform .18s ease,background .18s ease!important}
@@ -330,7 +335,7 @@
         .hero-bottom-line{left:0!important;bottom:17px!important;width:calc(100vw - 28px)!important;font-size:clamp(10.5px,3.25vw,13px)!important;line-height:1!important;letter-spacing:-.035em!important;white-space:nowrap!important}
         .services{padding:56px 0 66px!important}
         .services>.shell{margin-left:24px!important;margin-right:24px!important}
-        .services-master-title{margin-bottom:30px!important;font-size:clamp(30px,8.5vw,38px)!important;line-height:1!important;letter-spacing:-.055em!important}
+        .services-master-title{margin-bottom:30px!important;font-size:clamp(24px,7vw,30px)!important;line-height:1!important;letter-spacing:-.055em!important}
         .services-master-subhead{max-width:100%!important;font-size:clamp(29px,8.8vw,39px)!important;line-height:1.06!important;letter-spacing:-.05em!important}
         .services-master-copy{margin-top:20px!important;font-size:16px!important;line-height:1.48!important;max-width:100%!important}
         .services-master-visual{width:calc(100% + 16px)!important;margin:28px -8px 0!important;padding:0!important;min-height:0!important;background:transparent!important}
