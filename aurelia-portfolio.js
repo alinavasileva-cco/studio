@@ -1,49 +1,46 @@
 (() => {
   const order = [
-    'HUAWEI',
     'ALFA BANK',
+    'HUAWEI',
     'RED FOX',
-    'JAPANESE MINIMALISM',
-    'OZON',
-    'YANDEX TAXI'
+    'AURELIA',
+    'YANDEX TAXI',
+    'JAPANESE MINIMALISM'
   ];
 
   const configs = {
-    'HUAWEI': {
-      ru: 'Технологии', en: 'Technology',
-      slides: ['p1','p2','p3'].map(pageId => `https://docs.google.com/presentation/d/14EqD4BfOBe61t_WIry_DLBpq6UdKv78zi9e0s305ZFs/export/png?id=14EqD4BfOBe61t_WIry_DLBpq6UdKv78zi9e0s305ZFs&pageid=${pageId}`),
-      fallback: 'https://drive.google.com/thumbnail?id=14EqD4BfOBe61t_WIry_DLBpq6UdKv78zi9e0s305ZFs&sz=w1600'
-    },
     'ALFA BANK': {
       ru: 'Банк', en: 'Banking',
       slides: ['p1','p2'].map(pageId => `https://docs.google.com/presentation/d/15kwfUROFvD_83DoYzY5CQS3ilD3cg0hrGAQVcFTMPD8/export/png?id=15kwfUROFvD_83DoYzY5CQS3ilD3cg0hrGAQVcFTMPD8&pageid=${pageId}`),
       fallback: 'https://drive.google.com/thumbnail?id=15kwfUROFvD_83DoYzY5CQS3ilD3cg0hrGAQVcFTMPD8&sz=w1600'
     },
+    'HUAWEI': {
+      ru: 'Технологии', en: 'Technology',
+      slides: ['p1','p2','p3'].map(pageId => `https://docs.google.com/presentation/d/14EqD4BfOBe61t_WIry_DLBpq6UdKv78zi9e0s305ZFs/export/png?id=14EqD4BfOBe61t_WIry_DLBpq6UdKv78zi9e0s305ZFs&pageid=${pageId}`),
+      fallback: 'https://drive.google.com/thumbnail?id=14EqD4BfOBe61t_WIry_DLBpq6UdKv78zi9e0s305ZFs&sz=w1600'
+    },
     'RED FOX': {
       ru: 'Продукт', en: 'Product',
       slides: ['assets/cases/redfox-01.webp?v=20260904-1','assets/cases/redfox-02.webp?v=20260904-1']
     },
-    'JAPANESE MINIMALISM': {
-      ru: 'Editorial', en: 'Editorial',
-      slides: ['assets/cases/japanese-01.webp?v=20260904-1','assets/cases/japanese-02.webp?v=20260904-1','assets/cases/japanese-03.webp?v=20260904-1']
-    },
-    'OZON': {
-      ru: 'Retail media', en: 'Retail media',
-      slides: ['p2','p3','p4'].map(pageId => `https://docs.google.com/presentation/d/1vCxqqiwonb6E-VVP4qggV6tVw7P4bHWeFDSti5zBu4c/export/png?id=1vCxqqiwonb6E-VVP4qggV6tVw7P4bHWeFDSti5zBu4c&pageid=${pageId}`),
-      fallback: 'https://drive.google.com/thumbnail?id=1vCxqqiwonb6E-VVP4qggV6tVw7P4bHWeFDSti5zBu4c&sz=w1600'
+    'AURELIA': {
+      ru: 'Real estate', en: 'Real estate',
+      slides: ['p1','p2','p3','p4'].map(pageId => `https://docs.google.com/presentation/d/1sPhXPXcCsKAWD3QMxlUK-hCWob6zspTFyYv56O0reNQ/export/png?id=1sPhXPXcCsKAWD3QMxlUK-hCWob6zspTFyYv56O0reNQ&pageid=${pageId}`),
+      fallback: 'https://drive.google.com/thumbnail?id=1sPhXPXcCsKAWD3QMxlUK-hCWob6zspTFyYv56O0reNQ&sz=w1600'
     },
     'YANDEX TAXI': {
       ru: 'Recruitment', en: 'Recruitment',
       slides: ['assets/cases/yandex-01.webp?v=20260904-1','assets/cases/yandex-02.webp?v=20260904-1','assets/cases/yandex-03.webp?v=20260904-1','assets/cases/yandex-04.webp?v=20260904-1']
+    },
+    'JAPANESE MINIMALISM': {
+      ru: 'Editorial', en: 'Editorial',
+      slides: ['assets/cases/japanese-01.webp?v=20260904-1','assets/cases/japanese-02.webp?v=20260904-1','assets/cases/japanese-03.webp?v=20260904-1']
     }
   };
 
   const grid = document.querySelector('.cases-grid');
   if (!grid) return;
 
-  // Replace the legacy portfolio immediately so old Google Slides iframes are removed
-  // before the rest of the app initializes. Pending cards intentionally do not use
-  // .case-card yet, so the legacy portfolio initializer ignores them.
   const cards = order.map((title, index) => {
     const cfg = configs[title];
     const card = document.createElement('article');
@@ -181,8 +178,6 @@
 
   const activate = () => cards.forEach(buildCard);
 
-  // thecase.js adds .brief-modal only after the legacy original script has completed.
-  // Activate after that point so the legacy portfolio code never touches these cards.
   if (document.querySelector('.brief-modal')) {
     activate();
   } else {
