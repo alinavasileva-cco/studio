@@ -1,5 +1,13 @@
 (() => {
   const configs = {
+    'HUAWEI': {
+      slides: ['p1', 'p2', 'p3'].map(pageId => `https://docs.google.com/presentation/d/14EqD4BfOBe61t_WIry_DLBpq6UdKv78zi9e0s305ZFs/export/png?id=14EqD4BfOBe61t_WIry_DLBpq6UdKv78zi9e0s305ZFs&pageid=${pageId}`),
+      embed: 'https://docs.google.com/presentation/d/14EqD4BfOBe61t_WIry_DLBpq6UdKv78zi9e0s305ZFs/embed?start=false&loop=false&delayms=60000'
+    },
+    'ALFA BANK': {
+      slides: ['p1', 'p2'].map(pageId => `https://docs.google.com/presentation/d/15kwfUROFvD_83DoYzY5CQS3ilD3cg0hrGAQVcFTMPD8/export/png?id=15kwfUROFvD_83DoYzY5CQS3ilD3cg0hrGAQVcFTMPD8&pageid=${pageId}`),
+      embed: 'https://docs.google.com/presentation/d/15kwfUROFvD_83DoYzY5CQS3ilD3cg0hrGAQVcFTMPD8/embed?start=false&loop=false&delayms=60000'
+    },
     'OZON': {
       slides: ['p2', 'p3', 'p4'].map(pageId => `https://docs.google.com/presentation/d/1vCxqqiwonb6E-VVP4qggV6tVw7P4bHWeFDSti5zBu4c/export/png?id=1vCxqqiwonb6E-VVP4qggV6tVw7P4bHWeFDSti5zBu4c&pageid=${pageId}`),
       embed: 'https://docs.google.com/presentation/d/1vCxqqiwonb6E-VVP4qggV6tVw7P4bHWeFDSti5zBu4c/embed?start=false&loop=false&delayms=60000'
@@ -9,34 +17,54 @@
       embed: 'https://docs.google.com/presentation/d/1sPhXPXcCsKAWD3QMxlUK-hCWob6zspTFyYv56O0reNQ/embed?start=false&loop=false&delayms=60000'
     },
     'FABERGÉ': {
-      slides: ['assets/cases/faberge-01.webp?v=20260904-1','assets/cases/faberge-02.webp?v=20260904-1','assets/cases/faberge-03.webp?v=20260904-1'],
+      slides: ['assets/cases/faberge-01.webp?v=20260904-1', 'assets/cases/faberge-02.webp?v=20260904-1', 'assets/cases/faberge-03.webp?v=20260904-1'],
       embed: 'https://docs.google.com/presentation/d/1U2kSLYvgoq1DzTv52fAxs1wjbvIYNylOVjtapuNP16Y/embed?start=false&loop=false&delayms=60000'
     },
     'RED FOX': {
-      slides: ['assets/cases/redfox-01.webp?v=20260904-1','assets/cases/redfox-02.webp?v=20260904-1'],
+      slides: ['assets/cases/redfox-01.webp?v=20260904-1', 'assets/cases/redfox-02.webp?v=20260904-1'],
       embed: 'https://docs.google.com/presentation/d/1Fzz3W0-_Ir70kt8s0_VbsAvhzs0CCuOJIk1M24HGLCI/embed?start=false&loop=false&delayms=60000'
     },
     'ЕЛЕНА ЦВЕТОЧНАЯ': {
-      slides: ['assets/cases/elena-01.webp?v=20260904-1','assets/cases/elena-02.webp?v=20260904-1','assets/cases/elena-03.webp?v=20260904-1','assets/cases/elena-04.webp?v=20260904-1','assets/cases/elena-05.webp?v=20260904-1'],
+      slides: ['assets/cases/elena-01.webp?v=20260904-1', 'assets/cases/elena-02.webp?v=20260904-1', 'assets/cases/elena-03.webp?v=20260904-1', 'assets/cases/elena-04.webp?v=20260904-1', 'assets/cases/elena-05.webp?v=20260904-1'],
       embed: 'https://docs.google.com/presentation/d/1c4yJK7twEgL1nSS_sHkAUkabu2yGLQ7xvQeS2rNyO6k/embed?start=false&loop=false&delayms=60000'
     },
     'JAPANESE MINIMALISM': {
-      slides: ['assets/cases/japanese-01.webp?v=20260904-1','assets/cases/japanese-02.webp?v=20260904-1','assets/cases/japanese-03.webp?v=20260904-1'],
+      slides: ['assets/cases/japanese-01.webp?v=20260904-1', 'assets/cases/japanese-02.webp?v=20260904-1', 'assets/cases/japanese-03.webp?v=20260904-1'],
       embed: 'https://docs.google.com/presentation/d/1LxFhOK6EKMKNn4aIy_Y48HlyfuW-tE1ORtpe8n4ozJk/embed?start=false&loop=false&delayms=60000'
     },
     'YANDEX TAXI': {
-      slides: ['assets/cases/yandex-01.webp?v=20260904-1','assets/cases/yandex-02.webp?v=20260904-1','assets/cases/yandex-03.webp?v=20260904-1','assets/cases/yandex-04.webp?v=20260904-1'],
+      slides: ['assets/cases/yandex-01.webp?v=20260904-1', 'assets/cases/yandex-02.webp?v=20260904-1', 'assets/cases/yandex-03.webp?v=20260904-1', 'assets/cases/yandex-04.webp?v=20260904-1'],
       embed: 'https://docs.google.com/presentation/d/1O0LuxPKg917YbccV5rgVue16HbaZwSwicNI_N67Q5Cc/embed?start=false&loop=false&delayms=60000'
     },
     'CAT GROOMER': {
-      slides: ['assets/cases/cat-01.webp?v=20260904-1','assets/cases/cat-02.webp?v=20260904-1'],
+      slides: ['assets/cases/cat-01.webp?v=20260904-1', 'assets/cases/cat-02.webp?v=20260904-1'],
       embed: 'https://docs.google.com/presentation/d/1deDoDf3BO3Hf01T_wUzVa-VcDSmMoZYLjBKlyNK1hFk/embed?start=false&loop=false&delayms=60000'
     }
   };
 
-  const mobileOrder = ['OZON', 'RED FOX', 'AURELIA', 'FABERGÉ', 'ЕЛЕНА ЦВЕТОЧНАЯ', 'JAPANESE MINIMALISM', 'YANDEX TAXI', 'CAT GROOMER'];
-  const majorTitles = ['OZON', 'AURELIA', 'YANDEX TAXI'];
-  const minorTitles = ['RED FOX', 'FABERGÉ', 'ЕЛЕНА ЦВЕТОЧНАЯ', 'JAPANESE MINIMALISM', 'CAT GROOMER'];
+  const mobileOrder = [
+    'HUAWEI',
+    'ALFA BANK',
+    'RED FOX',
+    'OZON',
+    'AURELIA',
+    'FABERGÉ',
+    'ЕЛЕНА ЦВЕТОЧНАЯ',
+    'JAPANESE MINIMALISM',
+    'YANDEX TAXI',
+    'CAT GROOMER'
+  ];
+
+  // 4 large projects on the left + 6 smaller projects on the right.
+  // The 1.52:1 column ratio keeps both columns visually close in final height.
+  const majorTitles = ['HUAWEI', 'RED FOX', 'AURELIA', 'YANDEX TAXI'];
+  const minorTitles = ['ALFA BANK', 'OZON', 'FABERGÉ', 'ЕЛЕНА ЦВЕТОЧНАЯ', 'JAPANESE MINIMALISM', 'CAT GROOMER'];
+
+  const cardDefinitions = {
+    'HUAWEI': { className: 'case-large case-huawei', ru: 'Технологии', en: 'Technology' },
+    'ALFA BANK': { className: 'case-medium case-alfa', ru: 'Банк', en: 'Banking' },
+    'OZON': { className: 'case-medium case-ozon', ru: 'Retail media', en: 'Retail media' }
+  };
 
   const injectServicePriceStyles = () => {
     if (document.getElementById('services-price-style')) return;
@@ -53,10 +81,7 @@
         letter-spacing:.01em!important;
       }
       @media(max-width:640px){
-        .services-master-price{
-          margin-top:10px!important;
-          font-size:12px!important;
-        }
+        .services-master-price{margin-top:10px!important;font-size:12px!important}
       }
     `;
     document.head.appendChild(style);
@@ -65,14 +90,12 @@
   const ensureServicePrice = () => {
     const copy = document.querySelector('.services-master-copy');
     if (!copy) return false;
-
     let price = document.querySelector('.services-master-price');
     if (!price) {
       price = document.createElement('p');
       price.className = 'services-master-price';
       copy.insertAdjacentElement('afterend', price);
     }
-
     const lang = document.documentElement.lang === 'en' ? 'en' : 'ru';
     price.textContent = lang === 'en'
       ? 'from €100 (up to 15 slides)'
@@ -83,15 +106,10 @@
   injectServicePriceStyles();
   ensureServicePrice();
 
-  const serviceObserver = new MutationObserver(() => {
-    ensureServicePrice();
-  });
+  const serviceObserver = new MutationObserver(ensureServicePrice);
   serviceObserver.observe(document.body, { childList: true, subtree: true });
-
   document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      window.setTimeout(ensureServicePrice, 0);
-    });
+    btn.addEventListener('click', () => window.setTimeout(ensureServicePrice, 0));
   });
 
   const injectPortfolioLayoutStyles = () => {
@@ -100,124 +118,123 @@
     style.id = 'portfolio-editorial-layout';
     style.textContent = `
       @media (min-width: 981px) {
-        .cases-grid.portfolio-composed {
-          display: grid !important;
-          grid-template-columns: minmax(0, 1.52fr) minmax(330px, 1fr) !important;
-          gap: 28px !important;
-          align-items: stretch !important;
+        .cases-grid.portfolio-composed{
+          display:grid!important;
+          grid-template-columns:minmax(0,1.52fr) minmax(330px,1fr)!important;
+          gap:28px!important;
+          align-items:stretch!important;
         }
-        .cases-grid.portfolio-composed .cases-column {
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          gap: 28px;
+        .cases-grid.portfolio-composed .cases-column{
+          min-width:0;
+          display:flex;
+          flex-direction:column;
+          justify-content:space-between;
+          gap:28px;
         }
-        .cases-grid.portfolio-composed .case-card {
-          width: 100% !important;
-          min-width: 0 !important;
-          grid-column: auto !important;
-          margin: 0 !important;
+        .cases-grid.portfolio-composed .case-card{
+          width:100%!important;
+          min-width:0!important;
+          grid-column:auto!important;
+          margin:0!important;
         }
-        .cases-grid.portfolio-composed .case-viewport {
-          width: 100%;
-          aspect-ratio: 16 / 9;
+        .cases-grid.portfolio-composed .case-viewport{
+          width:100%!important;
+          aspect-ratio:16/9!important;
         }
-        .cases-grid.portfolio-composed .cases-column-major .case-viewport {
-          border-radius: 28px;
-        }
-        .cases-grid.portfolio-composed .cases-column-minor .case-viewport {
-          border-radius: 22px;
-        }
-        .cases-grid.portfolio-composed .cases-column-major .case-meta h3 {
-          font-size: 17px;
-        }
-        .cases-grid.portfolio-composed .cases-column-minor .case-meta h3 {
-          font-size: 14px;
-        }
-        .cases-grid.portfolio-composed .cases-column-minor .case-meta p {
-          font-size: 10px;
-        }
+        .cases-grid.portfolio-composed .cases-column-major .case-viewport{border-radius:28px!important}
+        .cases-grid.portfolio-composed .cases-column-minor .case-viewport{border-radius:22px!important}
+        .cases-grid.portfolio-composed .cases-column-major .case-meta h3{font-size:17px!important}
+        .cases-grid.portfolio-composed .cases-column-minor .case-meta h3{font-size:14px!important}
+        .cases-grid.portfolio-composed .cases-column-minor .case-meta p{font-size:10px!important}
       }
-
-      @media (min-width: 641px) and (max-width: 980px) {
-        .cases-grid.portfolio-composed {
-          display: grid !important;
-          grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr) !important;
-          gap: 20px !important;
-          align-items: stretch !important;
+      @media (min-width:641px) and (max-width:980px) {
+        .cases-grid.portfolio-composed{
+          display:grid!important;
+          grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)!important;
+          gap:20px!important;
+          align-items:stretch!important;
         }
-        .cases-grid.portfolio-composed .cases-column {
-          min-width: 0;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          gap: 20px;
+        .cases-grid.portfolio-composed .cases-column{
+          min-width:0;
+          display:flex;
+          flex-direction:column;
+          justify-content:space-between;
+          gap:20px;
         }
-        .cases-grid.portfolio-composed .case-card {
-          width: 100% !important;
-          grid-column: auto !important;
-          margin: 0 !important;
+        .cases-grid.portfolio-composed .case-card{
+          width:100%!important;
+          grid-column:auto!important;
+          margin:0!important;
         }
-        .cases-grid.portfolio-composed .case-viewport {
-          width: 100%;
-          aspect-ratio: 16 / 9;
-          border-radius: 20px;
+        .cases-grid.portfolio-composed .case-viewport{
+          width:100%!important;
+          aspect-ratio:16/9!important;
+          border-radius:20px!important;
         }
-        .cases-grid.portfolio-composed .cases-column-minor .case-meta h3 {
-          font-size: 12px;
-        }
+        .cases-grid.portfolio-composed .cases-column-minor .case-meta h3{font-size:12px!important}
       }
-
-      @media (max-width: 640px) {
-        .cases-grid.portfolio-composed {
-          display: flex !important;
-          flex-direction: column !important;
-          gap: 30px !important;
+      @media (max-width:640px) {
+        .cases-grid.portfolio-composed{
+          display:flex!important;
+          flex-direction:column!important;
+          gap:30px!important;
         }
-        .cases-grid.portfolio-composed .cases-column {
-          display: contents !important;
+        .cases-grid.portfolio-composed .cases-column{display:contents!important}
+        .cases-grid.portfolio-composed .case-card{
+          width:100%!important;
+          grid-column:auto!important;
+          order:var(--mobile-order,99);
+          margin:0!important;
         }
-        .cases-grid.portfolio-composed .case-card {
-          width: 100% !important;
-          grid-column: auto !important;
-          order: var(--mobile-order, 99);
-          margin: 0 !important;
-        }
-        .cases-grid.portfolio-composed .case-viewport {
-          width: 100%;
-          aspect-ratio: 16 / 9;
-          border-radius: 20px;
+        .cases-grid.portfolio-composed .case-viewport{
+          width:100%!important;
+          aspect-ratio:16/9!important;
+          border-radius:20px!important;
         }
       }
     `;
     document.head.appendChild(style);
   };
 
-  const ensurePortfolioOrder = () => {
+  const createCard = title => {
+    const def = cardDefinitions[title];
+    const config = configs[title];
+    if (!def || !config) return null;
+    const card = document.createElement('article');
+    card.className = `case-card ${def.className}`;
+    card.innerHTML = `
+      <div class="case-viewport">
+        <iframe allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${config.embed}" title="${title} presentation"></iframe>
+      </div>
+      <div class="case-meta"><div><h3>${title}</h3><p data-en="${def.en}" data-ru="${def.ru}">${def.ru}</p></div></div>`;
+    return card;
+  };
+
+  const ensurePortfolioCards = () => {
     const grid = document.querySelector('.cases-grid');
-    if (!grid) return false;
-    if (grid.dataset.composed === '1') return true;
+    if (!grid || grid.dataset.composed === '1') return false;
 
-    let ozonCard = [...grid.querySelectorAll('.case-card')].find(card => card.querySelector('.case-meta h3')?.textContent?.trim() === 'OZON');
-    if (!ozonCard) {
-      ozonCard = document.createElement('article');
-      ozonCard.className = 'case-card case-large case-ozon';
-      ozonCard.innerHTML = `
-        <div class="case-viewport"><iframe allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="${configs.OZON.embed}" title="OZON presentation"></iframe></div>
-        <div class="case-meta"><div><h3>OZON</h3><p data-en="Retail media" data-ru="Retail media">Retail media</p></div></div>`;
-    }
+    const byTitle = new Map(
+      [...grid.querySelectorAll(':scope > .case-card')].map(card => [card.querySelector('.case-meta h3')?.textContent?.trim(), card])
+    );
 
-    grid.insertBefore(ozonCard, grid.firstElementChild);
+    ['HUAWEI', 'ALFA BANK', 'OZON'].forEach(title => {
+      if (!byTitle.has(title)) {
+        const card = createCard(title);
+        if (card) {
+          grid.appendChild(card);
+          byTitle.set(title, card);
+        }
+      }
+    });
 
-    const redFoxCard = [...grid.querySelectorAll('.case-card')].find(card => card.querySelector('.case-meta h3')?.textContent?.trim() === 'RED FOX');
-    if (redFoxCard) {
-      redFoxCard.classList.remove('case-medium');
-      redFoxCard.classList.add('case-large');
-      grid.insertBefore(redFoxCard, ozonCard.nextElementSibling);
-    }
+    // Before the final two-column composition, keep the DOM in the requested reading order.
+    mobileOrder.forEach(title => {
+      const card = byTitle.get(title);
+      if (card) grid.appendChild(card);
+    });
 
-    return true;
+    return mobileOrder.every(title => byTitle.has(title));
   };
 
   const rebuildCard = card => {
@@ -286,10 +303,11 @@
     if (!grid || grid.dataset.composed === '1') return true;
 
     const cards = [...grid.querySelectorAll(':scope > .case-card')];
-    if (cards.length < 8 || !cards.every(card => card.dataset.portfolioFixed === '1')) return false;
+    if (cards.length < mobileOrder.length) return false;
 
     const byTitle = new Map(cards.map(card => [card.querySelector('.case-meta h3')?.textContent?.trim(), card]));
     if (!mobileOrder.every(title => byTitle.has(title))) return false;
+    if (!mobileOrder.every(title => byTitle.get(title)?.dataset.portfolioFixed === '1')) return false;
 
     mobileOrder.forEach((title, index) => {
       byTitle.get(title)?.style.setProperty('--mobile-order', String(index + 1));
@@ -311,32 +329,31 @@
 
   const repairPortfolio = () => {
     injectPortfolioLayoutStyles();
-    ensurePortfolioOrder();
+    if (!ensurePortfolioCards()) return false;
 
     const grid = document.querySelector('.cases-grid');
-    if (!grid) return false;
-    if (grid.dataset.composed === '1') return true;
+    if (!grid || grid.dataset.composed === '1') return true;
 
-    const cards = [...grid.querySelectorAll('.case-card')];
-    if (cards.length < 8) return false;
+    const cards = [...grid.querySelectorAll(':scope > .case-card')];
+    if (cards.length < mobileOrder.length) return false;
 
+    // Wait until the original portfolio script has initialized its six legacy cards,
+    // then replace every card by title so labels and slides can never drift apart.
     const nativeCount = cards.filter(card => card.querySelector('.case-viewport.case-native')).length;
     if (nativeCount < 6) return false;
 
     cards.forEach(rebuildCard);
-    if (!cards.every(card => card.dataset.portfolioFixed === '1')) return false;
-
     return composePortfolio();
   };
 
   injectPortfolioLayoutStyles();
-  ensurePortfolioOrder();
+  ensurePortfolioCards();
 
   if (!repairPortfolio()) {
     let attempts = 0;
     const timer = window.setInterval(() => {
       attempts += 1;
-      if (repairPortfolio() || attempts > 120) window.clearInterval(timer);
+      if (repairPortfolio() || attempts > 160) window.clearInterval(timer);
     }, 100);
   }
 })();
