@@ -53,7 +53,7 @@
             <figure class="services-master-visual">
               <img src="assets/service-combo-premium-final.png?v=20260910-services-approved" alt="THE CASE — презентации и сайты" loading="eager" decoding="async" />
             </figure>
-            <a class="services-master-cta" href="#brief-form" role="button" aria-haspopup="dialog" data-ru="Отправить ТЗ →" data-en="Send brief →">Отправить ТЗ →</a>
+            <a class="services-master-cta" href="#brief-form" role="button" aria-haspopup="dialog" data-ru="Отправить ТЗ" data-en="Send brief">Отправить ТЗ</a>
           </div>
         `;
         servicesTitle = shell.querySelector('.services-master-title');
@@ -95,7 +95,7 @@
             <textarea class="brief-task-input" name="message" rows="7" maxlength="10000" required></textarea>
           </label>
           <input class="brief-honey" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" />
-          <button class="brief-submit" type="submit">Отправить →</button>
+          <button class="brief-submit" type="submit">Отправить</button>
           <div class="brief-form-status" role="status" aria-live="polite"></div>
         </form>
       </section>
@@ -227,14 +227,14 @@
         if (metaDescription) metaDescription.content = 'THE CASE — презентации и сайты для бизнеса. Концепция. Аргументация. Визуальный код.';
       }
 
-      setText(document.querySelector('.head-cta'), lang, 'ЗАКАЗАТЬ ↗', 'START ↗');
-      setText(document.querySelector('.hero-actions .button.primary'), lang, 'ЗАКАЗАТЬ ПРЕЗЕНТАЦИЮ ↗', 'START A PROJECT ↗');
+      setText(document.querySelector('.head-cta'), lang, 'ЗАКАЗАТЬ', 'START');
+      setText(document.querySelector('.hero-actions .button.primary'), lang, 'ЗАКАЗАТЬ ПРЕЗЕНТАЦИЮ', 'START A PROJECT');
 
       setText(servicesTitle, lang, 'УСЛУГИ', 'SERVICES');
       setText(servicesSubhead, lang, 'Презентации и сайты', 'Presentations and websites');
       setText(servicesCopy, lang, 'Для бизнеса, конференций, выступлений и учёбы.', 'For business, conferences, talks and study.');
       setText(servicesPrice, lang, '10 000 рублей (до 15 слайдов)', 'from €100 (up to 15 slides)');
-      setText(servicesCta, lang, 'Отправить ТЗ →', 'Send brief →');
+      setText(servicesCta, lang, 'Отправить ТЗ', 'Send brief');
       setText(portfolioLinkLabel, lang, 'БОЛЬШЕ РАБОТ', 'MORE WORK');
 
       setText(briefTitle, lang, 'Отправить ТЗ', 'Send brief');
@@ -242,7 +242,7 @@
       setText(briefNameLabel, lang, 'Имя', 'Name');
       setText(briefEmailLabel, lang, 'Почта', 'Email');
       setText(briefTaskLabel, lang, 'Техническое задание', 'Brief');
-      setText(briefSubmit, lang, 'Отправить →', 'Send →');
+      setText(briefSubmit, lang, 'Отправить', 'Send');
       if (briefClose) briefClose.setAttribute('aria-label', lang === 'en' ? 'Close' : 'Закрыть');
       if (briefNameInput) briefNameInput.placeholder = lang === 'en' ? 'Your name' : 'Ваше имя';
       if (briefEmailInput) briefEmailInput.placeholder = 'name@example.com';
@@ -250,12 +250,13 @@
 
       setText(document.querySelector('.work h2'), lang, 'ПОРТФОЛИО', 'PORTFOLIO');
       const categories = {
-        'FABERGÉ': ['Культура', 'Culture'],
+        'ALFA BANK': ['Банк', 'Banking'],
+        'HUAWEI': ['Технологии', 'Technology'],
         'RED FOX': ['Продукт', 'Product'],
-        'ЕЛЕНА ЦВЕТОЧНАЯ': ['Бренд', 'Brand'],
-        'JAPANESE MINIMALISM': ['Editorial', 'Editorial'],
+        'AURELIA': ['Real estate', 'Real estate'],
         'YANDEX TAXI': ['Recruitment', 'Recruitment'],
-        'CAT GROOMER': ['Сервис', 'Service']
+        'JAPANESE MINIMALISM': ['Editorial', 'Editorial'],
+        'SAQAOMUK': ['Streetwear', 'Streetwear']
       };
       document.querySelectorAll('.case-card').forEach(card => {
         const title = card.querySelector('h3')?.textContent?.trim();
