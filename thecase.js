@@ -256,7 +256,8 @@
         'AURELIA': ['Real estate', 'Real estate'],
         'YANDEX TAXI': ['Recruitment', 'Recruitment'],
         'JAPANESE MINIMALISM': ['Editorial', 'Editorial'],
-        'SAQAOMUK': ['Streetwear', 'Streetwear']
+        'SAQAOMUK': ['Streetwear', 'Streetwear'],
+        'KAGE DENIM': ['Fashion', 'Fashion']
       };
       document.querySelectorAll('.case-card').forEach(card => {
         const title = card.querySelector('h3')?.textContent?.trim();
