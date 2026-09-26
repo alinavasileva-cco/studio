@@ -9,7 +9,7 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
   const browser = await chromium.launch({ headless: true, executablePath, args: ['--no-sandbox'] });
   fs.mkdirSync('qa-current', { recursive: true });
   const results = [];
-  const expectedTitles = ['ALFA BANK', 'HUAWEI', 'RED FOX', 'AURELIA', 'YANDEX TAXI', 'JAPANESE MINIMALISM'];
+  const expectedTitles = ['ALFA BANK', 'HUAWEI', 'RED FOX', 'AURELIA', 'YANDEX TAXI', 'JAPANESE MINIMALISM', 'SAQAOMUK'];
 
   for (const width of [390, 430, 768, 1024, 1440]) {
     const height = width >= 1000 ? 1000 : width >= 700 ? 1024 : 900;
@@ -32,7 +32,7 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
     await page.locator('.hero').waitFor({ state: 'visible', timeout: 5000 });
     await page.locator('#services .services-master').waitFor({ state: 'visible', timeout: 5000 });
     await page.locator('.brief-modal').waitFor({ state: 'attached', timeout: 5000 });
-    await page.waitForFunction(() => document.querySelectorAll('.cases-grid .case-card').length === 6, null, { timeout: 6000 });
+    await page.waitForFunction(() => document.querySelectorAll('.cases-grid .case-card').length === 7, null, { timeout: 6000 });
 
     const data = await page.evaluate(expectedTitles => {
       const rect = el => el ? ({
@@ -45,6 +45,9 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
       const cards = [...document.querySelectorAll('.cases-grid .case-card')];
       const titles = cards.map(card => card.querySelector('.case-meta h3')?.textContent?.trim() || '');
       const iframes = document.querySelectorAll('.cases-grid iframe').length;
+      const saqaCard = cards.find(card => card.querySelector('.case-meta h3')?.textContent?.trim() === 'SAQAOMUK');
+      const saqaSlideCount = saqaCard?.querySelectorAll('.case-slide').length || 0;
+      const arrowGlyphCount = (document.body.innerText.match(/[←→↗]/g) || []).length;
       const serviceImageLoaded = !!serviceImage && serviceImage.complete && serviceImage.naturalWidth > 0;
       const hero = document.querySelector('.hero');
       const services = document.querySelector('#services');
@@ -62,6 +65,8 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
         titles,
         titleOrderCorrect: JSON.stringify(titles) === JSON.stringify(expectedTitles),
         portfolioIframeCount: iframes,
+        saqaSlideCount,
+        arrowGlyphCount,
         overflowX: document.documentElement.scrollWidth - innerWidth,
         bodyHeight: document.body.scrollHeight,
         serviceText: document.querySelector('.services-master-subhead')?.textContent?.trim() || '',
@@ -84,9 +89,11 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
       data.services?.width > 0 &&
       data.work?.width > 0 &&
       data.serviceImageLoaded &&
-      data.cardCount === 6 &&
+      data.cardCount === 7 &&
       data.titleOrderCorrect &&
       data.portfolioIframeCount === 0 &&
+      data.saqaSlideCount === 5 &&
+      data.arrowGlyphCount === 0 &&
       data.overflowX <= 1 &&
       data.serviceText === 'Презентации и сайты' &&
       data.priceText === '10 000 рублей (до 15 слайдов)' &&
