@@ -49,7 +49,6 @@
             <h2 class="services-master-title" data-ru="УСЛУГИ" data-en="SERVICES">УСЛУГИ</h2>
             <h3 class="services-master-subhead" data-ru="Презентации и сайты" data-en="Presentations and websites">Презентации и сайты</h3>
             <p class="services-master-copy" data-ru="Для бизнеса, конференций, выступлений и учёбы." data-en="For business, conferences, talks and study.">Для бизнеса, конференций, выступлений и учёбы.</p>
-            <p class="services-master-price" data-ru="10 000 рублей (до 15 слайдов)" data-en="from €100 (up to 15 slides)">10 000 рублей (до 15 слайдов)</p>
             <figure class="services-master-visual">
               <img src="assets/service-combo-premium-final.png?v=20260910-services-approved" alt="THE CASE — презентации и сайты" loading="eager" decoding="async" />
             </figure>
