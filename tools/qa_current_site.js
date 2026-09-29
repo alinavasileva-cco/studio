@@ -73,7 +73,8 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
         overflowX: document.documentElement.scrollWidth - innerWidth,
         bodyHeight: document.body.scrollHeight,
         serviceText: document.querySelector('.services-master-subhead')?.textContent?.trim() || '',
-        priceText: document.querySelector('.services-master-price')?.textContent?.trim() || ''
+        priceText: document.querySelector('.services-master-price')?.textContent?.trim() || '',
+        priceElementCount: document.querySelectorAll('.services-master-price').length
       };
     }, expectedTitles);
 
@@ -100,7 +101,8 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
       data.arrowGlyphCount === 0 &&
       data.overflowX <= 1 &&
       data.serviceText === 'Презентации и сайты' &&
-      data.priceText === '10 000 рублей (до 15 слайдов)' &&
+      data.priceText === '' &&
+      data.priceElementCount === 0 &&
       pageErrors.length === 0;
 
     results.push({ width, pass, domContentLoadedMs, heartbeatMs, data, consoleErrors, pageErrors });
