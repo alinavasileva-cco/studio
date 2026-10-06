@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">The Case DM Queue</string>
+    <string name="accessibility_description">Помощник The Case: после вашего нажатия открывает Instagram и пытается вставить подготовленный текст в поле Direct. Никогда не нажимает «Отправить».</string>
+</resources>
