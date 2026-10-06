@@ -33,7 +33,7 @@ public class CsvUtils {
         int start = hasHeader ? 1 : 0;
         for (int r = start; r < rows.size(); r++) {
             List<String> row = rows.get(r);
-            if (row.isEmpty() || row.stream().allMatch(String::isBlank)) continue;
+            if (isRowBlank(row)) continue;
 
             String instagram;
             String message;
@@ -147,6 +147,12 @@ public class CsvUtils {
             rows.add(row);
         }
         return rows;
+    }
+
+    private static boolean isRowBlank(List<String> row) {
+        if (row == null || row.isEmpty()) return true;
+        for (String s : row) if (s != null && !s.trim().isEmpty()) return false;
+        return true;
     }
 
     private static Map<String,Integer> headerMap(List<String> row) {
