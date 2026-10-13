@@ -54,12 +54,17 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
       const hero = document.querySelector('.hero');
       const services = document.querySelector('#services');
       const work = document.querySelector('#work');
+      const calculator = document.querySelector('#calculator');
+      const calculatorLink = document.querySelector('.calculator-promo-link');
       return {
         title: document.title,
         readyState: document.readyState,
         hero: rect(hero),
         services: rect(services),
         work: rect(work),
+        calculator: rect(calculator),
+        calculatorHref: calculatorLink?.href || '',
+        calculatorText: calculatorLink?.textContent?.trim() || '',
         serviceImageLoaded,
         serviceImageNaturalWidth: serviceImage?.naturalWidth || 0,
         serviceImageSrc: serviceImage?.getAttribute('src') || '',
@@ -92,6 +97,9 @@ if (!executablePath) throw new Error('No system Chrome/Chromium found');
       data.hero?.width > 0 &&
       data.services?.width > 0 &&
       data.work?.width > 0 &&
+      data.calculator?.width > 0 &&
+      data.calculatorHref === 'https://alinavasileva-cco.github.io/studio/calculator/' &&
+      data.calculatorText === 'РАССЧИТАТЬ СТОИМОСТЬ' &&
       data.serviceImageLoaded &&
       data.cardCount === 8 &&
       data.titleOrderCorrect &&
