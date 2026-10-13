@@ -133,6 +133,22 @@
  .theme-btn[aria-pressed=true]{padding:3px}
  .theme-label{font-size:12px;padding:8px 4px 5px;line-height:1.25}
 }
+
+/* THE CASE: approved two-column thematic preview gallery */
+.visual-layout{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:clamp(24px,3.4vw,54px);align-items:start}
+.visual-main-wrap{min-width:0;position:sticky;top:22px;align-self:start}
+.theme-side{min-width:0;overflow:hidden;background:#eeeae4;border:1px solid var(--line);padding:15px}
+.theme-title{margin:0 0 13px;font-size:12px;line-height:1.45}
+.themes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;gap:11px;align-items:stretch;min-width:0;border:0}
+.theme-btn{box-sizing:border-box;min-width:0;width:100%;min-height:0;display:flex;flex-direction:column;justify-content:flex-start;align-items:stretch;gap:0;padding:5px;background:var(--white);border:1px solid var(--line);text-align:left;box-shadow:none}
+.theme-btn[aria-pressed=true]{border:2px solid var(--accent);padding:4px;background:var(--white);box-shadow:none}
+.theme-btn::before,.theme-btn[aria-pressed=true]::before{display:none}
+.theme-thumb{display:block;width:100%;height:auto;flex:0 0 auto;aspect-ratio:16/9;object-fit:contain;background:#ded9d1}
+.theme-label{display:block;flex:1 0 auto;min-width:0;padding:9px 7px 7px;color:var(--ink);font-size:clamp(12px,1.12vw,15px);line-height:1.33;font-weight:750;overflow-wrap:anywhere;hyphens:auto}
+.theme-btn[aria-pressed=true] .theme-label{color:var(--ink)}
+@media(max-width:1120px){.visual-layout{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:23px}.theme-side{padding:11px}.themes{gap:8px}.theme-label{font-size:12.5px;padding:8px 5px 5px}}
+@media(max-width:860px){.visual-layout{display:flex;flex-direction:column;gap:25px}.visual-main-wrap{position:static;top:auto;width:100%}.theme-side{width:100%;padding:14px}.themes{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.theme-label{font-size:14px;padding:10px 8px 8px}}
+@media(max-width:400px){.theme-side{padding:9px}.themes{gap:8px}.theme-btn{padding:4px}.theme-btn[aria-pressed=true]{padding:3px}.theme-label{font-size:12px;padding:8px 4px 5px;line-height:1.25}}
 </style></head><body>
 <header class="site-head"><div class="shell head-inner"><a class="wordmark" href="https://alinavasileva-cco.github.io/studio/" target="_blank" rel="noopener">THE CASE<span>.</span></a><a class="head-contact" href="https://t.me/AlinaVasileva" target="_blank" rel="noopener">Связаться ↗</a></div></header>
 <main class="shell">
