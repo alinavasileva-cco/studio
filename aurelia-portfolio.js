@@ -7,7 +7,9 @@
     'RED FOX',
     'AURELIA',
     'YANDEX TAXI',
-    'JAPANESE MINIMALISM'
+    'JAPANESE MINIMALISM',
+    '1С: ФРЕШ',
+    'МЕДИЦИНСКАЯ ПРЕЗЕНТАЦИЯ'
   ];
 
   const configs = {
@@ -45,6 +47,22 @@
     'KAGE DENIM': {
       ru: 'Fashion', en: 'Fashion',
       slides: ['p1','p2','p3','p4','p5'].map(pageId => `https://docs.google.com/presentation/d/1dtfS1wTIbDMxp5hVMjX_GtuQzgacvPbHIGT5CNae1P4/export/png?id=1dtfS1wTIbDMxp5hVMjX_GtuQzgacvPbHIGT5CNae1P4&pageid=${pageId}`)
+    },
+    '1С: ФРЕШ': {
+      ru: 'Облачные решения', en: 'Cloud solutions',
+      slides: [
+        'assets/cases/1c-fresh-01.webp?v=20261029-1',
+        'assets/cases/1c-fresh-02.webp?v=20261029-1',
+        'assets/cases/1c-fresh-03.webp?v=20261029-1'
+      ]
+    },
+    'МЕДИЦИНСКАЯ ПРЕЗЕНТАЦИЯ': {
+      ru: 'Медицина', en: 'Medical',
+      slides: [
+        'assets/cases/medical-01.webp?v=20261029-1',
+        'assets/cases/medical-02.webp?v=20261029-1',
+        'assets/cases/medical-03.webp?v=20261029-1'
+      ]
     }
   };
 
