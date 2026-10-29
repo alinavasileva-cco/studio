@@ -1,5 +1,6 @@
 (() => {
   const order = [
+    '1С: ФРЕШ',
     'SAQAOMUK',
     'KAGE DENIM',
     'ALFA BANK',
@@ -8,7 +9,6 @@
     'AURELIA',
     'YANDEX TAXI',
     'JAPANESE MINIMALISM',
-    '1С: ФРЕШ',
     'МЕДИЦИНСКАЯ ПРЕЗЕНТАЦИЯ'
   ];
 
@@ -59,9 +59,9 @@
     'МЕДИЦИНСКАЯ ПРЕЗЕНТАЦИЯ': {
       ru: 'Медицина', en: 'Medical',
       slides: [
-        'assets/cases/medical-01.webp?v=20261029-1',
-        'assets/cases/medical-02.webp?v=20261029-1',
-        'assets/cases/medical-03.webp?v=20261029-1'
+        'assets/cases/medical-borisov-08.png?v=20261029-2',
+        'assets/cases/medical-borisov-10.png?v=20261029-2',
+        'assets/cases/medical-borisov-11.png?v=20261029-2'
       ]
     }
   };
