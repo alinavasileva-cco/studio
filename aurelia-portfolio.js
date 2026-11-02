@@ -2,8 +2,10 @@
   const order = [
     '1С: ФРЕШ',
     'SAQAOMUK',
+    'Эстетическая медицина',
     'KAGE DENIM',
     'ALFA BANK',
+    'Пигментация',
     'HUAWEI',
     'RED FOX',
     'AURELIA',
@@ -47,6 +49,23 @@
     'KAGE DENIM': {
       ru: 'Fashion', en: 'Fashion',
       slides: ['p1','p2','p3','p4','p5'].map(pageId => `https://docs.google.com/presentation/d/1dtfS1wTIbDMxp5hVMjX_GtuQzgacvPbHIGT5CNae1P4/export/png?id=1dtfS1wTIbDMxp5hVMjX_GtuQzgacvPbHIGT5CNae1P4&pageid=${pageId}`)
+    },
+
+    'Эстетическая медицина': {
+      ru: 'Медицина', en: 'Aesthetic medicine',
+      slides: [
+        'assets/cases/esthetic-medicine-03.png?v=20261102-1',
+        'assets/cases/esthetic-medicine-04.png?v=20261102-1',
+        'assets/cases/esthetic-medicine-10.png?v=20261102-1'
+      ]
+    },
+    'Пигментация': {
+      ru: 'Эстетическая медицина', en: 'Aesthetic medicine',
+      slides: [
+        'assets/cases/pigmentation-04.png?v=20261102-1',
+        'assets/cases/pigmentation-05.png?v=20261102-1',
+        'assets/cases/pigmentation-09.png?v=20261102-1'
+      ]
     },
     '1С: ФРЕШ': {
       ru: 'Облачные решения', en: 'Cloud solutions',
