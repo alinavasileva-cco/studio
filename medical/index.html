@@ -132,10 +132,15 @@ header{height:80px;position:sticky;top:0;z-index:20;backdrop-filter:blur(18px);b
  .services .service h3{margin-top:0}
 }
 @media(prefers-reduced-motion:reduce){.hero-gallery img{transition:none!important}}
+
+/* Bidirectional THE CASE navigation */
+header .home-link{font-family:var(--m);font-size:11px;font-weight:600;letter-spacing:.015em;color:var(--orange);white-space:nowrap}
+header .home-link:hover,header .home-link:focus-visible{color:#aa431d;text-decoration:underline;text-underline-offset:5px}
+@media(max-width:600px){header .right{gap:9px}header .home-link{font-size:9px;letter-spacing:0}}
 </style>
 </head>
 <body>
-<header><div class="shell"><a class="logo" href="../" aria-label="THE CASE — главная">THE <b>CASE</b></a><nav class="navigation" aria-label="Навигация"><a href="#services" data-ru="УСЛУГИ" data-en="SERVICES">УСЛУГИ</a><a href="#portfolio" data-ru="РАБОТЫ" data-en="WORK">РАБОТЫ</a><a href="#process" data-ru="ПРОЦЕСС" data-en="PROCESS">ПРОЦЕСС</a></nav><div class="right"><div class="switch" aria-label="Язык"><button type="button" data-language="ru" aria-pressed="true">RU</button><button type="button" data-language="en" aria-pressed="false">EN</button></div><a class="nav-contact" href="#contact" data-ru="ОБСУДИТЬ ПРОЕКТ" data-en="LET'S TALK">ОБСУДИТЬ ПРОЕКТ</a></div></div></header>
+<header><div class="shell"><a class="logo" href="../" aria-label="THE CASE — главная">THE <b>CASE</b></a><nav class="navigation" aria-label="Навигация"><a href="#services" data-ru="УСЛУГИ" data-en="SERVICES">УСЛУГИ</a><a href="#portfolio" data-ru="РАБОТЫ" data-en="WORK">РАБОТЫ</a><a href="#process" data-ru="ПРОЦЕСС" data-en="PROCESS">ПРОЦЕСС</a></nav><div class="right"><a class="home-link" href="../index.html" data-ru="НА ГЛАВНУЮ" data-en="HOME">НА ГЛАВНУЮ</a><div class="switch" aria-label="Язык"><button type="button" data-language="ru" aria-pressed="true">RU</button><button type="button" data-language="en" aria-pressed="false">EN</button></div><a class="nav-contact" href="#contact" data-ru="ОБСУДИТЬ ПРОЕКТ" data-en="LET'S TALK">ОБСУДИТЬ ПРОЕКТ</a></div></div></header>
 <main>
 <section class="hero">
   <div class="shell">
@@ -183,12 +188,15 @@ header{height:80px;position:sticky;top:0;z-index:20;backdrop-filter:blur(18px);b
 <script>
 (() => {
  const buttons=[...document.querySelectorAll('[data-language]')];
- buttons.forEach(b=>b.addEventListener('click',()=>{
-  const lang=b.dataset.language;document.documentElement.lang=lang;
+ const setLanguage=lang=>{
+  document.documentElement.lang=lang;
   document.querySelectorAll('[data-ru]').forEach(el=>{el.textContent=el.dataset[lang]});
   document.querySelectorAll('[data-ru-html]').forEach(el=>{el.innerHTML=el.dataset[lang+'Html']});
-  buttons.forEach(btn=>btn.setAttribute('aria-pressed',String(btn===b)));
- }));
+  buttons.forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.language===lang)));
+  try{localStorage.setItem('thecase-lang',lang)}catch(_){}
+ };
+ buttons.forEach(b=>b.addEventListener('click',()=>setLanguage(b.dataset.language)));
+ try{if(localStorage.getItem('thecase-lang')==='en')setLanguage('en')}catch(_){};
  document.querySelectorAll('[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{
   const filter=btn.dataset.filter;
   document.querySelectorAll('[data-filter]').forEach(x=>x.setAttribute('aria-pressed',String(x===btn)));
