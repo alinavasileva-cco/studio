@@ -283,6 +283,7 @@
     document.querySelectorAll('.lang-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         currentLang = btn.dataset.lang;
+        try { localStorage.setItem('thecase-lang', currentLang); } catch (_) {}
         applyLanguage(currentLang);
       });
     });
