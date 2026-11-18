@@ -19,7 +19,7 @@ Python 3.11+:
 ```bash
 python -m pip install -r requirements.txt
 python pbn_creator.py --input my-image.png --out result \
-  --palette my-palette.csv --canvas-width 40 --canvas-height 60
+  --canvas-width 40 --canvas-height 60
 ```
 
 При исходном RGB-фото:
@@ -59,4 +59,4 @@ python pbn_creator.py --input own-photo.jpg --out result --width 800 \
 
 ## GitHub
 
-Папка готова к размещению в **новом отдельном** GitHub-репозитории (есть `.github/workflows/tests.yml`). В исходный репозиторий `victor-prog-1998/ColoringByNumberCreator` запись не вносится.
+Код опубликован в отдельной ветке GitHub-репозитория `studio` и готов к переносу в отдельный репозиторий (есть `.github/workflows/tests.yml`). В исходный репозиторий `victor-prog-1998/ColoringByNumberCreator` запись не вносится.
