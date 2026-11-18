@@ -12,6 +12,7 @@ import shutil
 from collections import Counter
 from pathlib import Path
 from xml.sax.saxutils import escape
+import xml.etree.ElementTree as ET
 
 import cv2
 import fitz
@@ -21,6 +22,8 @@ from rasterio.features import shapes
 from scipy import ndimage as ndi
 from scipy.spatial import cKDTree
 import cairosvg
+from smooth_geometry import smoothed_boundaries
+from retouch_lanterns import retouch_lantern_portrait
 
 PALETTE_DEFAULT = [
     (249,247,215),(253,232,129),(252,192,72),(251,153,47),(248,123,37),
@@ -123,7 +126,8 @@ def cleanup(index, palette, min_area=22, min_radius=3.2, passes=5, protected=Non
             in_face=rect is not None and (x0+x1)/2>=rect[0] and (x0+x1)/2<rect[2] and (y0+y1)/2>=rect[1] and (y0+y1)/2<rect[3]
             aa=max(7,min_area//3) if in_face else min_area
             rr=max(1.5,min_radius*0.52) if in_face else min_radius
-            if a>=aa and min(y1-y0,x1-x0)>=2*rr:continue
+            # Width of bounding box is not enough: a serpentine 1px-wide
+            # sliver may span a large box, yet has no room for a paint number.
             local=(regions[ysl,xsl]==rid)
             rmax=float(ndi.distance_transform_edt(np.pad(local,1)).max())
             if a>=aa and rmax>=rr:continue
@@ -180,67 +184,76 @@ def svg_paths(reg):
         if parts:result.append((int(rid),' '.join(parts)))
     return result
 
-def make_svg(reg,info,palette,out,width_cm=40,height_cm=60,label_size=7.8):
+def make_svg(reg,info,palette,out,width_cm=40,height_cm=60,label_size=7.8,
+             outline_mode='smooth',curve_sigma=1.4,curve_epsilon=0.8):
     h,w=reg.shape
     paths=svg_paths(reg)
     stroke=0.58
     header=(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width_cm}cm" height="{height_cm}cm" '
             f'viewBox="0 0 {w} {h}"><rect width="{w}" height="{h}" fill="white"/>')
     lines=[header]
-    # Paint the boundaries exactly once: each pair of neighboring pixels shares one edge.
-    # We draw all polygons as fills with no stroke, then a single contour raster mask's
-    # skeleton as paths from grid edges deduplicated to protect double strokes.
-    edges=set()
+    # Keep an exact 1:1 region/palette definition and editable segment IDs.
+    # The vector geometry of these fills follows the source pixels; the visible
+    # contour is a separately traced SHARED graph, smoothed as a single curve.
+    # No neighboring region is ever fitted independently.
     for rid,geom in paths:
-        # One region, one canonical path. SVG has editable IDs and correct topology.
         lines.append(f'<path id="segment-{rid}" d="{geom}" fill="white" stroke="none" fill-rule="evenodd"/>')
-    # Exact shared boundaries from label transitions, no overlapping stroke contours.
-    y_changes=(reg[:-1,:]!=reg[1:,:])
-    x_changes=(reg[:,:-1]!=reg[:,1:])
-    # Merge contiguous horizontal/vertical boundary runs (reduces SVG size considerably).
-    lines.append('<g id="contours" fill="none" stroke="#333333" stroke-width="0.52" stroke-linecap="round">')
-    for y in range(h-1):
-        ar=np.flatnonzero(y_changes[y]);
-        if ar.size:
-            split=np.flatnonzero(np.diff(ar)>1)+1
-            for run in np.split(ar,split):
-                lines.append(f'<path d="M{run[0]},{y+1}H{run[-1]+1}"/>')
-    for x in range(w-1):
-        ar=np.flatnonzero(x_changes[:,x]);
-        if ar.size:
-            split=np.flatnonzero(np.diff(ar)>1)+1
-            for run in np.split(ar,split):
-                lines.append(f'<path d="M{x+1},{run[0]}V{run[-1]+1}"/>')
-    lines.append('</g>')
+    if outline_mode == 'smooth':
+        smooth,geometry_qa=smoothed_boundaries(reg,sigma=curve_sigma,epsilon=curve_epsilon)
+        lines.append('<g id="shared-smooth-contours" fill="none" stroke="#303030" stroke-width="0.55" stroke-linecap="round" stroke-linejoin="round">')
+        for chain_number, path_d in enumerate(smooth, 1):
+            lines.append(f'<path id="shared-chain-{chain_number}" d="{path_d}"/>')
+        lines.append('</g>')
+    else:
+        # Deterministic legacy raster-grid boundaries, intended for regression
+        # tests and direct visual comparison only.
+        y_changes=(reg[:-1,:]!=reg[1:,:])
+        x_changes=(reg[:,:-1]!=reg[:,1:])
+        lines.append('<g id="pixel-contours" fill="none" stroke="#303030" stroke-width="0.55">')
+        for y in range(h-1):
+            ar=np.flatnonzero(y_changes[y])
+            if ar.size:
+                split=np.flatnonzero(np.diff(ar)>1)+1
+                for run in np.split(ar,split):
+                    lines.append(f'<path d="M{run[0]},{y+1}H{run[-1]+1}"/>')
+        for x in range(w-1):
+            ar=np.flatnonzero(x_changes[:,x])
+            if ar.size:
+                split=np.flatnonzero(np.diff(ar)>1)+1
+                for run in np.split(ar,split):
+                    lines.append(f'<path d="M{x+1},{run[0]}V{run[-1]+1}"/>')
+        lines.append('</g>')
     lines.append(f'<rect x="0.26" y="0.26" width="{w-0.52}" height="{h-0.52}" fill="none" stroke="#333" stroke-width="0.52"/>')
-    lines.append(f'<g id="paint-numbers" font-family="DejaVu Sans,Arial,sans-serif" font-size="{label_size}" font-weight="500" fill="#161616" text-anchor="middle" dominant-baseline="middle">')
+    lines.append('<g id="paint-numbers" font-family="DejaVu Sans,Arial,sans-serif" font-weight="500" fill="#161616" text-anchor="middle" dominant-baseline="middle">')
     for region in info[1:]:
-        lines.append(f'<text id="number-{region["id"]}" x="{region["x"]}" y="{region["y"]}">{region["paint_id"]}</text>')
+        # All numbers use one typeface and weight. Size may decrease only where
+        # the standard 7.8px label physically cannot fit the enclosed region.
+        # A label is bounded by the maximal inscribed disk, avoiding collisions.
+        label=str(region['paint_id'])
+        length_scale=1.12 if len(label)==1 else 1.61
+        size=min(float(label_size),max(0.9,float(region['radius'])*1.58/length_scale))
+        region['label_size']=round(size,2)
+        lines.append(f'<text id="number-{region["id"]}" font-size="{size:.2f}" x="{region["x"]}" y="{region["y"]}">{label}</text>')
     lines.append('</g></svg>')
     Path(out).write_text('\n'.join(lines),encoding='utf-8')
     return len(paths)
 
-def png_preview(reg,info,palette,out,scale=2):
+def png_preview(reg,info,palette,out,svg_file=None,scale=3):
+    """Render the same vector contours used in the PDF (not pixel-grid edges)."""
     h,w=reg.shape
-    color=np.asarray([palette[v-1] for v in range(1,20)],np.uint8)
-    ids=np.empty(20,np.uint8);ids[0]=0;ids[1:]=np.arange(19)
     index=np.zeros_like(reg,dtype=np.uint8)
-    for q in info[1:]: index[reg==q['id']]=q['paint_id']-1
+    for q in info[1:]:index[reg==q['id']]=q['paint_id']-1
     rgb=palette[index]
     Image.fromarray(rgb,'RGB').save(Path(out)/'color_19.png')
-    bg=np.full((h,w,3),255,np.uint8)
-    edge=np.zeros((h,w),bool)
-    edge[:-1,:]|=reg[:-1,:]!=reg[1:,:]
-    edge[:,:-1]|=reg[:,:-1]!=reg[:,1:]
-    bg[edge]=(48,48,48)
-    # Draw numbers on a supersampled canvas, keeping the same face/font.
-    pil=Image.fromarray(bg).resize((w*scale,h*scale),Image.Resampling.NEAREST)
-    draw=ImageDraw.Draw(pil)
-    font=ImageFont.truetype(FONT,int(8*scale))
-    for q in info[1:]:
-        x,y=q['x']*scale,q['y']*scale
-        draw.text((x,y),str(q['paint_id']),font=font,fill=(15,15,15),anchor='mm',stroke_width=0)
-    pil.save(Path(out)/'numbered_19.png')
+    if svg_file is not None:
+        cairosvg.svg2png(url=str(svg_file),write_to=str(Path(out)/'numbered_19.png'),
+                        output_width=w*scale,output_height=h*scale)
+    else:
+        raise ValueError('The numbered preview must be rendered from the SVG itself')
+    # Non-authoritative antialiased preview for eyes; color_19.png is the exact
+    # 19-color image and region_ids.npz is the exact indexed segmentation.
+    Image.fromarray(rgb,'RGB').resize((w*scale,h*scale),Image.Resampling.LANCZOS).save(
+        Path(out)/'color_preview_antialiased.png')
 
 def create_pdf(svgfile, out, info,palette,description, regionmap, qa, rows=3,cols=2):
     out=Path(out)
@@ -250,7 +263,7 @@ def create_pdf(svgfile, out, info,palette,description, regionmap, qa, rows=3,col
         result.insert_pdf(source)
         # Color check: exact geometry, no numbers obscuring the artwork.
         data=Image.open(out/'color_19.png')
-        pix=fitz.Pixmap(str(out/'color_19.png'))
+        pix=fitz.Pixmap(str(out/'color_preview_antialiased.png'))
         p=result.new_page(width=595,height=842)
         r=fitz.Rect(48,42,547,42+748)
         p.insert_image(r,pixmap=pix,keep_proportion=True)
@@ -277,8 +290,13 @@ def create_pdf(svgfile, out, info,palette,description, regionmap, qa, rows=3,col
                 pg.insert_text((32,38),f'SHEET {ry+1}-{cx+1} / {rows}x{cols}',fontsize=14)
         # High magnification cutouts (eyes, kimono, lantern, water) preserve exact IDs.
         h,w=regionmap.shape
-        zones=[('FACE',(.30,.19,.47,.33)),('KIMONO',(.20,.42,.55,.42)),
-               ('LANTERN',(.65,.34,.32,.43)),('WATER',(.0,.74,1.0,.26))]
+        zones=[('FACE',(.32,.26,.43,.22)),
+               ('LEFT_EYE',(.54,.315,.085,.058)),
+               ('RIGHT_EYE',(.63,.315,.055,.065)),
+               ('LIPS',(.59,.372,.105,.058)),
+               ('KIMONO',(.20,.42,.55,.42)),
+               ('LANTERN',(.65,.34,.32,.43)),
+               ('WATER',(.0,.74,1.0,.26))]
         for name,(x,y,zw,zh) in zones:
             crop=fitz.Rect(x*ww,y*hh,(x+zw)*ww,(y+zh)*hh)
             pg=result.new_page(width=595,height=842)
@@ -305,6 +323,11 @@ def create(args):
     index=read_indexed(args.input,palette,args.width,args.smooth_kernel)
     protected=tuple(float(x) for x in args.protected.split(',')) if args.protected else None
     edited,history=cleanup(index,palette,args.min_area,args.min_radius,args.passes,protected)
+    if args.face_retouch:
+        edited=retouch_lantern_portrait(edited)
+        edited,face_history=cleanup(edited,palette,min_area=20,min_radius=3.8,passes=4,
+                                    protected=(.50,.29,.21,.12))
+        history.extend({'pass':'retouch-'+str(item['pass']),'merged':item['merged']} for item in face_history)
     reg,info=layouts(edited,palette)
     h,w=reg.shape
     unique_reg=np.unique(reg)
@@ -317,21 +340,40 @@ def create(args):
         'region_count':len(info)-1,'number_labels':len(info)-1,
         'unassigned_pixels':int(np.sum(reg==0)),'multiple_labels_per_region':0,
         'small_label_regions':len(small),'small_label_region_ids':[r['id'] for r in small],
-        'cleanup_history':history,'status':'PROGRAMMATICALLY_VALIDATED',
+        'cleanup_history':history,'outline_mode':args.outline_mode,
+        'curve_sigma':args.curve_sigma,'curve_epsilon':args.curve_epsilon,
+        'status':'PIXEL_PARTITION_VALIDATED_VECTOR_VISUAL_QA_REQUIRED',
         'not_verified':'Manual visual QA and physical printing',
     }
     np.savez_compressed(out/'region_ids.npz',segment_id=reg,paint_id=edited+1,palette=palette)
-    Image.fromarray(edited,'P').save(out/'palette_indices.png')
+    indexed=Image.fromarray(edited,'P')
+    indexed.putpalette([int(v) for row in palette.tolist() for v in row]+[0]*(768-57))
+    indexed.save(out/'palette_indices.png')
+    n=make_svg(reg,info,palette,out/'numbered_19.svg',args.canvas_width,args.canvas_height,args.label_size,
+               args.outline_mode,args.curve_sigma,args.curve_epsilon)
     with (out/'regions.csv').open('w',newline='',encoding='utf-8') as f:
-        writer=csv.DictWriter(f,fieldnames=['id','paint_id','pixels','x','y','radius','bbox','paint_hex'],delimiter=';')
+        writer=csv.DictWriter(f,fieldnames=['id','paint_id','pixels','x','y','radius','bbox','paint_hex','label_size'],delimiter=';',extrasaction='ignore')
         writer.writeheader()
         for q in info[1:]:writer.writerow(q)
     with (out/'palette_19.csv').open('w',newline='',encoding='utf-8-sig') as f:
         wr=csv.writer(f,delimiter=';');wr.writerow(['paint_id','color_hex','description'])
         for i,(col,desc) in enumerate(zip(palette,descriptions),1):
             wr.writerow([i,'#'+''.join(f'{int(c):02X}' for c in col),desc])
-    n=make_svg(reg,info,palette,out/'numbered_19.svg',args.canvas_width,args.canvas_height,args.label_size)
-    png_preview(reg,info,palette,out)
+    qa['reduced_label_size_count']=sum(1 for r in info[1:] if r['label_size'] < args.label_size-0.05)
+    qa['minimum_label_size_px']=min(r['label_size'] for r in info[1:])
+    qa['face_retouch']=bool(args.face_retouch)
+    # Verify the actual serialized SVG, not just in-memory counts.
+    tree=ET.parse(out/'numbered_19.svg')
+    nodes=list(tree.iter())
+    svg_segments=[v for v in nodes if v.attrib.get('id','').startswith('segment-')]
+    svg_numbers=[v for v in nodes if v.attrib.get('id','').startswith('number-')]
+    qa['svg_segment_paths']=len(svg_segments)
+    qa['svg_number_labels']=len(svg_numbers)
+    assert len(svg_segments)==len(info)-1==len(svg_numbers)
+    assert len({v.attrib['id'] for v in svg_numbers})==len(svg_numbers)
+    assert len({v.attrib['id'] for v in svg_segments})==len(svg_segments)
+    png_preview(reg,info,palette,out,out/'numbered_19.svg')
+    (out/'numbered_19_40x60.pdf').write_bytes(cairosvg.svg2pdf(url=str(out/'numbered_19.svg')))
     create_pdf(out/'numbered_19.svg',out,info,palette,descriptions,reg,qa,args.rows,args.cols)
     (out/'qa_report.json').write_text(json.dumps(qa,ensure_ascii=False,indent=2),encoding='utf-8')
     assert n==len(info)-1, f'Path count differs: {n} != {len(info)-1}'
@@ -351,6 +393,14 @@ def cli():
     p.add_argument('--label-size',type=float,default=7.8)
     p.add_argument('--canvas-width',type=float,default=40.0)
     p.add_argument('--canvas-height',type=float,default=60.0)
+    p.add_argument('--face-retouch',action='store_true',
+                   help='Restore drawn eyes and lips for the specific 639x958 lantern portrait')
+    p.add_argument('--outline-mode',choices=['smooth','pixel'],default='smooth',
+                   help='Shared smooth Bézier boundaries (default), or original pixel grid')
+    p.add_argument('--curve-sigma',type=float,default=1.4,
+                   help='Gaussian strength for smoothing boundary chains')
+    p.add_argument('--curve-epsilon',type=float,default=0.8,
+                   help='Polyline simplification before cubic smoothing (pixels)')
     p.add_argument('--rows',type=int,default=3)
     p.add_argument('--cols',type=int,default=2)
     args=p.parse_args()
