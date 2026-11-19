@@ -24,6 +24,7 @@ from scipy.spatial import cKDTree
 import cairosvg
 from smooth_geometry import smoothed_boundaries
 from retouch_lanterns import retouch_lantern_portrait
+from art_direction import retouch_art
 
 PALETTE_DEFAULT = [
     (249,247,215),(253,232,129),(252,192,72),(251,153,47),(248,123,37),
@@ -323,7 +324,13 @@ def create(args):
     index=read_indexed(args.input,palette,args.width,args.smooth_kernel)
     protected=tuple(float(x) for x in args.protected.split(',')) if args.protected else None
     edited,history=cleanup(index,palette,args.min_area,args.min_radius,args.passes,protected)
-    if args.face_retouch:
+    art_metadata={}
+    if args.artistic_retouch:
+        edited,art_metadata=retouch_art(edited)
+        edited,art_history=cleanup(edited,palette,min_area=15,min_radius=2.2,passes=2,
+                                   protected=(.48,.31,.23,.13))
+        history.extend({'pass':'art-'+str(item['pass']),'merged':item['merged']} for item in art_history)
+    elif args.face_retouch:
         edited=retouch_lantern_portrait(edited)
         edited,face_history=cleanup(edited,palette,min_area=20,min_radius=3.8,passes=4,
                                     protected=(.50,.29,.21,.12))
@@ -362,6 +369,8 @@ def create(args):
     qa['reduced_label_size_count']=sum(1 for r in info[1:] if r['label_size'] < args.label_size-0.05)
     qa['minimum_label_size_px']=min(r['label_size'] for r in info[1:])
     qa['face_retouch']=bool(args.face_retouch)
+    qa['artistic_retouch']=bool(args.artistic_retouch)
+    qa.update(art_metadata)
     # Verify the actual serialized SVG, not just in-memory counts.
     tree=ET.parse(out/'numbered_19.svg')
     nodes=list(tree.iter())
@@ -393,6 +402,8 @@ def cli():
     p.add_argument('--label-size',type=float,default=7.8)
     p.add_argument('--canvas-width',type=float,default=40.0)
     p.add_argument('--canvas-height',type=float,default=60.0)
+    p.add_argument('--artistic-retouch',action='store_true',
+                   help='Author Bezier color zones for face, kimono and floral lanterns (639x958)')
     p.add_argument('--face-retouch',action='store_true',
                    help='Restore drawn eyes and lips for the specific 639x958 lantern portrait')
     p.add_argument('--outline-mode',choices=['smooth','pixel'],default='smooth',
