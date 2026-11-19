@@ -340,6 +340,15 @@ def create(args):
     # palette proofs and QA are regenerated from the SAME supersampled raster.
     vector_scale=int(args.vector_scale)
     edited=supersampled_partition(edited,vector_scale,args.partition_blur)
+    if vector_scale > 1:
+        # Re-evaluate the finished high-resolution paint map. Subpixel
+        # anti-staircase resampling may reveal islands too thin to label.
+        edited, final_history = cleanup(edited,palette,
+            min_area=95 if vector_scale == 3 else 45,
+            min_radius=6.2 if vector_scale == 3 else 4.0,
+            passes=2,protected=(.46,.28,.25,.16))
+        history.extend({'pass':'final-'+str(x['pass']),'merged':x['merged']}
+                       for x in final_history)
     reg,info=layouts(edited,palette)
     h,w=reg.shape
     unique_reg=np.unique(reg)
