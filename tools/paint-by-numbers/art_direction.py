@@ -89,38 +89,56 @@ class Artwork:
 
 def make_lantern_artwork():
     a=Artwork()
-    # FACE: two restrained, asymmetrical eyes. Preserve the original side
-    # profile; do not superimpose an invented, oversized symmetric face.
-    a.shape(7,'M357,329 C363,326 380,323 386,330 C378,339 367,339 359,334 Z')
-    a.shape(0,'M359,328 C365,322 378,323 385,328 C382,335 370,338 361,333 Z')
-    a.ellipse(3,373,329,6.3,7.1,7)
-    a.ellipse(18,372.7,328.9,3,4.5,7)
-    a.ellipse(0,375.4,326.5,1.9,2.1)
-    a.shape(18,'M357,326 C364,318 378,320 389,327 L386,329 C378,324 366,323 359,330 Z')
-    a.shape(12,'M364,340 C373,341 382,339 386,334 C379,342 370,344 365,342 Z')
-    # Smaller second eye, visibly foreshortened by the profile.
-    a.shape(0,'M412,327 C417,323 421,324 424,328 C425,333 420,336 416,333 Z')
-    a.ellipse(3,419,329.5,3.5,5.4)
-    a.ellipse(18,419,329,1.9,3.2)
-    a.ellipse(0,420.5,326.5,1.4,1.6)
-    a.shape(18,'M410,326 C416,321 421,323 426,329 L425,330 C419,326 416,326 413,329 Z')
-    # Brow and warm skin shadows are closed paint zones.
-    a.shape(12,'M351,315 C361,311 377,311 386,314 C373,314 361,316 352,320 Z')
-    a.shape(8,'M412,316 C419,313 424,314 427,319 C422,317 418,318 412,320 Z')
-    a.shape(7,'M419,353 C424,352 428,358 429,362 Q425,361 420,359 Z')
-    a.shape(12,'M423,363 Q429,363 428,366 Q425,367 422,366 Z')
-    # Understated lips — follow the actual photograph (not a broad smile).
-    a.shape(9,'M402,379 C408,379 413,375 419,375 C416,381 410,383 404,382 Z')
-    a.shape(6,'M405,383 C410,383 415,380 418,379 C415,386 408,387 405,383 Z')
-    a.shape(12,'M403,378 C409,378 415,376 419,375 Q411,379 404,380 Z')
-    a.shape(6,'M413,354 C416,354 418,351 419,350 L418,357 Q415,357 413,356 Z')
-    # Soft hair-braid sheen and hair ornament. Shapes are tapered, no hatch strokes.
+    # V7: redraw the face as an intentional, continuous illustrated profile.
+    # Apply the cheek first; subsequent eyelids/iris/mouth are their own paint
+    # cells. This also repairs the accidental blue-gray slash at the nose.
+    a.shape(6, 'M337,336 C353,324 369,320 387,314 C402,306 415,310 424,321 '
+               'C428,330 428,346 430,354 C435,359 439,363 436,368 '
+               'C432,374 423,377 420,385 C419,399 414,407 401,409 '
+               'C377,407 357,401 339,392 C333,378 335,363 337,336 Z')
+    # Soft rose edge under the brow: subtle anatomy, not a flat face patch.
+    a.shape(7, 'M346,336 C355,326 368,319 386,320 C371,324 360,330 351,338 Z')
+    a.shape(7, 'M405,321 C412,314 422,317 426,323 C418,321 412,324 407,329 Z')
+    # Large visible eye: shaped almond, ivory sclera, luminous amber iris,
+    # pupil, glints, lid and a delicate lower-lid shadow (independent zones).
+    a.shape(0,'M355,330 C362,323 375,320 387,326 C384,334 375,340 364,338 C359,337 356,333 355,330 Z')
+    a.ellipse(3,373,330,7.1,8.4,-9)
+    a.ellipse(8,373,330,4.7,6.7,-9)
+    a.ellipse(18,373.1,329.4,2.7,4.3,-8)
+    a.ellipse(0,376.3,326.4,2.25,2.35)
+    a.shape(18,'M353,328 C361,317 378,318 390,326 L386,329 C377,322 364,324 356,332 Z')
+    # Small lashes are connected to the dark lid, never left floating.
+    a.shape(18,'M356,328 L352,321 L362,325 Z')
+    a.shape(18,'M362,324 L361,318 L369,323 Z')
+    a.shape(12,'M361,340 C371,345 382,340 387,333 C383,342 372,347 363,343 Z')
+    a.shape(11,'M354,315 C366,308 381,308 390,315 C379,312 369,314 356,321 Z')
+    # Foreshortened far eye: narrower, darker, behind the warm edge lighting.
+    a.shape(0,'M410,328 C415,322 422,321 426,327 C427,333 422,338 416,336 Z')
+    a.ellipse(3,419.2,329.2,3.6,6.4,-4)
+    a.ellipse(18,419.1,329.1,2.1,4.3,-5)
+    a.ellipse(0,420.7,326.1,1.5,1.8)
+    a.shape(18,'M409,327 C413,320 422,319 428,326 L426,329 C420,323 415,325 411,330 Z')
+    a.shape(11,'M411,316 C417,310 424,313 429,320 C423,317 419,316 411,321 Z')
+    # A restrained cheek contour, nose bridge, nostril and shading: sculpted
+    # as actual colored cells so all detail receives paint numbers.
+    a.shape(7,'M390,347 C396,345 400,346 403,349 C399,348 394,350 390,350 Z')
+    a.shape(11,'M421,356 C423,355 426,355 427,357 C424,357 423,358 421,357 Z')
+    a.shape(7,'M343,360 C346,355 350,355 351,358 C349,362 348,368 347,370 Z')
+    # Mouth occupies only ~20 px, softly turned upward and cleanly bounded.
+    a.shape(9,'M398,381 C405,378 411,375 418,374 C416,379 410,383 403,384 Z')
+    a.shape(6,'M402,384 C409,384 415,381 419,378 C416,388 409,390 402,384 Z')
+    a.shape(11,'M398,381 C407,381 416,375 420,373 C416,380 405,385 398,382 Z')
+    # Ear sculpting, inner fold and hairline—replaces an empty oval.
+    a.shape(6,'M294,338 C293,325 299,314 308,317 C317,317 328,326 328,342 '
+               'C329,354 320,369 308,367 C297,362 294,351 294,338 Z')
+    a.shape(7,'M299,336 C302,324 314,323 320,337 C316,331 306,334 306,346 '
+               'C307,352 312,356 315,353 C307,365 299,349 299,336 Z')
+    # Hair highlights: two slender, tapered bands instead of broad gray slashes.
     for d in [
-        'M230,324 C258,299 291,276 330,265 C295,277 263,311 236,333 Z',
-        'M246,338 C281,322 302,301 338,292 C312,312 289,331 251,343 Z',
-        'M288,291 C311,269 347,251 386,252 C344,255 312,274 294,299 Z',
-        'M326,314 C351,292 373,282 405,282 C378,286 351,310 329,320 Z',
-    ]:a.shape(13,d)
+        'M240,315 C265,291 302,269 326,267 C300,282 276,307 244,321 Z',
+        'M268,330 C300,306 326,291 349,289 C330,303 302,327 272,335 Z',
+        'M322,301 C351,284 379,279 402,281 C375,288 352,305 325,306 Z',
+    ]: a.shape(13,d)
     # Silk ribbons: elegant broad curves that remain paintable, unlike 1px hatching.
     for color,d in [
         (11,'M170,711 C217,635 220,545 247,455 C230,537 210,644 181,721 Z'),
@@ -134,12 +152,13 @@ def make_lantern_artwork():
         (285,509,25,6,7,3,15),(342,540,20,9,10,3,-5),
         (247,648,19,7,6,3,15),(306,680,20,7,6,3,20),
         (344,718,16,6,7,3,16),(228,538,13,6,7,3,-3),
+        (291,564,14,7,6,3,10),(391,601,16,6,7,3,-18),
     ]:a.flower(x,y,r,col=pe,inner=inn,core=core,angle=rotation)
     # The kimono has a dark-to-light collar accent and an intentionally sharp edge.
     a.shape(6,'M259,406 C295,408 319,425 343,443 C318,426 287,414 257,415 Z')
     # LANTERNS: light panels remain bright; motifs have real flower petals and stems.
     # Middle lantern x450..524, y420..529 — clip purely inside its illuminated face.
-    a.blossom_sprig(480,477,1.08,stem=3,petal=4,flower_core=2)
+    a.blossom_sprig(482,479,1.12,stem=3,petal=4,flower_core=2)
     # Left lantern: motif is large enough to trace/paint, not featureless speckle.
     a.blossom_sprig(59,614,1.15,stem=4,petal=3,flower_core=1)
     # Foreground lantern: two elegant plants with distinct visible blossoms.
@@ -156,4 +175,4 @@ def retouch_art(index:np.ndarray):
     mask=artwork.mask()
     changed=mask>=0
     idx[changed]=mask[changed].astype(np.uint8)
-    return idx,{'art_primitives':len(artwork.primitives),'art_pixels':int(changed.sum()),'artwork_version':'authored-curves-1'}
+    return idx,{'art_primitives':len(artwork.primitives),'art_pixels':int(changed.sum()),'artwork_version':'authored-curves-2-v7'}
