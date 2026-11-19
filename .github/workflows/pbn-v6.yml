@@ -1,0 +1,23 @@
+name: Paint-by-Numbers V6 tests
+on:
+  push:
+    branches: [feature/paint-by-numbers-19]
+    paths:
+      - "tools/paint-by-numbers/**"
+      - ".github/workflows/pbn-v6.yml"
+  pull_request:
+    paths:
+      - "tools/paint-by-numbers/**"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools/paint-by-numbers
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r requirements.txt
+      - run: python -m unittest discover -s tests -v
