@@ -25,6 +25,7 @@ import cairosvg
 from smooth_geometry import smoothed_boundaries
 from retouch_lanterns import retouch_lantern_portrait
 from art_direction import retouch_art
+from refine_geometry import supersampled_partition
 
 PALETTE_DEFAULT = [
     (249,247,215),(253,232,129),(252,192,72),(251,153,47),(248,123,37),
@@ -335,13 +336,17 @@ def create(args):
         edited,face_history=cleanup(edited,palette,min_area=20,min_radius=3.8,passes=4,
                                     protected=(.50,.29,.21,.12))
         history.extend({'pass':'retouch-'+str(item['pass']),'merged':item['merged']} for item in face_history)
+    # Build smoother paint zones *before* region numbering. All labels, curves,
+    # palette proofs and QA are regenerated from the SAME supersampled raster.
+    vector_scale=int(args.vector_scale)
+    edited=supersampled_partition(edited,vector_scale,args.partition_blur)
     reg,info=layouts(edited,palette)
     h,w=reg.shape
     unique_reg=np.unique(reg)
     assigned={x['id'] for x in info[1:]}
     missing=set(int(r) for r in unique_reg)-assigned
     assert not missing and np.min(reg)>0 and np.max(reg)==len(info)-1
-    small=[r for r in info[1:] if r['radius']<5]
+    small=[r for r in info[1:] if r['radius'] < 5 * vector_scale]
     qa={
         'input':str(args.input),'size':[w,h],'paint_colors':int(len(np.unique(edited))),
         'region_count':len(info)-1,'number_labels':len(info)-1,
@@ -349,6 +354,7 @@ def create(args):
         'small_label_regions':len(small),'small_label_region_ids':[r['id'] for r in small],
         'cleanup_history':history,'outline_mode':args.outline_mode,
         'curve_sigma':args.curve_sigma,'curve_epsilon':args.curve_epsilon,
+        'vector_scale':vector_scale,'partition_blur':args.partition_blur,
         'status':'PIXEL_PARTITION_VALIDATED_VECTOR_VISUAL_QA_REQUIRED',
         'not_verified':'Manual visual QA and physical printing',
     }
@@ -356,7 +362,7 @@ def create(args):
     indexed=Image.fromarray(edited,'P')
     indexed.putpalette([int(v) for row in palette.tolist() for v in row]+[0]*(768-57))
     indexed.save(out/'palette_indices.png')
-    n=make_svg(reg,info,palette,out/'numbered_19.svg',args.canvas_width,args.canvas_height,args.label_size,
+    n=make_svg(reg,info,palette,out/'numbered_19.svg',args.canvas_width,args.canvas_height,args.label_size * vector_scale,
                args.outline_mode,args.curve_sigma,args.curve_epsilon)
     with (out/'regions.csv').open('w',newline='',encoding='utf-8') as f:
         writer=csv.DictWriter(f,fieldnames=['id','paint_id','pixels','x','y','radius','bbox','paint_hex','label_size'],delimiter=';',extrasaction='ignore')
@@ -366,7 +372,7 @@ def create(args):
         wr=csv.writer(f,delimiter=';');wr.writerow(['paint_id','color_hex','description'])
         for i,(col,desc) in enumerate(zip(palette,descriptions),1):
             wr.writerow([i,'#'+''.join(f'{int(c):02X}' for c in col),desc])
-    qa['reduced_label_size_count']=sum(1 for r in info[1:] if r['label_size'] < args.label_size-0.05)
+    qa['reduced_label_size_count']=sum(1 for r in info[1:] if r['label_size'] < args.label_size*vector_scale-0.05)
     qa['minimum_label_size_px']=min(r['label_size'] for r in info[1:])
     qa['face_retouch']=bool(args.face_retouch)
     qa['artistic_retouch']=bool(args.artistic_retouch)
@@ -412,6 +418,10 @@ def cli():
                    help='Gaussian strength for smoothing boundary chains')
     p.add_argument('--curve-epsilon',type=float,default=0.8,
                    help='Polyline simplification before cubic smoothing (pixels)')
+    p.add_argument('--vector-scale',type=int,choices=[1,2,3],default=1,
+                   help='Supersampled indexed partition: 2 removes single-pixel stairs without new colors')
+    p.add_argument('--partition-blur',type=float,default=1.15,
+                   help='Subpixel smoothness before discrete 19-color reassignment')
     p.add_argument('--rows',type=int,default=3)
     p.add_argument('--cols',type=int,default=2)
     args=p.parse_args()
